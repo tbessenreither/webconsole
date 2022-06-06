@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/tbessenreither/webconsole/compare/v1.1.2...v1.1.3) (2022-06-06)
+
+
+### Features
+
+* **tools:** added tools class with json function; ([2ec16e4](https://github.com/tbessenreither/webconsole/commit/2ec16e466f074d17e7d4f8e176d8b2e2bdae6da8))
+
+
+### Bug Fixes
+
+* **focus:** focus now only happens when no text is clicked; ([3092fe6](https://github.com/tbessenreither/webconsole/commit/3092fe6e59547731d44b25a7f888eb75c690e47d))
+
 ### [1.1.2](https://github.com/tbessenreither/webconsole/compare/v1.1.1...v1.1.2) (2022-06-06)
 
 
