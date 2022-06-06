@@ -24,6 +24,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 		try {
 			if (command.subcommands === null) {
 				this.printLn('Available commands:', { class: 'info subtitle' });
+				this.printLn(`type "help $command" for more information about a command`);
 				//sort this._console.commands by key
 				const cammandsSorted = this._console.getCommands();
 				for (let command of cammandsSorted) {

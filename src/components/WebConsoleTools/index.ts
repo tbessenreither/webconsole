@@ -34,7 +34,7 @@ export default class WebConsoleTools extends WebConsolePlugin {
 		this.printLn(`Help for ${command.subcommands[0]}:`, { class: 'info subtitle' });
 		if (command.subcommands[0] === 'json') {
 			this.printLn('Converts a JSON string to a JSON object, logs it in the console and prints it nicely formated ready to copy.');
-			this.printLn(`<span data-command='json [1, 2, 3, 4, "string"]'>example: [1, 2, 3, 4, "string"]</span>`, { html: true });
+			this.printLn(`example: <span data-command='json [1, 2, 3, 4, "string"]'>[1, 2, 3, 4, "string"]</span>`, { html: true });
 		} else if (command.subcommands[0] === 'ts') {
 			this.printLn('Converts a Unix Timestamp to a readable date string, logs it in the console and prints it nicely formated ready to copy.');
 			this.printLn(`example: <span data-command='ts'>ts</span>`, { html: true });
