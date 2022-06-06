@@ -323,17 +323,36 @@ export default class WebConsole extends CcHTMLElement {
 		if (!options.html) {
 			options.html = false;
 		}
+		if (!options.key) {
+			options.key = false;
+		}
 		if (!options.copy) {
 			options.copy = false;
 		}
+		if (!options.clearLast) {
+			options.clearLast = false;
+		} else if (options.clearLast === true) {
+			options.clearLast = 1;
+		}
 
+		let keyAttribute = options.key ? `data-key="${options.key}"` : '';
 		let copyAttribute = options.copy ? 'data-copy' : '';
 
 		if (!options.html) {
 			text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		}
 
-		this.output.innerHTML += `<span ${copyAttribute} class="${options.direction} ${options.class}">${text}</span>`;
+		if (options.clearKey) {
+			let obj = null;
+			do {
+				obj = this.output.querySelector(`[data-key="${options.clearKey}"]`);
+				if (obj) {
+					obj.remove();
+				}
+			} while (obj);
+		}
+
+		this.output.innerHTML += `<span ${keyAttribute} ${copyAttribute} class="${options.direction} ${options.class}">${text}</span>`;
 
 		this.contentObject.scrollTop = this.contentObject.scrollHeight;
 	}

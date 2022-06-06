@@ -31,6 +31,9 @@ export type WebConsolePrintOptions = {
 	html?: boolean;
 	direction?: 'input' | 'output';
 	copy?: boolean;
+	clearLast?: boolean | number;
+	clearKey?: string;
+	key?: false | string;
 };
 
 export type WebConsoleCommandOptions = {

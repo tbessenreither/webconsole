@@ -105,8 +105,18 @@
 						&::after {
 							//content: '🚀';
 						}
+						
 						color: #f9ff00;
 						cursor: pointer;
+					}
+
+					.button {
+						display: inline-block;
+						width: 30px;
+						height: 30px;
+						margin: 0px 10px;
+						background-color: #333333;
+						text-align: center;
 					}
 
 					.input {
