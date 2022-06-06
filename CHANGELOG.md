@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/tbessenreither/webconsole/compare/v1.2.0...v1.2.1) (2022-06-06)
+
+
+### Features
+
+* added nofocus data attribute; ([820ff9b](https://github.com/tbessenreither/webconsole/commit/820ff9b42a1b0a4b8fa41733de0eb05c529bb0a2))
+* **Otter:** added otter ascii art ([649b11f](https://github.com/tbessenreither/webconsole/commit/649b11fa2b6f4dae9740967efb077301f7814f9a))
+
 ## [1.2.0](https://github.com/tbessenreither/webconsole/compare/v1.1.3...v1.2.0) (2022-06-06)
 
 
