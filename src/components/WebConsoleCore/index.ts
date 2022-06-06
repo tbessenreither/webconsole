@@ -9,7 +9,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 	listMaxHistoryItems = 10;
 
 	myCommands: Array<string> = [
-		'help', 'clear', 'init', 'error',
+		'help', 'clear', 'init', 'error', 'history',
 	];
 
 	onRegister() {
