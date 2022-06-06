@@ -17,11 +17,11 @@ export default class WebConsolePlugin extends HTMLElement {
 
 
 	execute(command: WebConsoleCommand) {
-		this.printLn(`no execute() implemented for ${command.command}`, {class: 'warn'});
+		this.printLn(`no execute() implemented for ${command.command}`, { class: 'warn' });
 	}
 
 	help(_command: WebConsoleCommand) {
-		this.printLn('no help() implemented', {class: 'warn'});
+		this.printLn('no help() implemented', { class: 'warn' });
 	}
 
 	print(text: string, options: WebConsolePrintOptions = {}) {

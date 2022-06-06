@@ -105,7 +105,7 @@
 						&::after {
 							//content: '🚀';
 						}
-						
+
 						color: #f9ff00;
 						cursor: pointer;
 					}
@@ -164,6 +164,7 @@
 					}
 				}
 			}
+
 			.inputWrapper {
 				display: flex;
 				flex-direction: row;
@@ -173,6 +174,7 @@
 					content: '< ';
 					margin-right: 10px;
 				}
+
 				input {
 					caret-color: white;
 					color: white;

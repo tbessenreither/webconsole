@@ -16,7 +16,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 		this._console.registerCommand('help', this, this.help.bind(this));
 		this._console.registerCommand('clear', this, this._console.clear);
 		this._console.registerCommand('init', this, this._console.init);
-		this._console.registerCommand('error', this, ()=>{ throw new Error('what did you think would happen?')});
+		this._console.registerCommand('error', this, () => { throw new Error('what did you think would happen?') });
 		this._console.registerCommand('history', this, this.history.bind(this));
 	}
 
@@ -27,7 +27,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 				//sort this._console.commands by key
 				const cammandsSorted = this._console.getCommands();
 				for (let command of cammandsSorted) {
-					this.printLn(` - <span data-command='${command}'>${command}</span>`, {html: true});
+					this.printLn(` - <span data-command='${command}'>${command}</span>`, { html: true });
 				}
 			} else {
 				if (this.myCommands.includes(command.subcommands[0])) {
@@ -62,7 +62,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 
 		let historyToPrint = this._console.commandHistory.slice(this.listMaxHistoryItems * -1).reverse();
 		for (let command of historyToPrint) {
-			this.printLn(` - <span data-command='${command}'>${command}</span>`, {html: true});
+			this.printLn(` - <span data-command='${command}'>${command}</span>`, { html: true });
 		}
 	}
 

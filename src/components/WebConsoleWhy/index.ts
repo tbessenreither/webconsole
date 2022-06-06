@@ -8,7 +8,7 @@ export default class WebConsoleWhy extends WebConsolePlugin {
 
 	onRegister() {
 		this._console.registerCommand('why', this, this.why.bind(this));
-		this._console.registerCommand('longline', this, this.longline.bind(this), {hidden: true});
+		this._console.registerCommand('longline', this, this.longline.bind(this), { hidden: true });
 	}
 
 	why() {
