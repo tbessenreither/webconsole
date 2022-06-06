@@ -12,7 +12,7 @@
 		flex-direction: column;
 		width: 95vw;
 		height: 95vh;
-		background-color: rgb(255, 255, 255);
+		background-color: #202020;
 		border: 1px solid black;
 
 		.titlebar {
@@ -20,34 +20,55 @@
 			flex-direction: row;
 			justify-content: space-between;
 
-			background-color: gray;
+			background-color: #000000;
+			border-bottom: 1px solid #202020;
 
-			padding: 10px;
+			height: 40px;
+
 
 			.title {
-				font-size: 1.5em;
+				margin: 10px;
+				font-size: 1em;
 				color: white;
-				font-family: monospace;
+				font-family: Verdana, Geneva, Tahoma, sans-serif;
 			}
 
 			.buttons {
+				display: flex;
+				flex-direction: row;
+
 				button {
-					margin: 0px;
-					padding: 5px;
-					border-radius: 50%;
-
-					width: 20px;
-					height: 20px;
-					border: none;
-
-					background-color: chocolate;
-
 					display: flex;
 					justify-content: center;
 					align-items: center;
+					cursor: pointer;
+
+					margin: 0px;
+					padding: 10px;
+
+					min-width: 70px;
+					height: 100%;
+					background-color: rgba(255, 255, 255, 0);
+					border-width: 0px;
+
+					color: white;
+					font-family: Verdana, Geneva, Tahoma, sans-serif;
+					font-size: 20px;
+
+
+					transition: background-color 200ms linear;
+
+					&:hover {
+						background-color: #1a1a1a;
+						transition: background-color 0ms linear;
+					}
 
 					&[data-action="close"] {
-						background-color: red;
+						min-width: 70px;
+
+						&:hover {
+							background-color: crimson;
+						}
 					}
 				}
 			}
@@ -60,6 +81,9 @@
 
 			padding: 5px 10px;
 
+			overflow: scroll;
+			overflow-x: hidden;
+
 			pre {
 				margin: 0px;
 				padding: 0px;
@@ -70,6 +94,11 @@
 					a {
 						color: aquamarine;
 						font-weight: bold;
+					}
+
+					[data-command] {
+						color: #f9ff00;
+						cursor: pointer;
 					}
 
 					.input {
@@ -117,13 +146,37 @@
 					}
 				}
 			}
+			.inputWrapper {
+				display: flex;
+				flex-direction: row;
+				font: 11pt/1.25 Monaco, monospace;
 
-			input {
-				caret-color: white;
+				&::before {
+					content: '< ';
+					margin-right: 10px;
+				}
+				input {
+					caret-color: white;
+					color: white;
+					border: none;
+					outline: none;
+					background-color: rgba(255, 255, 255, 0);
+					width: 100%;
+				}
+			}
+		}
+
+		.footer {
+			display: flex;
+			flex-direction: row;
+			justify-content: flex-end;
+
+			background-color: #333333;
+			padding: 5px 10px;
+
+			a {
+				font-family: Verdana, Geneva, Tahoma, sans-serif;
 				color: white;
-				border: none;
-				outline: none;
-				background-color: rgba(255, 255, 255, 0);
 			}
 		}
 

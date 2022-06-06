@@ -73,9 +73,9 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	help(command?: WebConsoleCommand) {
 		if (command.subcommands[0] === 'about') {
 			this.printLn('Ich kann dir etwas über folgende Dinge erzählen:');
-			this.printLn(' - Tobias');
-			this.printLn(' - WebConsole');
-			this.printLn(' - Fotografie');
+			this.printLn(' - <span data-command="about Tobias">Tobias</span>', {html: true});
+			this.printLn(' - <span data-command="about WebConsole">WebConsole</span>', {html: true});
+			this.printLn(' - <span data-command="about Fotografie">Fotografie</span>', {html: true});
 		} else {
 			this.printLn(`Über ${command.subcommands[0]} weiß ich leider nichts`);
 		}
