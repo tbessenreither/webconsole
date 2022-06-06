@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/tbessenreither/webconsole/compare/v1.1.3...v1.2.0) (2022-06-06)
+
+
+### Features
+
+* **games:** added tictactoe board; ([0ae15ec](https://github.com/tbessenreither/webconsole/commit/0ae15ecf620194eb3250e2ecf39ba8d430bde7c4))
+
+
+### Bug Fixes
+
+* **core:** added history to myCommands; ([11ae999](https://github.com/tbessenreither/webconsole/commit/11ae99955ba46f887cc27f6eeee1194bfefccdb7))
+
 ### [1.1.3](https://github.com/tbessenreither/webconsole/compare/v1.1.2...v1.1.3) (2022-06-06)
 
 
