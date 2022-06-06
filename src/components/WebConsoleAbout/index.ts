@@ -32,9 +32,6 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			`Ich arbeite im Moment bei Webprojaggt, einer Web & Werbeagentur in der Oberpfalz.`,
 			`Davor war ich selbstständig im Bereich Backend Entwicklung & System-Design und Hosting.`,
 		],
-		Torsten: [
-			'Torsten ist ein anderer Befehl',
-		],
 	}
 
 	onRegister() {
