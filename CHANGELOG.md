@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.3](https://github.com/tbessenreither/webconsole/compare/v1.2.2...v1.2.3) (2022-06-06)
+
+
+### Features
+
+* **autocomplete:** added autocomplete on tab including search in plugins, moved command from type to class; ([dcd5d91](https://github.com/tbessenreither/webconsole/commit/dcd5d910d6456caba7a2d8e816f620b646622e48))
+
 ### [1.2.2](https://github.com/tbessenreither/webconsole/compare/v1.2.1...v1.2.2) (2022-06-06)
 
 
