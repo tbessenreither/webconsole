@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/tbessenreither/webconsole/compare/v1.1.0...v1.1.1) (2022-06-06)
+
+
+### Bug Fixes
+
+* **style:** removed rocket from commands. ([7691e4f](https://github.com/tbessenreither/webconsole/commit/7691e4fd014df39cfbfacb4f81c458c775630914))
+
 ## [1.1.0](https://github.com/tbessenreither/webconsole/compare/v1.0.2...v1.1.0) (2022-06-06)
 
 
