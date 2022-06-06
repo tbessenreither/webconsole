@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.4](https://github.com/tbessenreither/webconsole/compare/v1.2.3...v1.2.4) (2022-06-06)
+
+
+### Bug Fixes
+
+* **about:** removed debug content; ([348233d](https://github.com/tbessenreither/webconsole/commit/348233d751de13678aa94a4fe3b11b2ea67a0378))
+* **autocomplete:** fixed bug in autocomplete subcommand detection; ([7961ce6](https://github.com/tbessenreither/webconsole/commit/7961ce65ced3f6ed138fdded565401c47ca362f2))
+* **build:** made build use npm script instead of npx webpack; ([285bc3c](https://github.com/tbessenreither/webconsole/commit/285bc3cdebe171809f544c71cf5164d868610712))
+
 ### [1.2.3](https://github.com/tbessenreither/webconsole/compare/v1.2.2...v1.2.3) (2022-06-06)
 
 
