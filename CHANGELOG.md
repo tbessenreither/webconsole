@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.2](https://github.com/tbessenreither/webconsole/compare/v1.2.1...v1.2.2) (2022-06-06)
+
+
+### Features
+
+* **otter:** random otter ([2b17c46](https://github.com/tbessenreither/webconsole/commit/2b17c46becf7236a0ffa082a9e1f81ca384e1ea8))
+* **ts:** timestamp converter; ([cf9de0a](https://github.com/tbessenreither/webconsole/commit/cf9de0ab9a670fef039dfd4a71132f16c8df4a12))
+
+
+### Bug Fixes
+
+* added more help text; ([e75ac6a](https://github.com/tbessenreither/webconsole/commit/e75ac6a7310f83c78ae391522214caf9f709dd95))
+
 ### [1.2.1](https://github.com/tbessenreither/webconsole/compare/v1.2.0...v1.2.1) (2022-06-06)
 
 
