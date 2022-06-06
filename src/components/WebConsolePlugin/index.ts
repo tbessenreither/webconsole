@@ -32,5 +32,3 @@ export default class WebConsolePlugin extends HTMLElement {
 		this._console.printLn(text, options);
 	}
 }
-
-window.customElements.define('web-console-plugin', WebConsolePlugin);

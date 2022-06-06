@@ -1,4 +1,5 @@
 import WebConsole from './components/WebConsole';
-import WebConsolePluginCore from './components/WebConsoleCore';
-import WebConsolePluginAbout from './components/WebConsoleAbout';
+import WebConsoleCore from './components/WebConsoleCore';
+import WebConsoleAbout from './components/WebConsoleAbout';
+import WebConsoleWhy from './components/WebConsoleWhy';
 

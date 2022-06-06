@@ -2,9 +2,10 @@ import WebConsolePlugin from "../WebConsolePlugin";
 import WebConsole from "../WebConsole";
 import { WebConsoleCommand } from "../WebConsole/types";
 
+
 export default class WebConsoleCore extends WebConsolePlugin {
 	_console: WebConsole = null;
-	name: string = 'Plugin';
+	name: string = 'Core';
 
 	myCommands: Array<string> = [
 		'help', 'clear', 'init', 'error',
@@ -21,7 +22,9 @@ export default class WebConsoleCore extends WebConsolePlugin {
 		try {
 			if (command.subcommands === null) {
 				this.printLn('Available commands:', { class: 'info subtitle' });
-				for (let command in this._console.commands) {
+				//sort this._console.commands by key
+				const cammandsSorted = this._console.getCommands();
+				for (let command of cammandsSorted) {
 					this.printLn(` - ${command}`);
 				}
 			} else {
@@ -44,6 +47,8 @@ export default class WebConsoleCore extends WebConsolePlugin {
 		} else if (command.subcommands[0] === 'clear') {
 			this.printLn('Clears the console');
 		} else if (command.subcommands[0] === 'init') {
+			this.printLn('resets the console');
+		} else if (command.subcommands[0] === 'why') {
 			this.printLn('resets the console');
 		} else {
 			this.printLn(`no forther information available`);

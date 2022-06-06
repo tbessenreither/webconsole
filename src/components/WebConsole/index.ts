@@ -5,7 +5,8 @@ import { CcHTMLElement } from '../CcHTMLElement';
 import WebConsolePlugin from '../WebConsolePlugin';
 import { WebConsolePluginStore, WebConsoleCommandTargets, WebConsoleCommand, WebConsoleArguments, WebConsolePrintOptions } from './types';
 
-
+const PACKAGE = require('../../../package.json');
+const version = PACKAGE.version;
 
 export default class WebConsole extends CcHTMLElement {
 	output: HTMLPreElement = null;
@@ -50,15 +51,25 @@ export default class WebConsole extends CcHTMLElement {
 			this.input.focus();
 		});
 
+		const versionSpan = this._shadowRoot.querySelector('[data-source="version"]') as HTMLSpanElement;
+		if (versionSpan !== null) {
+			versionSpan.innerText = version;
+		}
+
 		this.plugins = this._getPlugins();
 
 		this.init();
 	}
 
+	getDomain() {
+		return window.location.hostname;
+	}
+
 	init() {
 		this.clear();
-		this.printLn('Welcome to the WebConsole', { class: 'info title' });
+		this.printLn(`Welcome to the WebConsole on ${this.getDomain()}`, { class: 'info title' });
 		this.printLn('Type "help" for a list of available commands.');
+		this.printLn('Remember all commands are case-sensitive.');
 
 		this.input.focus();
 	}
@@ -134,6 +145,11 @@ export default class WebConsole extends CcHTMLElement {
 				this.printLn(`syntax error: ${err.message}`, { class: 'error' });
 			}
 		}
+	}
+
+	getCommands() {
+		let commands = Object.keys(this.commands).sort();
+		return commands;
 	}
 
 	onCommand(command: WebConsoleCommand) {

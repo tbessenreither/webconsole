@@ -2,7 +2,7 @@ import WebConsolePlugin from "../WebConsolePlugin";
 import WebConsole from "../WebConsole";
 import { WebConsoleCommand } from "../WebConsole/types";
 
-export default class WebConsolePluginAbout extends WebConsolePlugin {
+export default class WebConsoleAbout extends WebConsolePlugin {
 	_console: WebConsole = null;
 	name = 'About';
 	dateOfBirth = '1986-10-21';
@@ -83,4 +83,4 @@ export default class WebConsolePluginAbout extends WebConsolePlugin {
 
 }
 
-window.customElements.define('web-console-about', WebConsolePluginAbout);
+window.customElements.define('web-console-about', WebConsoleAbout);
