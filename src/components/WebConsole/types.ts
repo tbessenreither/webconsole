@@ -11,13 +11,6 @@ export type WebConsoleArguments = {
 	}
 };
 
-export type WebConsoleCommand = {
-	string: string,
-	command: string,
-	subcommands: Array<string>,
-	arguments: WebConsoleArguments,
-};
-
 export type WebConsoleCommandTargets = {
 	[key: string]: {
 		plugin: WebConsolePlugin;
@@ -39,3 +32,10 @@ export type WebConsolePrintOptions = {
 export type WebConsoleCommandOptions = {
 	hidden?: boolean;
 };
+
+export type WebConsoleAutocompleteResponse = {
+	input: string,
+	result: string,
+	numberResults: number,
+	options: Array<string>,
+}

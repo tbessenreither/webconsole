@@ -3,12 +3,92 @@ import css from './style.scss';
 
 import { CcHTMLElement } from '../CcHTMLElement';
 import WebConsolePlugin from '../WebConsolePlugin';
-import { WebConsolePluginStore, WebConsoleCommandTargets, WebConsoleCommand, WebConsoleArguments, WebConsolePrintOptions, WebConsoleCommandOptions } from './types';
+import { WebConsolePluginStore, WebConsoleCommandTargets, WebConsoleArguments, WebConsolePrintOptions, WebConsoleCommandOptions, WebConsoleAutocompleteResponse } from './types';
 
 const PACKAGE = require('../../../package.json');
 const version = PACKAGE.version;
 
-export default class WebConsole extends CcHTMLElement {
+export class WebConsoleCommand {
+	command: string = '';
+	subcommands: Array<string> = null;
+	arguments: WebConsoleArguments = {};
+
+	constructor(command?: string) {
+		if (command) {
+			this._getCommandParts(command);
+		}
+	}
+
+	getString(): string {
+		let commandString = this.command;
+
+		if (this.subcommands) {
+			commandString += ' ' + this.subcommands.join(' ');
+		}
+		if (this.arguments) {
+			commandString += ' ' + Object.keys(this.arguments).map((key) => {
+				return `${key}=${JSON.stringify(this.arguments[key])}`;
+			}).join(' ');
+		}
+		commandString = commandString.trim();
+
+		return commandString;
+	}
+
+	lastSubcommand(value: string = null): string {
+		if (this.subcommands) {
+			if (value !== null) {
+				this.subcommands[this.subcommands.length - 1] = value;
+			}
+			return this.subcommands[this.subcommands.length - 1];
+		}
+		return null;
+	}
+
+	_getCommandParts(commandString: string): WebConsoleCommand {
+		const commandPattern = /^([\w]+)((?: [\w]+)+)?((?:[ ]*-[\w]+(?:="[^"]+?")?)+)?$/;
+
+		const command = commandString.split(' ').shift();
+		let subcommands = null;
+		const commandArguments: WebConsoleArguments = {};
+
+		let matches = commandPattern.exec(commandString);
+
+		if (matches) {
+
+			if (matches && matches[2]) {
+				subcommands = matches[2].trim().split(' ');
+			}
+
+			if (matches && matches[3]) {
+				const argumentPatternParts = /[ ]*-([\w]+)(?:="(.+?)")?/g;
+				const argumentPattern = /[ ]*-([\w]+)(?:=(".+?"))?/;
+
+				let argumentStrings = matches[3].match(argumentPatternParts);
+
+				for (let argumentString of argumentStrings) {
+					let argumentMatch = argumentString.match(argumentPattern);
+					if (!argumentMatch) {
+						continue;
+					}
+
+					commandArguments[argumentMatch[1]] = {
+						name: argumentMatch[1],
+						value: argumentMatch[2] ? JSON.parse(argumentMatch[2]) : true,
+					};
+				}
+			}
+		}
+
+		this.command = command;
+		this.subcommands = subcommands;
+		this.arguments = commandArguments;
+
+		return this;
+	}
+}
+
+export class WebConsole extends CcHTMLElement {
 	output: HTMLPreElement = null;
 	input: HTMLInputElement = null;
 	closeButton: HTMLButtonElement = null;
@@ -21,6 +101,9 @@ export default class WebConsole extends CcHTMLElement {
 	plugins: WebConsolePluginStore = {};
 
 	commands: WebConsoleCommandTargets = {};
+
+	autocompleteTabCounter = 0;
+	autocompleteTabCounterTimeout = 200;
 
 	constructor() {
 		super({ html, css });
@@ -63,7 +146,7 @@ export default class WebConsole extends CcHTMLElement {
 
 		if (this.helpButton) {
 			this.helpButton.addEventListener('click', () => {
-				this.onCommand(this._getCommandParts('help'));
+				this.onCommand(new WebConsoleCommand('help'));
 			});
 		}
 
@@ -90,7 +173,7 @@ export default class WebConsole extends CcHTMLElement {
 				if (target.dataset.command) {
 					e.preventDefault();
 					e.stopPropagation();
-					this.onCommand(this._getCommandParts(target.dataset.command));
+					this.onCommand(new WebConsoleCommand(target.dataset.command));
 				} else if (target.dataset.copy !== undefined) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -111,37 +194,6 @@ export default class WebConsole extends CcHTMLElement {
 		this.plugins = this._getPlugins();
 
 		this.init();
-	}
-
-	getCommand(options: any): WebConsoleCommand {
-		let command = {
-			string: '',
-			command: '',
-			subcommands: null,
-			arguments: {},
-		} as WebConsoleCommand;
-
-		if (options.command) {
-			command.command = options.command;
-		}
-		if (options.subcommands) {
-			command.subcommands = options.subcommands;
-		}
-		if (options.arguments) {
-			command.arguments = options.arguments;
-		}
-
-		command.string = command.command;
-		if (command.subcommands) {
-			command.string += ' ' + command.subcommands.join(' ');
-		}
-		if (command.arguments) {
-			command.string += ' ' + Object.keys(command.arguments).map((key) => {
-				return `${key}=${JSON.stringify(command.arguments[key])}`;
-			}).join(' ');
-		}
-
-		return command;
 	}
 
 	getDomain() {
@@ -171,49 +223,6 @@ export default class WebConsole extends CcHTMLElement {
 			plugin.register(this);
 		}
 		return pluginStore;
-	}
-
-	_getCommandParts(commandString: string): WebConsoleCommand {
-		const commandPattern = /^([\w]+)((?: [\w]+)+)?((?:[ ]*-[\w]+(?:="[^"]+?")?)+)?$/;
-
-		const command = commandString.split(' ').shift();
-		let subcommands = null;
-		const commandArguments: WebConsoleArguments = {};
-
-		let matches = commandPattern.exec(commandString);
-
-		if (matches) {
-
-			if (matches && matches[2]) {
-				subcommands = matches[2].trim().split(' ');
-			}
-
-			if (matches && matches[3]) {
-				const argumentPatternParts = /[ ]*-([\w]+)(?:="(.+?)")?/g;
-				const argumentPattern = /[ ]*-([\w]+)(?:=(".+?"))?/;
-
-				let argumentStrings = matches[3].match(argumentPatternParts);
-
-				for (let argumentString of argumentStrings) {
-					let argumentMatch = argumentString.match(argumentPattern);
-					if (!argumentMatch) {
-						continue;
-					}
-
-					commandArguments[argumentMatch[1]] = {
-						name: argumentMatch[1],
-						value: argumentMatch[2] ? JSON.parse(argumentMatch[2]) : true,
-					};
-				}
-			}
-		}
-
-		return {
-			string: commandString,
-			command: command,
-			subcommands: subcommands,
-			arguments: commandArguments,
-		};
 	}
 
 	cleanCommandOptions(options: WebConsoleCommandOptions): WebConsoleCommandOptions {
@@ -269,7 +278,7 @@ export default class WebConsole extends CcHTMLElement {
 			this.input.value = '';
 			let command = null;
 			try {
-				command = this._getCommandParts(commandString);
+				command = new WebConsoleCommand(commandString);
 				this.onCommand(command);
 			} catch (err) {
 				this.printLn(`syntax error: ${err.message}`, { class: 'error' });
@@ -282,6 +291,10 @@ export default class WebConsole extends CcHTMLElement {
 			e.preventDefault();
 			e.stopPropagation();
 			this.moveCommandHistoryIndex(-1);
+		} else if (e.key === 'Tab') {
+			e.preventDefault();
+			e.stopPropagation();
+			this.autocomplete();
 		}
 	}
 
@@ -292,13 +305,13 @@ export default class WebConsole extends CcHTMLElement {
 				commands.push(command);
 			}
 		}
-		return commands;
+		return commands.sort();
 	}
 
 	onCommand(command: WebConsoleCommand) {
-		this.addToCommandHistory(command.string);
+		this.addToCommandHistory(command.getString());
 
-		this.printLn(command.string, { direction: 'input' });
+		this.printLn(command.getString(), { direction: 'input' });
 
 		try {
 			if (this.commands[command.command]) {
@@ -311,6 +324,66 @@ export default class WebConsole extends CcHTMLElement {
 		}
 
 		this.input.focus();
+	}
+
+	autocomplete() {
+		this.autocompleteTabCounter++;
+		setTimeout(() => {
+			this.autocompleteTabCounter--;
+		}, this.autocompleteTabCounterTimeout);
+
+		const command = new WebConsoleCommand(this.input.value);
+		let autocompleteResult: WebConsoleAutocompleteResponse = null;
+
+		if (command.subcommands === null) {
+			const options = this.getCommands();
+			autocompleteResult = this.autocompleteFromOptions(options, command.command);
+			if (autocompleteResult.numberResults > 0) {
+				this.input.value = autocompleteResult.result;
+			}
+			if (autocompleteResult.numberResults === 1) {
+				this.input.value += ' ';
+			}
+		} else {
+			const plugin = this.getPlugin(command.command);
+			if (plugin) {
+				const pluginOptions = plugin.autocompleteOptionsForCommand(command);
+				autocompleteResult = this.autocompleteFromOptions(pluginOptions, command.lastSubcommand());
+				if (autocompleteResult.numberResults > 0) {
+					command.lastSubcommand(autocompleteResult.result);
+					this.input.value = command.getString();
+				}
+			}
+		}
+
+		if (this.autocompleteTabCounter >= 2 && autocompleteResult.numberResults > 1) {
+			this.printLn(`Available options: ${autocompleteResult.options.join(', ')}`, { class: 'autocomplete' });
+		}
+	}
+
+	autocompleteFromOptions(options: Array<string>, searchTerm: string): WebConsoleAutocompleteResponse {
+		let optionsFiltered = options.filter(option => option.startsWith(searchTerm));
+
+		//find smallest comon prefix of all options
+		let commonPrefix = '';
+		for (let option of optionsFiltered) {
+			if (commonPrefix === '') {
+				commonPrefix = option;
+			} else {
+				let i = 0;
+				while (i < commonPrefix.length && i < option.length && commonPrefix[i] === option[i]) {
+					i++;
+				}
+				commonPrefix = commonPrefix.substr(0, i);
+			}
+		}
+
+		return {
+			input: searchTerm,
+			result: commonPrefix,
+			numberResults: optionsFiltered.length,
+			options: optionsFiltered,
+		};
 	}
 
 	print(text: string, options: WebConsolePrintOptions = {}) {

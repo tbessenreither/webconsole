@@ -1,6 +1,6 @@
 import WebConsolePlugin from "../WebConsolePlugin";
-import WebConsole from "../WebConsole";
-import { WebConsoleCommand } from "../WebConsole/types";
+import { WebConsole, WebConsoleCommand } from "../WebConsole";
+import { WebConsoleAutocompleteResponse } from "../WebConsole/types";
 
 import randomOtter from './otters';
 
@@ -8,6 +8,34 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	_console: WebConsole = null;
 	name = 'About';
 	dateOfBirth = '1986-10-21';
+
+	abouts: { [key: string]: Array<string> } = {
+		WebConsole: [
+			`Ich probiere gern mal neues Zeug aus und was dabei raus kommt ist dann zum beispiel sowas hier.`,
+			`Unter anderem habe mir hier schon Nachrichten auf einen POS Drucker schicken lassen oder mit <a href="https://projects.tobias.bessenreither.de/three01/" target="_blank">WebGL</a> experimentiert.`,
+			`Die Web console ist Comandline Interface geschrieben in Javascript. Gerendert wird die Ausgabe dann über pre und code tags.`,
+			`Als minimalistische Userinterface habe ich clickbare commands eingebaut, primäre Eingabeform ist jedoch die Komandozeile.`
+		],
+		Tobias: [
+			`Das bin ich.`,
+			`Geboren am 21.10.1986 und damit aktuell ${this.getAge(this.dateOfBirth)} Jahre alt.`,
+			`Von Beruf bin ich Web- und App-Entwickler.`,
+		],
+		Fotografie: [
+			`Oh, ein großartiges Thema.`,
+			`Fotografie ist seit Jahren ein Hobby dem ich immer mal wieder nachgehe.`,
+			`Eine Auswahl meiner Bilder kannst du dir <a href="https://bessenreither.de/" target="_blank">hier</a> anschauen.`,
+			`Größtenteils fotografiere ich mit einer Nikon D5500 und dem 18-55mm Zoom Objektiv.`,
+			`Am liebsten irgendwas mit Natur.`,
+		],
+		Arbeit: [
+			`Ich arbeite im Moment bei Webprojaggt, einer Web & Werbeagentur in der Oberpfalz.`,
+			`Davor war ich selbstständig im Bereich Backend Entwicklung & System-Design und Hosting.`,
+		],
+		Torsten: [
+			'Torsten ist ein anderer Befehl',
+		],
+	}
 
 	onRegister() {
 		this._console.registerCommand('about', this, this.execute.bind(this));
@@ -38,51 +66,57 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 		return age;
 	}
 
+	getAboutKeys() {
+		return Object.keys(this.abouts).sort();
+	}
+
 	execute(command: WebConsoleCommand) {
 		if (command.subcommands === null) {
-			return this.help({
-				string: 'help about',
-				command: 'help',
-				subcommands: ['about'],
-				arguments: {},
-			});
+			return this.help(new WebConsoleCommand('help about'));
 		}
 
-		if (command.subcommands[0] === 'Tobias') {
-			this.printLn(``);
-			this.printLn(`Das bin ich.`, { class: 'subtitle' });
-			this.printLn(`Geboren am 21.10.1986 und damit aktuell ${this.getAge(this.dateOfBirth)} Jahre alt.`);
-			this.printLn(`Von Beruf bin ich Web- und App-Entwickler.`);
-			this.printLn(``);
-		} else if (command.subcommands[0] === 'WebConsole') {
-			this.printLn(``);
-			this.printLn(`Ich probiere gern mal neues Zeug aus und was dabei raus kommt ist dann zum beispiel sowas hier.`);
-			this.printLn(`Unter anderem habe mir hier schon Nachrichten auf einen POS Drucker schicken lassen oder mit <a href="https://projects.tobias.bessenreither.de/three01/" target="_blank">WebGL</a> experimentiert.`, { html: true });
-			this.printLn(``);
-		} else if (command.subcommands[0] === 'Fotografie') {
-			this.printLn(``);
-			this.printLn(`Oh, ein großartiges Thema.`, { class: 'subtitle' });
-			this.printLn(`Fotografie ist seit Jahren ein Hobby dem ich immer mal wieder nachgehe`, {});
-			this.printLn(`Eine Auswahl meiner Bilder kannst du dir <a href="https://bessenreither.de/" target="_blank">hier</a> anschauen`, { html: true });
-			this.printLn(`Größtenteils fotografiere ich mit einer Nikon D5500 und dem 18-55mm Zoom Objektiv.`, {});
-			this.printLn(`Am liebsten irgendwas mit Natur.`, {});
-			this.printLn(``);
-		} else if (command.subcommands[0] === 'Otter') {
-			this.print(`Otter sind toll\n`+randomOtter(), {class: ''})
+		if (command.subcommands[0] === 'Otter') {
+			this.print(`Otter sind toll\n` + randomOtter(), { class: '' })
+		} else if (this.abouts[command.subcommands[0]] !== undefined) {
+			this.printLn(``, { key: 'about', clearKey: 'about' });
+			this.printLn(`Über ${command.subcommands[0]}:`, { class: 'subtitle', key: 'about' });
+			for (let line of this.abouts[command.subcommands[0]]) {
+				this.printLn(line, { html: true, key: 'about' });
+			}
+			this.printLn(`Mehr über: ${this.moreAboutLinks(command.subcommands[0])}`, { html: true, key: 'about' });
+			this.printLn(``, { key: 'about' });
 		} else {
 			this.printLn(`Über ${command.subcommands[0]} weiß ich leider nichts`);
 		}
 	}
 
+	moreAboutLinks(currentAbout: string) {
+		let links = [];
+		for (let about of this.getAboutKeys()) {
+			if (about !== currentAbout) {
+				links.push(`<span data-command="about ${about}">${about}</span>`);
+			}
+		}
+		return links.join(', ');
+	}
+
 	help(command?: WebConsoleCommand) {
 		if (command.subcommands[0] === 'about') {
 			this.printLn('Ich kann dir etwas über folgende Dinge erzählen:');
-			this.printLn(' - <span data-command="about Tobias">Tobias</span>', { html: true });
-			this.printLn(' - <span data-command="about WebConsole">WebConsole</span>', { html: true });
-			this.printLn(' - <span data-command="about Fotografie">Fotografie</span>', { html: true });
+			let aboutStrings = this.getAboutKeys();
+			for (let about of aboutStrings) {
+				this.printLn(` - <span data-command="about ${about}">${about}</span>`, { html: true });
+			}
 		} else {
 			this.printLn(`Über ${command.subcommands[0]} weiß ich leider nichts`);
 		}
+	}
+
+	autocompleteOptionsForCommand(command: WebConsoleCommand): Array<string> {
+		if (command.command === 'about' && command.subcommands.length === 1) {
+			return this.getAboutKeys();
+		}
+		return null;
 	}
 
 }

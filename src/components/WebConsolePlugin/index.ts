@@ -1,5 +1,5 @@
-import WebConsole from "../WebConsole";
-import { WebConsoleCommand, WebConsolePrintOptions } from "../WebConsole/types";
+import { WebConsole, WebConsoleCommand } from "../WebConsole";
+import { WebConsolePrintOptions, WebConsoleAutocompleteResponse } from "../WebConsole/types";
 
 export default class WebConsolePlugin extends HTMLElement {
 	_console: WebConsole = null;
@@ -30,5 +30,9 @@ export default class WebConsolePlugin extends HTMLElement {
 
 	printLn(text: string, options: WebConsolePrintOptions = {}) {
 		this._console.printLn(text, options);
+	}
+
+	autocompleteOptionsForCommand(command: WebConsoleCommand): Array<string> {
+		return null;
 	}
 }

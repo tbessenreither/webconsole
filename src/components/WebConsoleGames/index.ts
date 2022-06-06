@@ -1,6 +1,5 @@
 import WebConsolePlugin from "../WebConsolePlugin";
-import WebConsole from "../WebConsole";
-import { WebConsoleCommand } from "../WebConsole/types";
+import { WebConsole, WebConsoleCommand } from "../WebConsole";
 
 type tictactoeState = Number;
 type tictactoeRow = Array<tictactoeState>;

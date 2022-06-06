@@ -1,6 +1,5 @@
 import WebConsolePlugin from "../WebConsolePlugin";
-import WebConsole from "../WebConsole";
-import { WebConsoleCommand } from "../WebConsole/types";
+import { WebConsole, WebConsoleCommand} from "../WebConsole";
 
 export default class WebConsoleTools extends WebConsolePlugin {
 	_console: WebConsole = null;
@@ -12,9 +11,9 @@ export default class WebConsoleTools extends WebConsolePlugin {
 	}
 
 	json(command: WebConsoleCommand) {
-		const jsonString = command.string.split(' ').slice(1).join(' ');
+		const jsonString = command.getString().split(' ').slice(1).join(' ');
 		const jsonData = JSON.parse(jsonString);
-		console.log(jsonString);
+		console.info(jsonString);
 		this.printLn("\n" + JSON.stringify(jsonData, null, 2), { copy: true });
 	}
 
@@ -23,7 +22,7 @@ export default class WebConsoleTools extends WebConsolePlugin {
 		this.printLn(`Timestamp converter`, { class: 'info subtitle' });
 		this.printLn(`Unix timestamp: <span data-copy>${timestamp}</span>`, { html: true });
 		this.printLn(`Date: <span data-copy>${new Date(timestamp * 1000).toLocaleString()}</span>`, { html: true });
-		console.log({
+		console.info({
 			unix: timestamp,
 			date: new Date(timestamp * 1000),
 		});

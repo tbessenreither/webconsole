@@ -1,6 +1,5 @@
 import WebConsolePlugin from "../WebConsolePlugin";
-import WebConsole from "../WebConsole";
-import { WebConsoleCommand } from "../WebConsole/types";
+import { WebConsole, WebConsoleCommand} from "../WebConsole";
 
 export default class WebConsoleWhy extends WebConsolePlugin {
 	_console: WebConsole = null;
