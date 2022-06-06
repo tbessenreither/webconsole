@@ -367,7 +367,7 @@ export class WebConsole extends CcHTMLElement {
 		}
 
 		if (this.autocompleteTabCounter >= 2 && autocompleteResult.numberResults > 1) {
-			this.printLn(`Available options: ${autocompleteResult.options.join(', ')}`, { class: 'autocomplete' });
+			this.printLn(`Available options: ${autocompleteResult.options.join(', ')}`, { clearKey: 'autocomplete', key: 'autocomplete', class: 'autocomplete' });
 		}
 	}
 
