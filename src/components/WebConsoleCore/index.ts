@@ -22,12 +22,12 @@ export default class WebConsoleCore extends WebConsolePlugin {
 	help(command: WebConsoleCommand) {
 		try {
 			if (command.subcommands === null) {
-				this.printLn('Available commands:', { class: 'info subtitle' });
-				this.printLn(`type "help $command" for more information about a command`);
+				this.printLn('Available commands:', { key: 'help', clearKey: 'help', class: 'info subtitle' });
+				this.printLn(`type "help $command" for more information about a command`, { key: 'help' });
 				//sort this._console.commands by key
 				const cammandsSorted = this._console.getCommands();
 				for (let command of cammandsSorted) {
-					this.printLn(` - <span data-command='${command}'>${command}</span>`, { html: true });
+					this.printLn(` - <span data-command='${command}'>${command}</span>`, { html: true, key: 'help' });
 				}
 			} else {
 				if (this.myCommands.includes(command.subcommands[0])) {
@@ -50,8 +50,8 @@ export default class WebConsoleCore extends WebConsolePlugin {
 			this.printLn('Clears the console');
 		} else if (command.subcommands[0] === 'init') {
 			this.printLn('resets the console');
-		} else if (command.subcommands[0] === 'why') {
-			this.printLn('resets the console');
+		} else if (command.subcommands[0] === 'history') {
+			this.printLn(`lists the last ${this.listMaxHistoryItems} commands used.`);
 		} else {
 			this.printLn(`no forther information available`);
 		}
@@ -64,6 +64,13 @@ export default class WebConsoleCore extends WebConsolePlugin {
 		for (let command of historyToPrint) {
 			this.printLn(` - <span data-command='${command}'>${command}</span>`, { html: true });
 		}
+	}
+
+	autocompleteOptionsForCommand(command: WebConsoleCommand): string[] {
+		if (command.command === 'help' && command.subcommandLenght() <= 1) {
+			return this._console.getCommands();
+		}
+		return null;
 	}
 
 }

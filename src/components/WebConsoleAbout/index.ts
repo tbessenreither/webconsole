@@ -47,7 +47,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 		if (!command.subcommands) {
 			command.subcommands = [];
 		}
-		if (command.subcommands.length === 0) {
+		if (command.subcommandLenght() === 0) {
 			command.subcommands.push('Tobias');
 		}
 	}
@@ -110,7 +110,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	}
 
 	autocompleteOptionsForCommand(command: WebConsoleCommand): Array<string> {
-		if (command.command === 'about' && command.subcommands.length === 1) {
+		if (command.command === 'about' && command.subcommandLenght() <= 1) {
 			return this.getAboutKeys();
 		}
 		return null;

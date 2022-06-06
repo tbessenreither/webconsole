@@ -22,7 +22,7 @@ export class WebConsoleCommand {
 	getString(): string {
 		let commandString = this.command;
 
-		if (this.subcommands) {
+		if (this.subcommands !== null) {
 			commandString += ' ' + this.subcommands.join(' ');
 		}
 		if (this.arguments) {
@@ -38,11 +38,17 @@ export class WebConsoleCommand {
 	lastSubcommand(value: string = null): string {
 		if (this.subcommands) {
 			if (value !== null) {
-				this.subcommands[this.subcommands.length - 1] = value;
+				this.subcommands[this.subcommandLenght() - 1] = value;
 			}
-			return this.subcommands[this.subcommands.length - 1];
+			return this.subcommands[this.subcommandLenght() - 1];
+		} else if (value !== null) {
+			this.subcommands = [value];
 		}
 		return null;
+	}
+
+	subcommandLenght(): number {
+		return this.subcommands ? this.subcommands.length : 0;
 	}
 
 	_getCommandParts(commandString: string): WebConsoleCommand {
@@ -335,7 +341,9 @@ export class WebConsole extends CcHTMLElement {
 		const command = new WebConsoleCommand(this.input.value);
 		let autocompleteResult: WebConsoleAutocompleteResponse = null;
 
-		if (command.subcommands === null) {
+		const plugin = this.getPlugin(command.command);
+
+		if (command.subcommands === null && !plugin) {
 			const options = this.getCommands();
 			autocompleteResult = this.autocompleteFromOptions(options, command.command);
 			if (autocompleteResult.numberResults > 0) {
@@ -345,13 +353,15 @@ export class WebConsole extends CcHTMLElement {
 				this.input.value += ' ';
 			}
 		} else {
-			const plugin = this.getPlugin(command.command);
 			if (plugin) {
 				const pluginOptions = plugin.autocompleteOptionsForCommand(command);
 				autocompleteResult = this.autocompleteFromOptions(pluginOptions, command.lastSubcommand());
 				if (autocompleteResult.numberResults > 0) {
 					command.lastSubcommand(autocompleteResult.result);
 					this.input.value = command.getString();
+				}
+				if (command.lastSubcommand() === '') {
+					this.input.value += ' ';
 				}
 			}
 		}
@@ -362,26 +372,31 @@ export class WebConsole extends CcHTMLElement {
 	}
 
 	autocompleteFromOptions(options: Array<string>, searchTerm: string): WebConsoleAutocompleteResponse {
-		let optionsFiltered = options.filter(option => option.startsWith(searchTerm));
-
-		//find smallest comon prefix of all options
 		let commonPrefix = '';
-		for (let option of optionsFiltered) {
-			if (commonPrefix === '') {
-				commonPrefix = option;
-			} else {
-				let i = 0;
-				while (i < commonPrefix.length && i < option.length && commonPrefix[i] === option[i]) {
-					i++;
+		let optionsFiltered: Array<string> = [];
+
+
+		if (options) {
+			optionsFiltered = searchTerm === null ? options : options.filter(option => option.startsWith(searchTerm));
+			//find smallest comon prefix of all options
+			for (let option of optionsFiltered) {
+				if (commonPrefix === '') {
+					commonPrefix = option;
+				} else {
+					let i = 0;
+					while (i < commonPrefix.length && i < option.length && commonPrefix[i] === option[i]) {
+						i++;
+					}
+					commonPrefix = commonPrefix.slice(0, i);
 				}
-				commonPrefix = commonPrefix.substr(0, i);
 			}
+
 		}
 
 		return {
 			input: searchTerm,
 			result: commonPrefix,
-			numberResults: optionsFiltered.length,
+			numberResults: optionsFiltered ? optionsFiltered.length : 0,
 			options: optionsFiltered,
 		};
 	}
@@ -440,7 +455,6 @@ export class WebConsole extends CcHTMLElement {
 	getPlugin(commandString: string): false | WebConsolePlugin {
 		const commandObj = this.commands[commandString];
 		if (!commandObj) {
-			this.printLn(`Command '${commandString}' not found.`, { class: 'warn' });
 			return false;
 		}
 		return commandObj.plugin;
