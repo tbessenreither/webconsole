@@ -30,6 +30,7 @@ export type WebConsolePrintOptions = {
 	class?: string;
 	html?: boolean;
 	direction?: 'input' | 'output';
+	copy?: boolean;
 };
 
 export type WebConsoleCommandOptions = {

@@ -97,6 +97,10 @@
 						font-weight: bold;
 					}
 
+					[data-copy] {
+						cursor: copy;
+					}
+
 					[data-command] {
 						&::after {
 							//content: '🚀';

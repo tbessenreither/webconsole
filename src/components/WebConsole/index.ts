@@ -70,7 +70,7 @@ export default class WebConsole extends CcHTMLElement {
 		this.input.addEventListener('keydown', this.onInputKeyDown.bind(this));
 		this._shadowRoot.addEventListener('click', (e) => {
 			let target = e.target as HTMLElement;
-			
+
 			if (target.classList.contains('output') || target.classList.contains('input')) {
 				return;
 			}
@@ -86,10 +86,23 @@ export default class WebConsole extends CcHTMLElement {
 		this.contentObject.addEventListener('click', (e) => {
 			if (e.target) {
 				let target = e.target as HTMLElement;
+
 				if (target.dataset.command) {
 					e.preventDefault();
 					e.stopPropagation();
 					this.onCommand(this._getCommandParts(target.dataset.command));
+				} else if (target.dataset.copy !== undefined) {
+					e.preventDefault();
+					e.stopPropagation();
+					let text = target.innerText;
+					let textArea = document.createElement('textarea');
+					textArea.value = text;
+					document.body.appendChild(textArea);
+					textArea.select();
+					document.execCommand('copy');
+					document.body.removeChild(textArea);
+
+					this.printLn('Copied text to Clipboard', { class: 'info' });
 				}
 			}
 		});
@@ -160,38 +173,44 @@ export default class WebConsole extends CcHTMLElement {
 		return pluginStore;
 	}
 
-	_getCommandParts(command: string): WebConsoleCommand {
+	_getCommandParts(commandString: string): WebConsoleCommand {
 		const commandPattern = /^([\w]+)((?: [\w]+)+)?((?:[ ]*-[\w]+(?:="[^"]+?")?)+)?$/;
-		let matches = commandPattern.exec(command);
 
+		const command = commandString.split(' ').shift();
 		let subcommands = null;
-		if (matches[2]) {
-			subcommands = matches[2].trim().split(' ');
-		}
-
 		const commandArguments: WebConsoleArguments = {};
-		if (matches[3]) {
-			const argumentPatternParts = /[ ]*-([\w]+)(?:="(.+?)")?/g;
-			const argumentPattern = /[ ]*-([\w]+)(?:=(".+?"))?/;
 
-			let argumentStrings = matches[3].match(argumentPatternParts);
+		let matches = commandPattern.exec(commandString);
 
-			for (let argumentString of argumentStrings) {
-				let argumentMatch = argumentString.match(argumentPattern);
-				if (!argumentMatch) {
-					continue;
+		if (matches) {
+
+			if (matches && matches[2]) {
+				subcommands = matches[2].trim().split(' ');
+			}
+
+			if (matches && matches[3]) {
+				const argumentPatternParts = /[ ]*-([\w]+)(?:="(.+?)")?/g;
+				const argumentPattern = /[ ]*-([\w]+)(?:=(".+?"))?/;
+
+				let argumentStrings = matches[3].match(argumentPatternParts);
+
+				for (let argumentString of argumentStrings) {
+					let argumentMatch = argumentString.match(argumentPattern);
+					if (!argumentMatch) {
+						continue;
+					}
+
+					commandArguments[argumentMatch[1]] = {
+						name: argumentMatch[1],
+						value: argumentMatch[2] ? JSON.parse(argumentMatch[2]) : true,
+					};
 				}
-
-				commandArguments[argumentMatch[1]] = {
-					name: argumentMatch[1],
-					value: argumentMatch[2] ? JSON.parse(argumentMatch[2]) : true,
-				};
 			}
 		}
 
 		return {
-			string: command,
-			command: matches[1],
+			string: commandString,
+			command: command,
 			subcommands: subcommands,
 			arguments: commandArguments,
 		};
@@ -282,7 +301,6 @@ export default class WebConsole extends CcHTMLElement {
 
 		this.printLn(command.string, { direction: 'input' });
 
-		console.log('onCommand', command);
 		try {
 			if (this.commands[command.command]) {
 				this.commands[command.command].callback(command);
@@ -305,11 +323,17 @@ export default class WebConsole extends CcHTMLElement {
 		if (!options.html) {
 			options.html = false;
 		}
+		if (!options.copy) {
+			options.copy = false;
+		}
+
+		let copyAttribute = options.copy ? 'data-copy' : '';
 
 		if (!options.html) {
 			text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		}
-		this.output.innerHTML += `<span class="${options.direction} ${options.class}">${text}</span>`;
+
+		this.output.innerHTML += `<span ${copyAttribute} class="${options.direction} ${options.class}">${text}</span>`;
 
 		this.contentObject.scrollTop = this.contentObject.scrollHeight;
 	}
