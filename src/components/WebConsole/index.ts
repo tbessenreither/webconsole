@@ -60,16 +60,22 @@ export default class WebConsole extends CcHTMLElement {
 			this.closeButton.addEventListener('click', this.init);
 		}
 		this.helpButton = this._shadowRoot.querySelector('button[data-action="help"]') as HTMLButtonElement;
-		
+
 		if (this.helpButton) {
-			this.helpButton.addEventListener('click', ()=>{
+			this.helpButton.addEventListener('click', () => {
 				this.onCommand(this._getCommandParts('help'));
 			});
 		}
-		
+
 		this.input.addEventListener('keydown', this.onInputKeyDown.bind(this));
 		this._shadowRoot.addEventListener('click', (e) => {
+			let target = e.target as HTMLElement;
+			
+			if (target.classList.contains('output') || target.classList.contains('input')) {
+				return;
+			}
 			this.input.focus();
+			return;
 		});
 
 		const versionSpan = this._shadowRoot.querySelector('[data-source="version"]') as HTMLSpanElement;
@@ -77,23 +83,23 @@ export default class WebConsole extends CcHTMLElement {
 			versionSpan.innerText = version;
 		}
 
-		this.contentObject.addEventListener('click',(e) => {
-			if(e.target){
-				  let target = e.target as HTMLElement;
-				  if (target.dataset.command) {
-					  e.preventDefault();
-					  e.stopPropagation();
-					  this.onCommand(this._getCommandParts(target.dataset.command));
-				  }
-			 }
-		 });
-		
+		this.contentObject.addEventListener('click', (e) => {
+			if (e.target) {
+				let target = e.target as HTMLElement;
+				if (target.dataset.command) {
+					e.preventDefault();
+					e.stopPropagation();
+					this.onCommand(this._getCommandParts(target.dataset.command));
+				}
+			}
+		});
+
 
 		this.plugins = this._getPlugins();
 
 		this.init();
 	}
-	
+
 	getCommand(options: any): WebConsoleCommand {
 		let command = {
 			string: '',
@@ -134,7 +140,7 @@ export default class WebConsole extends CcHTMLElement {
 
 		this.clear();
 		this.printLn(`Welcome to the WebConsole on ${this.getDomain()}`, { class: 'info title' });
-		this.printLn('Type "<span data-command="help">help</span>" for a list of available commands.', {html: true});
+		this.printLn('Type "<span data-command="help">help</span>" for a list of available commands.', { html: true });
 		this.printLn('Remember all commands are case-sensitive.');
 
 		this.input.focus();
@@ -250,11 +256,11 @@ export default class WebConsole extends CcHTMLElement {
 			} catch (err) {
 				this.printLn(`syntax error: ${err.message}`, { class: 'error' });
 			}
-		} else if(e.key === 'ArrowUp') {
+		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
 			e.stopPropagation();
 			this.moveCommandHistoryIndex(1);
-		} else if(e.key === 'ArrowDown') {
+		} else if (e.key === 'ArrowDown') {
 			e.preventDefault();
 			e.stopPropagation();
 			this.moveCommandHistoryIndex(-1);
@@ -275,7 +281,7 @@ export default class WebConsole extends CcHTMLElement {
 		this.addToCommandHistory(command.string);
 
 		this.printLn(command.string, { direction: 'input' });
-		
+
 		console.log('onCommand', command);
 		try {
 			if (this.commands[command.command]) {
