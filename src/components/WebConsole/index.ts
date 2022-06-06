@@ -232,7 +232,6 @@ export default class WebConsole extends CcHTMLElement {
 	}
 
 	addToCommandHistory(commandString: string) {
-		console.log('adding to command history', commandString);
 		if (this.commandHistory.indexOf(commandString) === -1) {
 			this.commandHistory.push(commandString);
 		} else {
