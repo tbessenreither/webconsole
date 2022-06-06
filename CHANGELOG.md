@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.5](https://github.com/tbessenreither/webconsole/compare/v1.2.4...v1.2.5) (2022-06-06)
+
+
+### Bug Fixes
+
+* autocomplete now uses clearKey, removed old styling; ([4f295d2](https://github.com/tbessenreither/webconsole/commit/4f295d22ecec2e7727444537e5b4d753474c4252))
+* cleanup and bugfixing; ([d0e085b](https://github.com/tbessenreither/webconsole/commit/d0e085bf6e268acc8bb2187bedf1e60175117b03))
+
 ### [1.2.4](https://github.com/tbessenreither/webconsole/compare/v1.2.3...v1.2.4) (2022-06-06)
 
 
