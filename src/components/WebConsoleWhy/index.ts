@@ -8,6 +8,7 @@ export default class WebConsoleWhy extends WebConsolePlugin {
 
 	onRegister() {
 		this._console.registerCommand('why', this, this.why.bind(this));
+		this._console.registerCommand('longline', this, this.longline.bind(this), {hidden: true});
 	}
 
 	why() {
@@ -18,6 +19,10 @@ export default class WebConsoleWhy extends WebConsolePlugin {
 		this.printLn(`Ich bin mir bewusst das so eine Seite nicht für jeden ist, aber ich mag es und wenn du es auch gut findest sind wir schon zwei.`);
 		this.printLn(`Außerdem ist ein CLI irgendwie viel persönlicher, findest du nicht?`);
 		this.printLn(``);
+	}
+
+	longline() {
+		this.printLn(`Ich bin mir bewusst das so eine Seite nicht für jeden ist, aber ich mag es und wenn du es auch gut findest sind wir schon zweifür jeden ist, aber ich mag es und wenn du es auch gut findest sind wir schon zweifür jeden ist, aber ich mag es und wenn du es auch gut findest sind wir schon zwei.`);
 	}
 
 }

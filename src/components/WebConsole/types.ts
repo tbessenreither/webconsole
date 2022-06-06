@@ -22,6 +22,7 @@ export type WebConsoleCommandTargets = {
 	[key: string]: {
 		plugin: WebConsolePlugin;
 		callback: Function;
+		options: WebConsoleCommandOptions;
 	};
 };
 
@@ -29,4 +30,8 @@ export type WebConsolePrintOptions = {
 	class?: string;
 	html?: boolean;
 	direction?: 'input' | 'output';
+};
+
+export type WebConsoleCommandOptions = {
+	hidden?: boolean;
 };

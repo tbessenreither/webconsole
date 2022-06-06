@@ -6,6 +6,7 @@ import { WebConsoleCommand } from "../WebConsole/types";
 export default class WebConsoleCore extends WebConsolePlugin {
 	_console: WebConsole = null;
 	name: string = 'Core';
+	listMaxHistoryItems = 10;
 
 	myCommands: Array<string> = [
 		'help', 'clear', 'init', 'error',
@@ -16,6 +17,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 		this._console.registerCommand('clear', this, this._console.clear);
 		this._console.registerCommand('init', this, this._console.init);
 		this._console.registerCommand('error', this, ()=>{ throw new Error('what did you think would happen?')});
+		this._console.registerCommand('history', this, this.history.bind(this));
 	}
 
 	help(command: WebConsoleCommand) {
@@ -52,6 +54,15 @@ export default class WebConsoleCore extends WebConsolePlugin {
 			this.printLn('resets the console');
 		} else {
 			this.printLn(`no forther information available`);
+		}
+	}
+
+	history() {
+		this.printLn(`Command History (last ${this.listMaxHistoryItems}):`, { class: 'info subtitle' });
+
+		let historyToPrint = this._console.commandHistory.slice(this.listMaxHistoryItems * -1).reverse();
+		for (let command of historyToPrint) {
+			this.printLn(` - <span data-command='${command}'>${command}</span>`, {html: true});
 		}
 	}
 

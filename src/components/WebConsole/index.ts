@@ -3,7 +3,7 @@ import css from './style.scss';
 
 import { CcHTMLElement } from '../CcHTMLElement';
 import WebConsolePlugin from '../WebConsolePlugin';
-import { WebConsolePluginStore, WebConsoleCommandTargets, WebConsoleCommand, WebConsoleArguments, WebConsolePrintOptions } from './types';
+import { WebConsolePluginStore, WebConsoleCommandTargets, WebConsoleCommand, WebConsoleArguments, WebConsolePrintOptions, WebConsoleCommandOptions } from './types';
 
 const PACKAGE = require('../../../package.json');
 const version = PACKAGE.version;
@@ -14,6 +14,9 @@ export default class WebConsole extends CcHTMLElement {
 	closeButton: HTMLButtonElement = null;
 	helpButton: HTMLButtonElement = null;
 	contentObject: HTMLDivElement = null;
+	commandHistory: Array<string> = [];
+	commandHistoryIndex: number = 0;
+	commandHistoryMaxLength: number = 50;
 
 	plugins: WebConsolePluginStore = {};
 
@@ -64,7 +67,7 @@ export default class WebConsole extends CcHTMLElement {
 			});
 		}
 		
-		this.input.addEventListener('keydown', this.onInputChange.bind(this));
+		this.input.addEventListener('keydown', this.onInputKeyDown.bind(this));
 		this._shadowRoot.addEventListener('click', (e) => {
 			this.input.focus();
 		});
@@ -127,12 +130,16 @@ export default class WebConsole extends CcHTMLElement {
 	}
 
 	init() {
+		this.commandHistory = localStorage.getItem('commandHistory') ? JSON.parse(localStorage.getItem('commandHistory')) : [];
+
 		this.clear();
 		this.printLn(`Welcome to the WebConsole on ${this.getDomain()}`, { class: 'info title' });
 		this.printLn('Type "<span data-command="help">help</span>" for a list of available commands.', {html: true});
 		this.printLn('Remember all commands are case-sensitive.');
 
 		this.input.focus();
+
+		this.onCommand(this._getCommandParts('longline'));
 	}
 
 	_getPlugins(): WebConsolePluginStore {
@@ -186,15 +193,56 @@ export default class WebConsole extends CcHTMLElement {
 		};
 	}
 
-	registerCommand(command: string, plugin: WebConsolePlugin, callback: Function) {
+	cleanCommandOptions(options: WebConsoleCommandOptions): WebConsoleCommandOptions {
+		if (options.hidden === undefined) {
+			options.hidden = false;
+		}
+		return options;
+	}
+
+	registerCommand(command: string, plugin: WebConsolePlugin, callback: Function, options: WebConsoleCommandOptions = {}) {
 		this.commands[command] = {
 			plugin: plugin,
 			callback: callback,
+			options: options,
 		};
 	}
 
-	onInputChange(e: KeyboardEvent) {
+	addToCommandHistory(commandString: string) {
+		console.log('adding to command history', commandString);
+		if (this.commandHistory.indexOf(commandString) === -1) {
+			this.commandHistory.push(commandString);
+		} else {
+			this.commandHistory.splice(this.commandHistory.indexOf(commandString), 1);
+			this.commandHistory.push(commandString);
+		}
+		this.commandHistoryIndex = 0;
+		while (this.commandHistory.length > this.commandHistoryMaxLength) {
+			this.commandHistory.shift();
+		}
+		localStorage.setItem('commandHistory', JSON.stringify(this.commandHistory));
+	}
+
+	moveCommandHistoryIndex(offset: number) {
+		this.commandHistoryIndex += offset;
+		if (this.commandHistoryIndex < 0) {
+			this.commandHistoryIndex = 0;
+		}
+		if (this.commandHistoryIndex > this.commandHistory.length) {
+			this.commandHistoryIndex = this.commandHistory.length;
+		}
+		if (this.commandHistoryIndex === 0) {
+			this.input.value = '';
+		} else {
+			this.input.value = this.commandHistory[this.commandHistory.length - this.commandHistoryIndex];
+		}
+	}
+
+	onInputKeyDown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
+			e.preventDefault();
+			e.stopPropagation();
+			this.commandHistoryIndex = 0;
 			const commandString = this.input.value;
 			this.input.value = '';
 			let command = null;
@@ -204,15 +252,30 @@ export default class WebConsole extends CcHTMLElement {
 			} catch (err) {
 				this.printLn(`syntax error: ${err.message}`, { class: 'error' });
 			}
+		} else if(e.key === 'ArrowUp') {
+			e.preventDefault();
+			e.stopPropagation();
+			this.moveCommandHistoryIndex(1);
+		} else if(e.key === 'ArrowDown') {
+			e.preventDefault();
+			e.stopPropagation();
+			this.moveCommandHistoryIndex(-1);
 		}
 	}
 
-	getCommands() {
-		let commands = Object.keys(this.commands).sort();
+	getCommands(): Array<string> {
+		const commands = [];
+		for (let command in this.commands) {
+			if (!this.commands[command].options.hidden) {
+				commands.push(command);
+			}
+		}
 		return commands;
 	}
 
 	onCommand(command: WebConsoleCommand) {
+		this.addToCommandHistory(command.string);
+
 		this.printLn(command.string, { direction: 'input' });
 		
 		console.log('onCommand', command);
