@@ -138,8 +138,6 @@ export default class WebConsole extends CcHTMLElement {
 		this.printLn('Remember all commands are case-sensitive.');
 
 		this.input.focus();
-
-		this.onCommand(this._getCommandParts('longline'));
 	}
 
 	_getPlugins(): WebConsolePluginStore {
