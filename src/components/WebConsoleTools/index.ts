@@ -11,7 +11,7 @@ export default class WebConsoleTools extends WebConsolePlugin {
 	}
 
 	json(command: WebConsoleCommand) {
-		const jsonString = command.getString().split(' ').slice(1).join(' ');
+		const jsonString = command.getStringRaw().split(' ').slice(1).join(' ');
 		const jsonData = JSON.parse(jsonString);
 		console.info(jsonString);
 		this.printLn("\n" + JSON.stringify(jsonData, null, 2), { copy: true });

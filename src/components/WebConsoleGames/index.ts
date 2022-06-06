@@ -7,7 +7,7 @@ type tictactoeBoard = Array<tictactoeRow>;
 
 export default class WebConsoleGames extends WebConsolePlugin {
 	_console: WebConsole = null;
-	name: string = 'Tools';
+	name: string = 'Games';
 
 	ticktactoeNext = 1;
 	ticktactoeBoard: tictactoeBoard = [];
@@ -73,6 +73,21 @@ export default class WebConsoleGames extends WebConsolePlugin {
 			} else {
 				this.printLn('That space is already taken.');
 			}
+		}
+	}
+
+	help(command: WebConsoleCommand) {
+		if (command.subcommands[0] === 'tictactoe') {
+			this.printLn(`Tic-tac-toe game.`, { class: 'info subtitle' });
+			this.printLn(`Usage: tictactoe [new [size]] [move x y]`);
+			this.printLn(`new [size] - Generates a new board with size x size. Defaults to 3x3.`);
+			this.printLn(`move x y - Marks the field at x,y with the current player.`);
+			this.printLn(`<span data-command="tictactoe new 3">New Game 3x3</span>`, { html: true });
+			this.printLn(`<span data-command="tictactoe new 4">New Game 4x4</span>`, { html: true });
+			this.printLn(`<span data-command="tictactoe new 5">New Game 5x5</span>`, { html: true });
+			this.printLn(`<span data-command="tictactoe new 10">New Game 10x10</span>`, { html: true });
+		} else {
+			this.printLn(`I don't know anything about the ${command.subcommands[0]} command.`);
 		}
 	}
 

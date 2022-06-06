@@ -9,6 +9,7 @@ const PACKAGE = require('../../../package.json');
 const version = PACKAGE.version;
 
 export class WebConsoleCommand {
+	commandStringIn: string = null;
 	command: string = '';
 	subcommands: Array<string> = null;
 	arguments: WebConsoleArguments = {};
@@ -51,7 +52,12 @@ export class WebConsoleCommand {
 		return this.subcommands ? this.subcommands.length : 0;
 	}
 
+	getStringRaw() {
+		return this.commandStringIn;
+	}
+
 	_getCommandParts(commandString: string): WebConsoleCommand {
+		this.commandStringIn = commandString;
 		const commandPattern = /^([\w]+)((?: [\w]+)+)?((?:[ ]*-[\w]+(?:="[^"]+?")?)+)?$/;
 
 		const command = commandString.split(' ').shift();
@@ -191,7 +197,7 @@ export class WebConsole extends CcHTMLElement {
 					document.execCommand('copy');
 					document.body.removeChild(textArea);
 
-					this.printLn('Copied text to Clipboard', { class: 'info' });
+					this.printLn('Copied text to Clipboard', { class: 'success' });
 				}
 			}
 		});

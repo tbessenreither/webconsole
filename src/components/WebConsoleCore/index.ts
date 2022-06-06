@@ -27,7 +27,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 				//sort this._console.commands by key
 				const cammandsSorted = this._console.getCommands();
 				for (let command of cammandsSorted) {
-					this.printLn(` - <span data-command='${command}'>${command}</span>`, { html: true, key: 'help' });
+					this.printLn(` - <span data-command='help ${command}'>${command}</span>`, { html: true, key: 'help' });
 				}
 			} else {
 				if (this.myCommands.includes(command.subcommands[0])) {
