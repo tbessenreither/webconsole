@@ -26,8 +26,15 @@ export default class WebConsoleCore extends WebConsolePlugin {
 				this.printLn(`type "help $command" for more information about a command`, { key: 'help' });
 				//sort this._console.commands by key
 				const cammandsSorted = this._console.getCommands();
+				let longestCommand = 0;
 				for (let command of cammandsSorted) {
-					this.printLn(` - <span data-command='help ${command}'>${command}</span>`, { html: true, key: 'help' });
+					if (command.length > longestCommand) {
+						longestCommand = command.length;
+					}
+				}
+				longestCommand += 1;
+				for (let command of cammandsSorted) {
+					this.printLn(` - <span data-command='help ${command}'>${command}</span>${''.padEnd(longestCommand - command.length)} / <span data-command='${command}'>run</span>`, { html: true, key: 'help' });
 				}
 			} else {
 				if (this.myCommands.includes(command.subcommands[0])) {
