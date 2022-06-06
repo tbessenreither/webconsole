@@ -71,7 +71,7 @@ export default class WebConsole extends CcHTMLElement {
 		this._shadowRoot.addEventListener('click', (e) => {
 			let target = e.target as HTMLElement;
 
-			if (target.classList.contains('output') || target.classList.contains('input')) {
+			if (target.dataset.nofocus !== undefined || target.classList.contains('output') || target.classList.contains('input')) {
 				return;
 			}
 			this.input.focus();
