@@ -1,17 +1,18 @@
-<div class="window">
-	<div class="titlebar">
-		<div class="title">WebConsole <span data-source="version"></span></div>
-		<div class="buttons">
-			<button data-action="help" title="help">?</button>
-			<button data-action="close" title="clear">x</button>
+<div class="wrapper">
+	<div class="window">
+		<div class="titlebar">
+			<div class="title">WebConsole <span data-source="version"></span></div>
+			<div class="buttons">
+				<button data-action="help" title="help">?</button>
+				<button data-action="close" title="clear">x</button>
+			</div>
+		</div>
+		<div class="content">
+			<pre><code data-for="output"></code></pre>
+			<span class="inputWrapper"><input data-action="input"><button style="display: none;" data-action="inputButton">The Button</button></span>
+		</div>
+		<div class="footer">
+			<a href="https://github.com/tbessenreither/webconsole" target="_blank">GitHub</a>
 		</div>
 	</div>
-	<div class="content">
-		<pre><code data-for="output"></code></pre>
-		<span class="inputWrapper"><input data-action="input"><button style="display: none;" data-action="inputButton">The Button</button></span>
-	</div>
-	<div class="footer">
-		<a href="https://github.com/tbessenreither/webconsole" target="_blank">GitHub</a>
-	</div>
-	<slot></slot>
 </div>

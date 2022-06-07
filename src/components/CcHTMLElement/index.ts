@@ -24,7 +24,7 @@ export class CcHTMLElement extends HTMLElement {
 
 	loadStyle(css: string) {
 		const style = document.createElement('style');
-		style.innerHTML = css;
+		style.innerHTML = css.trim();
 		this._shadowRoot.appendChild(style);
 	}
 
