@@ -117,7 +117,7 @@ export class WebConsole extends CcHTMLElement {
 
 	autocompleteTabCounter = 0;
 	autocompleteTabCounterTimeout = 200;
-	
+
 	mode: string = 'normal';
 	inputBuffer: Array<string> = [];
 	inputPromiseResolve: Function = null;
@@ -215,8 +215,6 @@ export class WebConsole extends CcHTMLElement {
 		});
 
 		this.init();
-
-		this.requestInput();
 	}
 
 	changeMode(mode: 'normal' | 'input') {
@@ -325,14 +323,14 @@ export class WebConsole extends CcHTMLElement {
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			e.stopPropagation();
-			this.inputBuffer.push(this.input.value+'\n');
+			this.inputBuffer.push(this.input.value + '\n');
 			this.printLn(this.input.value, { direction: 'input' });
 			this.input.value = '';
 
 			if (e.shiftKey) {
 				this._resolveInputBuffer();
 			}
-		} else if(e.key === 'Backspace' && this.input.value.length === 0 && this.inputBuffer.length > 0) {
+		} else if (e.key === 'Backspace' && this.input.value.length === 0 && this.inputBuffer.length > 0) {
 			e.preventDefault();
 			e.stopPropagation();
 			this.removeLines(1);
@@ -393,7 +391,7 @@ export class WebConsole extends CcHTMLElement {
 					this.input.disabled = true;
 				}
 				await this.commands[command.command].callback(command);
-				
+
 			} else {
 				this.printLn(`Command '${command.command}' not found.`, { class: 'warn' });
 			}
@@ -476,7 +474,7 @@ export class WebConsole extends CcHTMLElement {
 	}
 
 	removeLines(number: number = 1) {
-		for(let i = 0; i < number; i++) {
+		for (let i = 0; i < number; i++) {
 			this.removeLine();
 		}
 	}

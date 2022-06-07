@@ -139,10 +139,10 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	}
 
 	async contact(command: WebConsoleCommand) {
-		this.printLn(`Gib jetzt deine Nachricht an mich ein.`, {class: 'title'});
+		this.printLn(`Gib jetzt deine Nachricht an mich ein.`, { class: 'title' });
 
 		let message = await this._console.requestInput();
-		console.log('contact', {message});
+		console.log('contact', { message });
 
 		this.printLn(`Danke aber leider können Nachrichten gerade noch nicht verarbeitet werden.`, {});
 		this.printLn(`Hätte ich vielleicht vorher sagen sollen. Mein Fehler. Sorry`);
