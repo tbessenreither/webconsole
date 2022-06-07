@@ -48,6 +48,13 @@ class WebConsoleEastereggs extends WebConsolePlugin {
 	onRegister(): void {
 		this._console.registerCommand('eastereggs', this, this.eastereggs.bind(this), { hidden: true });
 		this._console.registerCommand('rm', this, this.rm.bind(this), { blocking: true, hidden: true });
+		this._console.registerCommand('rmdir', this, this.fakeProtected.bind(this), { blocking: true, hidden: true });
+		this._console.registerCommand('ls', this, this.fakeProtected.bind(this), { blocking: true, hidden: true });
+		this._console.registerCommand('mkdir', this, this.fakeProtected.bind(this), { blocking: true, hidden: true });
+		this._console.registerCommand('touch', this, this.fakeProtected.bind(this), { blocking: true, hidden: true });
+		this._console.registerCommand('vi', this, this.fakeProtected.bind(this), { blocking: true, hidden: true });
+		this._console.registerCommand('vim', this, this.fakeProtected.bind(this), { blocking: true, hidden: true });
+		this._console.registerCommand('nano', this, this.fakeProtected.bind(this), { blocking: true, hidden: true });
 	}
 
 	eastereggs(command: WebConsoleCommand) {
@@ -66,7 +73,7 @@ class WebConsoleEastereggs extends WebConsolePlugin {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
-	async _rmMessages(args: { dir: string, force: boolean }) {
+	async backendConnection() {
 		this.printLn(`Backend command detected`, { class: 'info' });
 		await this.wait(1000);
 		this.printLn(`establishing connection.`, { key: 'connecting' });
@@ -82,6 +89,10 @@ class WebConsoleEastereggs extends WebConsolePlugin {
 		this.printLn(`connection established`, { class: 'success' });
 		await this.wait(500);
 		this.printLn(`security check failed`, { class: 'error' });
+	}
+
+	async _rmMessages(args: { dir: string, force: boolean }) {
+		await this.backendConnection();
 		await this.wait(1000);
 		this.printLn(`retry`, {});
 		if (args.force) {
@@ -133,6 +144,10 @@ class WebConsoleEastereggs extends WebConsolePlugin {
 		await this._rmMessages(args);
 		await this._rmDelete(args);
 
+	}
+
+	async fakeProtected() {
+		await this.backendConnection();
 	}
 }
 let webConsoleEastereggs = new WebConsoleEastereggs();
