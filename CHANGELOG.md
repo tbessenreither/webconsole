@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.7](https://github.com/tbessenreither/webconsole/compare/v1.2.6...v1.2.7) (2022-06-07)
+
+
+### Features
+
+* rework of plugin integration; ([1f389d8](https://github.com/tbessenreither/webconsole/commit/1f389d88489f646c8ff57270b7e423be7dbc402a))
+
 ### [1.2.6](https://github.com/tbessenreither/webconsole/compare/v1.2.5...v1.2.6) (2022-06-07)
 
 
