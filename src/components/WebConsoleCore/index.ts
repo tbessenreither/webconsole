@@ -79,7 +79,6 @@ export default class WebConsoleCore extends WebConsolePlugin {
 		}
 		return null;
 	}
-
 }
 
-window.customElements.define('web-console-core', WebConsoleCore);
+let webConsoleCore = new WebConsoleCore();

@@ -26,4 +26,4 @@ export default class WebConsoleWhy extends WebConsolePlugin {
 
 }
 
-window.customElements.define('web-console-why', WebConsoleWhy);
+let webConsoleWhy = new WebConsoleWhy();

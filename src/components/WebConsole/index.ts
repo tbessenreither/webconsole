@@ -28,7 +28,7 @@ export class WebConsoleCommand {
 		}
 		if (this.arguments) {
 			commandString += ' ' + Object.keys(this.arguments).map((key) => {
-				return `${key}=${JSON.stringify(this.arguments[key])}`;
+				return `-${key}=${JSON.stringify(this.arguments[key].value)}`;
 			}).join(' ');
 		}
 		commandString = commandString.trim();
@@ -202,9 +202,6 @@ export class WebConsole extends CcHTMLElement {
 			}
 		});
 
-
-		this.plugins = this._getPlugins();
-
 		this.init();
 	}
 
@@ -221,20 +218,6 @@ export class WebConsole extends CcHTMLElement {
 		this.printLn('Remember all commands are case-sensitive.');
 
 		this.input.focus();
-	}
-
-	_getPlugins(): WebConsolePluginStore {
-		let pluginStore: WebConsolePluginStore = {};
-		let plugins = this.getSlotNodes() as Array<WebConsolePlugin>;
-		plugins = plugins.filter((node) => {
-			return node.register !== undefined;
-		});
-
-		for (let plugin of plugins) {
-			pluginStore[plugin.name] = plugin;
-			plugin.register(this);
-		}
-		return pluginStore;
 	}
 
 	cleanCommandOptions(options: WebConsoleCommandOptions): WebConsoleCommandOptions {
@@ -325,21 +308,31 @@ export class WebConsole extends CcHTMLElement {
 		return commands.sort();
 	}
 
-	onCommand(command: WebConsoleCommand) {
+	async onCommand(command: WebConsoleCommand) {
+		if (this.input.disabled) {
+			return false;
+		}
 		this.addToCommandHistory(command.getString());
 
 		this.printLn(command.getString(), { direction: 'input' });
 
 		try {
 			if (this.commands[command.command]) {
-				this.commands[command.command].callback(command);
+				if (this.commands[command.command].options.blocking) {
+					this.input.disabled = true;
+				}
+				await this.commands[command.command].callback(command);
+				
 			} else {
 				this.printLn(`Command '${command.command}' not found.`, { class: 'warn' });
 			}
 		} catch (err) {
 			this.printLn(`😱 Error: ${err.message}`, { class: 'error' });
 		}
-
+		console.log('unblock', this.input.disabled);
+		if (this.input.disabled) {
+			this.input.disabled = false;
+		}
 		this.input.focus();
 	}
 

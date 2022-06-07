@@ -115,7 +115,5 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 		}
 		return null;
 	}
-
 }
-
-window.customElements.define('web-console-about', WebConsoleAbout);
+let webconsoleAbout = new WebConsoleAbout();

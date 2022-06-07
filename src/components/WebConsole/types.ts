@@ -31,6 +31,7 @@ export type WebConsolePrintOptions = {
 
 export type WebConsoleCommandOptions = {
 	hidden?: boolean;
+	blocking?: boolean;
 };
 
 export type WebConsoleAutocompleteResponse = {

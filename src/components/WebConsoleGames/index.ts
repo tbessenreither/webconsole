@@ -90,7 +90,6 @@ export default class WebConsoleGames extends WebConsolePlugin {
 			this.printLn(`I don't know anything about the ${command.subcommands[0]} command.`);
 		}
 	}
-
 }
 
-window.customElements.define('web-console-games', WebConsoleGames);
+let webConsoleGames = new WebConsoleGames();
