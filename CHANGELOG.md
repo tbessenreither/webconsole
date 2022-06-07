@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.6](https://github.com/tbessenreither/webconsole/compare/v1.2.5...v1.2.6) (2022-06-07)
+
+
+### Features
+
+* **help:** added padEnd to command listing and added run command; ([82cf7a8](https://github.com/tbessenreither/webconsole/commit/82cf7a829452541e79392024b0148041eb5ba811))
+
+
+### Bug Fixes
+
+* **commandHistory:** added getter to console; ([a7f8324](https://github.com/tbessenreither/webconsole/commit/a7f8324beec6827c6e21726a2c0b158291ad38e8))
+
 ### [1.2.5](https://github.com/tbessenreither/webconsole/compare/v1.2.4...v1.2.5) (2022-06-06)
 
 
