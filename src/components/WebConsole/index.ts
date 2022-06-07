@@ -281,6 +281,11 @@ export class WebConsole extends CcHTMLElement {
 		}
 	}
 
+	getCommandHistory(count: number) {
+		let history = this.commandHistory.slice(count * -1).reverse();
+		return history;
+	}
+
 	onInputKeyDown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();

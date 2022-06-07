@@ -67,7 +67,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 	history() {
 		this.printLn(`Command History (last ${this.listMaxHistoryItems}):`, { class: 'info subtitle' });
 
-		let historyToPrint = this._console.commandHistory.slice(this.listMaxHistoryItems * -1).reverse();
+		let historyToPrint = this._console.getCommandHistory(this.listMaxHistoryItems);
 		for (let command of historyToPrint) {
 			this.printLn(` - <span data-command='${command}'>${command}</span>`, { html: true });
 		}
