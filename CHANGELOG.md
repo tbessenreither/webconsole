@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.9](https://github.com/tbessenreither/webconsole/compare/v1.2.8...v1.2.9) (2022-06-07)
+
+
+### Bug Fixes
+
+* **command:** fixed issue with boolean arguments; ([b118bf1](https://github.com/tbessenreither/webconsole/commit/b118bf19418676abaf9db6144c5c40a31f7becb0))
+
 ### [1.2.8](https://github.com/tbessenreither/webconsole/compare/v1.2.7...v1.2.8) (2022-06-07)
 
 
