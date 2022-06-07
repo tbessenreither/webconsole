@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/tbessenreither/webconsole/compare/v1.2.9...v1.3.0) (2022-06-07)
+
+
+### Features
+
+* **input mode:** added requestInput method that returns a promise with the text that was entered by the user; ([80dd687](https://github.com/tbessenreither/webconsole/commit/80dd6879241296290efc20cccd1eda23e6f54c1f))
+
 ### [1.2.9](https://github.com/tbessenreither/webconsole/compare/v1.2.8...v1.2.9) (2022-06-07)
 
 
