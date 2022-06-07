@@ -95,7 +95,6 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			this.print(`Otter sind toll\n` + randomOtter(), { class: '' })
 		} else if (this.abouts[command.subcommands[0]] !== undefined || this.unlistedAbouts[command.subcommands[0]] !== undefined) {
 			let about = this.abouts[command.subcommands[0]] || this.unlistedAbouts[command.subcommands[0]];
-			console.log('about', about);
 
 			this.printLn(``, { key: 'about', clearKey: 'about' });
 			this.printLn(`Über ${command.subcommands[0]}:`, { class: 'subtitle', key: 'about' });
@@ -142,7 +141,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 		this.printLn(`Gib jetzt deine Nachricht an mich ein.`, { class: 'title' });
 
 		let message = await this._console.requestInput();
-		console.log('contact', { message });
+		console.info('contact', { message });
 
 		this.printLn(`Danke aber leider können Nachrichten gerade noch nicht verarbeitet werden.`, {});
 		this.printLn(`Hätte ich vielleicht vorher sagen sollen. Mein Fehler. Sorry`);
