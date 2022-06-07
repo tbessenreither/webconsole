@@ -171,6 +171,12 @@
 							content: '🔎 ';
 						}
 					}
+
+					.easterEgg {
+						&::before {
+							content: '🥚 ';
+						}
+					}
 				}
 			}
 

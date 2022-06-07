@@ -14,7 +14,10 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			`Ich probiere gern mal neues Zeug aus und was dabei raus kommt ist dann zum beispiel sowas hier.`,
 			`Unter anderem habe mir hier schon Nachrichten auf einen POS Drucker schicken lassen oder mit <a href="https://projects.tobias.bessenreither.de/three01/" target="_blank">WebGL</a> experimentiert.`,
 			`Die Web console ist Comandline Interface geschrieben in Javascript. Gerendert wird die Ausgabe dann über pre und code tags.`,
-			`Als minimalistische Userinterface habe ich clickbare commands eingebaut, primäre Eingabeform ist jedoch die Komandozeile.`
+			`Als minimalistische Userinterface habe ich clickbare commands eingebaut, primäre Eingabeform ist jedoch die Komandozeile.`,
+			``,
+			`Obwohl das meiste hier durch klicks auf die gelben Texte erreichbar ist gibt es einiges das nur durch ausprobieren und die Texteingabe zu finden ist.`,
+			`Warum probierst du es nicht aus und suchst die Easter Eggs?`,
 		],
 		Tobias: [
 			`Das bin ich.`,
@@ -101,8 +104,8 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			for (let line of about) {
 				this.printLn(line, { html: true, key: 'about' });
 			}
-			this.printLn(`Mehr über: ${this.moreAboutLinks(command.subcommands[0])}`, { html: true, key: 'about' });
 			this.printLn(``, { key: 'about' });
+			this.printLn(`Mehr über: ${this.moreAboutLinks(command.subcommands[0])}`, { html: true, key: 'about' });
 		} else {
 			this.printLn(`Über ${command.subcommands[0]} weiß ich leider nichts`);
 		}
