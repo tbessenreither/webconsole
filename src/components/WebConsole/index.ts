@@ -329,7 +329,6 @@ export class WebConsole extends CcHTMLElement {
 		} catch (err) {
 			this.printLn(`😱 Error: ${err.message}`, { class: 'error' });
 		}
-		console.log('unblock', this.input.disabled);
 		if (this.input.disabled) {
 			this.input.disabled = false;
 		}
