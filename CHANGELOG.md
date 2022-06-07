@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/tbessenreither/webconsole/compare/v1.3.1...v1.3.2) (2022-06-07)
+
+
+### Bug Fixes
+
+* **build:** fixed css control character bug in css and swtiched back to production build; ([8d57441](https://github.com/tbessenreither/webconsole/commit/8d574414b4416e995f169e0e4dc9eac020eea929))
+
 ### [1.3.1](https://github.com/tbessenreither/webconsole/compare/v1.3.0...v1.3.1) (2022-06-07)
 
 
