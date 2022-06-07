@@ -103,6 +103,7 @@ export class WebConsoleCommand {
 export class WebConsole extends CcHTMLElement {
 	output: HTMLPreElement = null;
 	input: HTMLInputElement = null;
+	inputButton: HTMLButtonElement = null;
 	closeButton: HTMLButtonElement = null;
 	helpButton: HTMLButtonElement = null;
 	contentObject: HTMLDivElement = null;
@@ -116,11 +117,18 @@ export class WebConsole extends CcHTMLElement {
 
 	autocompleteTabCounter = 0;
 	autocompleteTabCounterTimeout = 200;
+	
+	mode: string = 'normal';
+	inputBuffer: Array<string> = [];
+	inputPromiseResolve: Function = null;
 
 	constructor() {
 		super({ html, css });
 
 		this.onCommand = this.onCommand.bind(this);
+		this.changeMode = this.changeMode.bind(this);
+		this.requestInput = this.requestInput.bind(this);
+		this._resolveInputBuffer = this._resolveInputBuffer.bind(this);
 
 		this.init = this.init.bind(this);
 		this.print = this.print.bind(this);
@@ -150,12 +158,16 @@ export class WebConsole extends CcHTMLElement {
 		this.contentObject = this._shadowRoot.querySelector('.content');
 		this.output = this._shadowRoot.querySelector('[data-for="output"]') as HTMLPreElement;
 		this.input = this._shadowRoot.querySelector('input[data-action="input"]') as HTMLInputElement;
+		this.inputButton = this._shadowRoot.querySelector('button[data-action="inputButton"]') as HTMLButtonElement;
+		if (this.inputButton) {
+			this.inputButton.addEventListener('click', this._resolveInputBuffer);
+		}
 		this.closeButton = this._shadowRoot.querySelector('button[data-action="close"]') as HTMLButtonElement;
 		if (this.closeButton) {
 			this.closeButton.addEventListener('click', this.init);
 		}
-		this.helpButton = this._shadowRoot.querySelector('button[data-action="help"]') as HTMLButtonElement;
 
+		this.helpButton = this._shadowRoot.querySelector('button[data-action="help"]') as HTMLButtonElement;
 		if (this.helpButton) {
 			this.helpButton.addEventListener('click', () => {
 				this.onCommand(new WebConsoleCommand('help'));
@@ -203,6 +215,38 @@ export class WebConsole extends CcHTMLElement {
 		});
 
 		this.init();
+
+		this.requestInput();
+	}
+
+	changeMode(mode: 'normal' | 'input') {
+		if (mode === 'input') {
+			this.input.parentElement.classList.add('inputMode');
+			this.inputButton.innerText = 'Enter';
+			this.mode = 'input';
+			this.inputButton.style.display = 'inline';
+		} else {
+			this.input.parentElement.classList.remove('inputMode');
+			this.mode = 'normal';
+			this.inputButton.style.display = 'none';
+		}
+	}
+
+	async requestInput() {
+		return new Promise((resolve) => {
+			this._resolveInputBuffer();
+			this.changeMode('input');
+			this.inputPromiseResolve = resolve;
+		});
+	}
+
+	_resolveInputBuffer() {
+		if (this.inputPromiseResolve !== null) {
+			this.inputPromiseResolve(this.inputBuffer.join(' '));
+		}
+		this.inputPromiseResolve = null;
+		this.inputBuffer = [];
+		this.changeMode('normal');
 	}
 
 	getDomain() {
@@ -270,6 +314,33 @@ export class WebConsole extends CcHTMLElement {
 	}
 
 	onInputKeyDown(e: KeyboardEvent) {
+		if (this.mode === 'input') {
+			this.onInputKeyDownHandlerInput(e);
+		} else {
+			this.onInputKeyDownHandlerNormal(e);
+		}
+	}
+
+	onInputKeyDownHandlerInput(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			e.stopPropagation();
+			this.inputBuffer.push(this.input.value+'\n');
+			this.printLn(this.input.value, { direction: 'input' });
+			this.input.value = '';
+
+			if (e.shiftKey) {
+				this._resolveInputBuffer();
+			}
+		} else if(e.key === 'Backspace' && this.input.value.length === 0 && this.inputBuffer.length > 0) {
+			e.preventDefault();
+			e.stopPropagation();
+			this.removeLines(1);
+			this.input.value = this.inputBuffer.pop();
+		}
+	}
+
+	onInputKeyDownHandlerNormal(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			e.stopPropagation();
@@ -402,6 +473,16 @@ export class WebConsole extends CcHTMLElement {
 			numberResults: optionsFiltered ? optionsFiltered.length : 0,
 			options: optionsFiltered,
 		};
+	}
+
+	removeLines(number: number = 1) {
+		for(let i = 0; i < number; i++) {
+			this.removeLine();
+		}
+	}
+
+	removeLine() {
+		this.output.removeChild(this.output.lastChild);
 	}
 
 	print(text: string, options: WebConsolePrintOptions = {}) {

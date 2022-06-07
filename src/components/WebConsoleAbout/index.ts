@@ -32,10 +32,29 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			`Ich arbeite im Moment bei Webprojaggt, einer Web & Werbeagentur in der Oberpfalz.`,
 			`Davor war ich selbstständig im Bereich Backend Entwicklung & System-Design und Hosting.`,
 		],
+		Socials: [
+			`Auf folgenden Plattformen könnt ihr mich finden:`,
+			` - <a href="https://github.com/tbessenreither" target="_blank">GitHub</a>`,
+			` - <a href="https://www.xing.com/profile/Tobias_Bessenreither" target="_blank">Xing</a>`,
+			` - <a href="https://de.linkedin.com/in/tobias-bessenreither" target="_blank">LinkedIn</a>`,
+			` - <a href="https://www.youtube.com/channel/UCqWvqUR5KkDAM4ELT1QhXZQ" target="_blank">YouTube</a>`,
+		],
 	}
+
+	unlistedAbouts: { [key: string]: Array<string> } = {
+		Eastereggs: [
+			`Ja, ich habe einige Eastereggs eingebaut.`,
+			`Aber suchen musst du schon selbst.`,
+		],
+		Single: [
+			`Ja, warum fragst du?`,
+			`<span data-command="contact">Kontakt</span>`,
+		],
+	};
 
 	onRegister() {
 		this._console.registerCommand('about', this, this.execute.bind(this));
+		this._console.registerCommand('contact', this, this.contact.bind(this));
 	}
 
 	commandDefaults(command: WebConsoleCommand) {
@@ -74,10 +93,13 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 
 		if (command.subcommands[0] === 'Otter') {
 			this.print(`Otter sind toll\n` + randomOtter(), { class: '' })
-		} else if (this.abouts[command.subcommands[0]] !== undefined) {
+		} else if (this.abouts[command.subcommands[0]] !== undefined || this.unlistedAbouts[command.subcommands[0]] !== undefined) {
+			let about = this.abouts[command.subcommands[0]] || this.unlistedAbouts[command.subcommands[0]];
+			console.log('about', about);
+
 			this.printLn(``, { key: 'about', clearKey: 'about' });
 			this.printLn(`Über ${command.subcommands[0]}:`, { class: 'subtitle', key: 'about' });
-			for (let line of this.abouts[command.subcommands[0]]) {
+			for (let line of about) {
 				this.printLn(line, { html: true, key: 'about' });
 			}
 			this.printLn(`Mehr über: ${this.moreAboutLinks(command.subcommands[0])}`, { html: true, key: 'about' });
@@ -114,6 +136,19 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			return this.getAboutKeys();
 		}
 		return null;
+	}
+
+	async contact(command: WebConsoleCommand) {
+		this.printLn(`Gib jetzt deine Nachricht an mich ein.`, {class: 'title'});
+
+		let message = await this._console.requestInput();
+		console.log('contact', {message});
+
+		this.printLn(`Danke aber leider können Nachrichten gerade noch nicht verarbeitet werden.`, {});
+		this.printLn(`Hätte ich vielleicht vorher sagen sollen. Mein Fehler. Sorry`);
+		this.printLn('');
+		this.printLn(`Aber positiv gesehen, die Texteingabe funktioniert 1A. Danke fürs Testen.`);
+		this.printLn(`Hier ein Keks 🍪`);
 	}
 }
 let webconsoleAbout = new WebConsoleAbout();

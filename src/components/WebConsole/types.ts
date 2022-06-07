@@ -22,7 +22,7 @@ export type WebConsoleCommandTargets = {
 export type WebConsolePrintOptions = {
 	class?: string;
 	html?: boolean;
-	direction?: 'input' | 'output';
+	direction?: 'input' | 'output' | 'none';
 	copy?: boolean;
 	clearLast?: boolean | number;
 	clearKey?: string;
