@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/tbessenreither/webconsole/compare/v1.3.0...v1.3.1) (2022-06-07)
+
+
+### Features
+
+* **about:** added more flavour text; ([9833585](https://github.com/tbessenreither/webconsole/commit/98335856742d49b9a13d3cbd265d7022d405c8fe))
+
 ## [1.3.0](https://github.com/tbessenreither/webconsole/compare/v1.2.9...v1.3.0) (2022-06-07)
 
 
