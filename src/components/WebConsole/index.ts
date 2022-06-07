@@ -444,15 +444,17 @@ export class WebConsole extends CcHTMLElement {
 	}
 
 	autocompleteFromOptions(options: Array<string>, searchTerm: string): WebConsoleAutocompleteResponse {
-		let commonPrefix = '';
+		let commonPrefix: string = null;
 		let optionsFiltered: Array<string> = [];
-
+		if (searchTerm === null) {
+			searchTerm = '';
+		}
 
 		if (options) {
 			optionsFiltered = searchTerm === null ? options : options.filter(option => option.startsWith(searchTerm));
 			//find smallest comon prefix of all options
 			for (let option of optionsFiltered) {
-				if (commonPrefix === '') {
+				if (commonPrefix === null) {
 					commonPrefix = option;
 				} else {
 					let i = 0;
