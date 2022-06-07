@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.3](https://github.com/tbessenreither/webconsole/compare/v1.3.2...v1.3.3) (2022-06-07)
+
+
+### Bug Fixes
+
+* **autocomplete:** fixed another bug in autocomplete overwriting the sliced result if it becomes empty because no common demoninator was found; ([e551b01](https://github.com/tbessenreither/webconsole/commit/e551b016a6ededb82968d2cab00bc4401335a30c))
+
 ### [1.3.2](https://github.com/tbessenreither/webconsole/compare/v1.3.1...v1.3.2) (2022-06-07)
 
 
