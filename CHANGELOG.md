@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.8](https://github.com/tbessenreither/webconsole/compare/v1.2.7...v1.2.8) (2022-06-07)
+
+
+### Features
+
+* added more commands; ([e5f65e9](https://github.com/tbessenreither/webconsole/commit/e5f65e9d95d5b1b3a8427961bcf71d9600aebeab))
+
 ### [1.2.7](https://github.com/tbessenreither/webconsole/compare/v1.2.6...v1.2.7) (2022-06-07)
 
 
