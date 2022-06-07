@@ -58,7 +58,7 @@ export class WebConsoleCommand {
 
 	_getCommandParts(commandString: string): WebConsoleCommand {
 		this.commandStringIn = commandString;
-		const commandPattern = /^([\w]+)((?: [\w]+)+)?((?:[ ]*-[\w]+(?:="[^"]+?")?)+)?$/;
+		const commandPattern = /^([\w]+)((?: [\w]+)+)?((?:[ ]*-[\w]+(?:="?[^"]+?"?)?)+)?$/;
 
 		const command = commandString.split(' ').shift();
 		let subcommands = null;
