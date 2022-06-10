@@ -198,6 +198,11 @@ export class WebConsole extends CcHTMLElement {
 					e.preventDefault();
 					e.stopPropagation();
 					this.onCommand(new WebConsoleCommand(target.dataset.command));
+				} else if (target.dataset.run !== undefined) {
+					e.preventDefault();
+					e.stopPropagation();
+
+					this.onCommand(new WebConsoleCommand(target.innerText));
 				} else if (target.dataset.copy !== undefined) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -256,7 +261,7 @@ export class WebConsole extends CcHTMLElement {
 
 		this.clear();
 		this.printLn(`Welcome to the WebConsole on ${this.getDomain()}`, { class: 'info title' });
-		this.printLn('Type "<span data-command="help">help</span>" for a list of available commands.', { html: true });
+		this.printLn('Type "<span data-run>help</span>" for a list of available commands.', { html: true });
 		this.printLn('Remember all commands are case-sensitive.');
 
 		this.input.focus();

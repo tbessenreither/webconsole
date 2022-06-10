@@ -34,7 +34,7 @@ export default class WebConsoleCore extends WebConsolePlugin {
 				}
 				longestCommand += 1;
 				for (let command of cammandsSorted) {
-					this.printLn(` - <span data-command='help ${command}'>${command}</span>${''.padEnd(longestCommand - command.length)} / <span data-command='${command}'>run command</span>`, { html: true, key: 'help' });
+					this.printLn(` - <span data-run>help ${command}</span>${''.padEnd(longestCommand - command.length)} / <span data-run>${command}</span>`, { html: true, key: 'help' });
 				}
 			} else {
 				if (this.myCommands.includes(command.subcommands[0])) {
