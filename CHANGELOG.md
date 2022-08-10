@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/tbessenreither/webconsole/compare/v1.3.3...v1.4.0) (2022-08-10)
+
+
+### Features
+
+* added data-run attribute to run whatever code is inside the element as a easy way around typing it twice with data-command; ([38b1434](https://github.com/tbessenreither/webconsole/commit/38b14342c766b108c693fcc8aee6e3952516ec7b))
+* **WebConsoleAbout:** added about Filme to the list; ([1cc5b88](https://github.com/tbessenreither/webconsole/commit/1cc5b88f08a4776f145c88ccf7a5218b98b26f59))
+
+
+### Bug Fixes
+
+* removed random test code; ([3d55873](https://github.com/tbessenreither/webconsole/commit/3d558738bf3032f6fcf9f149854558625be4520a))
+
 ### [1.3.3](https://github.com/tbessenreither/webconsole/compare/v1.3.2...v1.3.3) (2022-06-07)
 
 
