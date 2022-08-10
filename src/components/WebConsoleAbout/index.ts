@@ -8,6 +8,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	_console: WebConsole = null;
 	name = 'About';
 	dateOfBirth = '1986-10-21';
+	numberOfMovies = 418;
 
 	abouts: { [key: string]: Array<string> } = {
 		WebConsole: [
@@ -30,6 +31,12 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			`Eine Auswahl meiner Bilder kannst du dir <a href="https://bessenreither.de/" target="_blank">hier</a> anschauen.`,
 			`Größtenteils fotografiere ich mit einer Nikon D5500 und dem 18-55mm Zoom Objektiv.`,
 			`Am liebsten irgendwas mit Natur.`,
+		],
+		Filme: [
+			`Mein zweites großes Hobby.`,
+			`Wenn ich nicht gerade Programmiere oder Fotografiere wäre der dritte Platz an dem man mich suchen sollte in meinem Heimkino.`,
+			`Dort schaue ich vermutlich gerade einen meiner ${this.numberOfMovies} Filme.`,
+			`Ob Arthouse, Classics, Action oder ein anderes Genre. Geschaut wird was interessant wirkt.`
 		],
 		Arbeit: [
 			`Ich arbeite im Moment bei Webprojaggt, einer Web & Werbeagentur in der Oberpfalz.`,
