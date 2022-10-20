@@ -8,7 +8,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	_console: WebConsole = null;
 	name = 'About';
 	dateOfBirth = '1986-10-21';
-	numberOfMovies = 418;
+	numberOfMovies = 424;
 
 	abouts: { [key: string]: Array<string> } = {
 		WebConsole: [
@@ -23,7 +23,8 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 		Tobias: [
 			`Das bin ich.`,
 			`Geboren am 21.10.1986 und damit aktuell ${this.getAge(this.dateOfBirth)} Jahre alt.`,
-			`Von Beruf bin ich Web- und App-Entwickler.`,
+			`Von Beruf bin ich Software-Entwickler, Primär mit Web Technologien.`,
+			`Mit Krawatte wird man mich nie treffen, dafür haben im Grunde alle meine Shirts irgend einen mehr oder weniger uniqen Aufdruck.`,
 		],
 		Fotografie: [
 			`Oh, ein großartiges Thema.`,
@@ -39,8 +40,8 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			`Ob Arthouse, Classics, Action oder ein anderes Genre. Geschaut wird was interessant wirkt.`
 		],
 		Arbeit: [
-			`Ich arbeite im Moment bei Webprojaggt, einer Web & Werbeagentur in der Oberpfalz.`,
-			`Davor war ich selbstständig im Bereich Backend Entwicklung & System-Design und Hosting.`,
+			`Ich arbeite derzeit als Softwareentwickler für eine Firma aus Kiel.`,
+			`Davor war ich Webentwickler bei einer Fullservice Werbeagentur in der Oberpfalz und davor selbstständig im Bereich Backend Entwicklung & System-Design und Hosting.`,
 		],
 		Socials: [
 			`Auf folgenden Plattformen könnt ihr mich finden:`,
@@ -48,6 +49,11 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			` - <a href="https://www.xing.com/profile/Tobias_Bessenreither" target="_blank">Xing</a>`,
 			` - <a href="https://de.linkedin.com/in/tobias-bessenreither" target="_blank">LinkedIn</a>`,
 			` - <a href="https://www.youtube.com/channel/UCqWvqUR5KkDAM4ELT1QhXZQ" target="_blank">YouTube</a>`,
+		],
+		Tierschutz: [
+			`Aktiv setze ich mich immer wieder für den Schutz von Ottern und Haien ein.`,
+			`So bin ich seit inzwischen vielen Jahren Mitglied in der <a href="https://aktion-fischotterschutz.de/start" target="_blank">Aktion Fischotterschutz</a>.`,
+			`Für Haie unterstütze ich aktiv die Organisation <a href="https://sharkangels.org/what-we-do/" target="_blank">Shark Angels</a> mit deren Hoodie ihr mich im Winter regelmäßig sehen könnt.`,
 		],
 	}
 
