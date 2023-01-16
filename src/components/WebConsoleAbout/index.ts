@@ -13,7 +13,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	abouts: { [key: string]: Array<string> } = {
 		WebConsole: [
 			`Ich probiere gern mal neues Zeug aus und was dabei raus kommt ist dann zum beispiel sowas hier.`,
-			`Unter anderem habe mir hier schon Nachrichten auf einen POS Drucker schicken lassen oder mit <a href="https://projects.tobias.bessenreither.de/three01/" target="_blank">WebGL</a> experimentiert.`,
+			`Unter anderem habe mir hier schon Nachrichten auf einen POS Drucker schicken lassen oder mit <a href="https://three.tobias.bessenreither.de/" target="_blank">WebGL</a> experimentiert.`,
 			`Die Web console ist Comandline Interface geschrieben in Javascript. Gerendert wird die Ausgabe dann über pre und code tags.`,
 			`Als minimalistische Userinterface habe ich clickbare commands eingebaut, primäre Eingabeform ist jedoch die Komandozeile.`,
 			``,
@@ -29,7 +29,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 		Fotografie: [
 			`Oh, ein großartiges Thema.`,
 			`Fotografie ist seit Jahren ein Hobby dem ich immer mal wieder nachgehe.`,
-			`Eine Auswahl meiner Bilder kannst du dir <a href="https://bessenreither.de/" target="_blank">hier</a> anschauen.`,
+			`Eine Auswahl meiner Bilder kannst du dir <a href="https://tobias.bessenreither.de/" target="_blank">hier</a> anschauen.`,
 			`Größtenteils fotografiere ich mit einer Nikon D5500 und dem 18-55mm Zoom Objektiv.`,
 			`Am liebsten irgendwas mit Natur.`,
 		],
