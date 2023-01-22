@@ -12,6 +12,9 @@ export default class Quest extends WebConsolePlugin {
 		rename: {
 			description: `Nutze entweder <span data-type>rename player </span>oder <span data-type>rename character </span> um dich oder deinen Charakter umzubenennen.`,
 		},
+		investigate: {
+			description: `Nutze <span data-run>investigate</span> um die Umgebung zu untersuchen.`,
+		},
 		exit: {
 			description: `Nutze <span data-type>exit</span> um das Spiel zu beenden.`,
 		},
@@ -29,6 +32,7 @@ export default class Quest extends WebConsolePlugin {
 		this.printLn('Willkommen bei Quest', { class: 'title' });
 
 		this._gameState.load();
+		console.log(JSON.parse(JSON.stringify(this._gameState.toObject())));
 
 		if (this._gameState.gameInitiated) {
 			this.printLn(`Hallo ${this._gameState.player.playerName},<br>schön das du wieder hier bist. Bereit mit dem Abenteuer weiter zu machen? ${this._gameState.player.name} wartet schon.`, { html: true });
@@ -68,9 +72,8 @@ export default class Quest extends WebConsolePlugin {
 			this._gameState.save();
 		} else if (input === 'help') {
 			this.printHelp();
-		} else if (input === 'investigate') {
-			this.printLn(`Du siehst dich um.`, { html: true });
-			this.printLn(`Du befindest dich in einem kleinen Raum. In der östlichen Ecke steht ein hölzerner Tisch mit einem Stuhl. Südlich von dir siehst du eine geschlossene Türe.`, { html: true });
+		} else {
+			this._gameState.command(input);
 		}
 		console.info('capturedInput', { input });
 	}

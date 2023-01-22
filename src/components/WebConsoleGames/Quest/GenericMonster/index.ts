@@ -1,28 +1,29 @@
 
-import GameObject from '../GameObject';
+import { MonsterId, MonsterConfig } from './types';
 
+import { LocationDescriptor } from '../Descriptors/Location';
+import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
 
 export default class GenericMonster implements GameObject {
+	id: MonsterId;
 	name: string;
+	location: LocationDescriptor;
 	health: number;
 	maxHealth: number;
 	strength: number;
 	defense: number;
 	loot: GenericItem[];
 
-	constructor() {
-		this.name = 'Monster';
-		this.health = 100;
-		this.maxHealth = 100;
-		this.strength = 10;
-		this.defense = 10;
-		this.loot = [];
+	constructor(config: MonsterConfig) {
+		this.fromObject(config);
 	}
 
-	toObject(): any {
+	toObject(): MonsterConfig {
 		return {
+			id: this.id,
 			name: this.name,
+			location: this.location.location,
 			health: this.health,
 			maxHealth: this.maxHealth,
 			strength: this.strength,
@@ -31,17 +32,17 @@ export default class GenericMonster implements GameObject {
 		};
 	}
 
-	fromObject(object: any): GameObject {
+	fromObject(object: MonsterConfig): GameObject {
+		this.id = object.id;
 		this.name = object.name;
+		this.location = new LocationDescriptor(object.location.direction, object.location.height);
 		this.health = object.health;
 		this.maxHealth = object.maxHealth;
 		this.strength = object.strength;
 		this.defense = object.defense;
-		this.loot = object.loot.map((item: any) => {
-			const genericItem = new GenericItem();
-			genericItem.fromObject(item);
-			return genericItem;
-		});
+		for (let itemId in Object.keys(object.loot)) {
+			this.loot[itemId] = new GenericItem(object.loot[itemId]);
+		}
 
 		return this;
 	}

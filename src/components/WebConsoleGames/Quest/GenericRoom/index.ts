@@ -1,57 +1,138 @@
-import GameObject from '../GameObject';
 
+import { RoomId, RoomConfig } from './types';
+import { ExitObjectList, ExitType } from '../Exits/types';
+import { ItemList } from "../GenericItem/types";
+
+import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
+import { ItemObjectList } from '../GenericItem/types';
 import GenericMonster from '../GenericMonster';
+import { MonsterObjectList } from '../GenericMonster/types';
+import GenericExit from '../Exits';
+import GameState from '../GameState';
+import { Direction } from '../Location/types';
+import { lookupDirection } from '../Location/helpers';
+
 
 export default class GenericRoom implements GameObject {
+	_gameState: GameState;
+
+	id: RoomId;
 	name: string;
 	description: string;
-	items: GenericItem[];
-	monsters: GenericMonster[];
-	exits: GenericRoom[];
+	items: ItemObjectList = {};
+	monsters: MonsterObjectList = {};
+	exits: ExitObjectList = {};
 
-	constructor() {
-		this.name = 'Room';
-		this.description = 'A generic room';
-		this.items = [];
-		this.monsters = [];
-		this.exits = [];
+	constructor(gameState: GameState, config: RoomConfig) {
+		this._gameState = gameState;
+		this.fromObject(config);
 	}
 
 	toObject(): any {
+		let itemsAsObjects: ItemList = [];
+		for (let itemObject of Object.values(this.items)) {
+			itemsAsObjects.push(itemObject.toObject());
+		}
 		return {
+			id: this.id,
 			name: this.name,
 			description: this.description,
-			items: this.items.map(item => item.toObject()),
-			monsters: this.monsters.map(monster => monster.toObject()),
-			exits: this.exits.map(exit => exit.toObject())
+			items: itemsAsObjects,
+			monsters: this.monsters,
+			exits: this.exits,
 		};
 	}
 
-	fromObject(object: any): GameObject {
+	fromObject(object: RoomConfig): GameObject {
+		this.id = object.id;
 		this.name = object.name;
 		this.description = object.description;
-		this.items = object.items.map((item: any) => {
-			const genericItem = new GenericItem();
-			genericItem.fromObject(item);
-			return genericItem;
-		});
-		this.monsters = object.monsters.map((monster: any) => {
-			const genericMonster = new GenericMonster();
-			genericMonster.fromObject(monster);
-			return genericMonster;
-		});
-		this.exits = object.exits.map((exit: any) => {
-			const genericRoom = new GenericRoom();
-			genericRoom.fromObject(exit);
-			return genericRoom;
-		});
+
+		for (let itemConfig of Object.values(object.items)) {
+			this.items[itemConfig.id] = new GenericItem(itemConfig);
+		}
+		for (let monsterConfig of Object.values(object.monsters)) {
+			this.monsters[monsterConfig.id] = new GenericMonster(monsterConfig);
+		}
+
+		for (let exitLink of object.exits) {
+			let exit = this._gameState.getExitById(exitLink.id);
+			if (exit) {
+				exit.setRoomLocation(this.id, exitLink);
+				this.addExit(exit);
+			}
+		}
 
 		return this;
 	}
 
+	addExit(exit: GenericExit): void {
+		this.exits[exit.id] = exit;
+	}
+
 	tick(): void {
-		this.monsters.forEach(monster => monster.tick());
-		this.items.forEach(item => item.tick());
+		// Do nothing
+	}
+
+	_describeRoom(): string {
+		let description = [];
+		description.push(`${this.description}<br>`);
+
+		if (Object.keys(this.monsters).length > 0) {
+			description.push('Du bist nicht allein in diesem Raum.<br>');
+			description.push('[Monsterbeschreibung'); //todo: add monster description
+		}
+
+		if (Object.keys(this.items).length === 0) {
+			//description.push('Es befinden sich keine Gegenstände in diesem Raum.<br>');
+		} else {
+			let itemDescriptions = [];
+			for (let item of Object.values(this.items)) {
+				itemDescriptions.push(`${item.describe()}`);
+			}
+			description.push(itemDescriptions.join('<br>').trim() + '<br>');
+		}
+
+		if (Object.keys(this.exits).length === 0) {
+			description.push('Es gibt keine sichtbaren Ausgänge aus diesem Raum.<br>');
+		} else {
+			let exitDescriptions: string[] = [];
+			for (const exit of Object.values(this.exits)) {
+				exitDescriptions.push(`${exit.describe(this.id)}`);
+			}
+			description.push(exitDescriptions.join('<br>')); /** */
+		}
+
+		return description.join('');
+	}
+
+	investigate(perception: number = 10): string {
+		return this._describeRoom();
+	}
+
+	lookupItemByName(name: string): GenericItem | null {
+		for (let item of Object.values(this.items)) {
+			for (let keyword of item.keywords) {
+				if (keyword.toLowerCase() === name.toLowerCase()) {
+					return item;
+				}
+			}
+		}
+		return null;
+	}
+
+	lookupExitByDirection(direction: string, onlyFilter?: ExitType[]): GenericExit | null {
+		let directionMapped = lookupDirection(direction);
+
+		for (let exit of Object.values(this.exits)) {
+			if (onlyFilter && !onlyFilter.includes(exit.type)) {
+				continue;
+			}
+			if (exit.locations.get(this.id).direction === directionMapped) {
+				return exit;
+			}
+		}
+		return null;
 	}
 }

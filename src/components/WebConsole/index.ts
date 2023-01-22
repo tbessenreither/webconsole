@@ -9,9 +9,9 @@ const PACKAGE = require('../../../package.json');
 const version = PACKAGE.version;
 
 export class WebConsoleCommand {
-	commandStringIn: string = null;
+	commandStringIn: string;
 	command: string = '';
-	subcommands: Array<string> = null;
+	subcommands: Array<string>;
 	arguments: WebConsoleArguments = {};
 
 	constructor(command?: string) {
@@ -36,7 +36,7 @@ export class WebConsoleCommand {
 		return commandString;
 	}
 
-	lastSubcommand(value: string = null): string {
+	lastSubcommand(value: string | null = null): string | null {
 		if (this.subcommands) {
 			if (value !== null) {
 				this.subcommands[this.subcommandLenght() - 1] = value;
@@ -219,13 +219,11 @@ export class WebConsole extends CcHTMLElement {
 
 					this.onCommand(new WebConsoleCommand(target.innerText));
 				} else if (target.dataset.type !== undefined) {
-					console.log('type', target);
 					e.preventDefault();
 					e.stopPropagation();
 
 					this.input.value = target.innerText;
 					this.input.focus();
-
 				} else if (target.dataset.copy !== undefined) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -386,12 +384,8 @@ export class WebConsole extends CcHTMLElement {
 			this.input.value = '';
 			let command = null;
 			try {
-				if (this.captureInputTarget !== null) {
-					this.captureInputTarget(commandString);
-				} else {
-					command = new WebConsoleCommand(commandString);
-					this.onCommand(command);
-				}
+				command = new WebConsoleCommand(commandString);
+				this.onCommand(command);
 			} catch (err) {
 				this.printLn(`syntax error: ${err.message}`, { class: 'error' });
 			}
@@ -421,7 +415,9 @@ export class WebConsole extends CcHTMLElement {
 	}
 
 	async onCommand(command: WebConsoleCommand) {
-		if (this.input.disabled) {
+		if (this.captureInputTarget !== null) {
+			return this.captureInputTarget(command.getStringRaw());
+		} else if (this.input.disabled) {
 			return false;
 		}
 		this.addToCommandHistory(command.getString());
@@ -440,6 +436,7 @@ export class WebConsole extends CcHTMLElement {
 			}
 		} catch (err) {
 			this.printLn(`😱 Error: ${err.message}`, { class: 'error' });
+			console.error(err);
 		}
 		if (this.input.disabled) {
 			this.input.disabled = false;
