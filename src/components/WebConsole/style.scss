@@ -104,7 +104,13 @@
 						cursor: copy;
 					}
 
-					[data-command], [data-run] {
+					[data-type] {
+						color: #fea100;
+						cursor: pointer;
+					}
+
+					[data-command],
+					[data-run] {
 						color: #f9ff00;
 						cursor: pointer;
 					}

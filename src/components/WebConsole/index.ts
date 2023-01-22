@@ -122,6 +122,10 @@ export class WebConsole extends CcHTMLElement {
 	inputBuffer: Array<string> = [];
 	inputPromiseResolve: Function = null;
 
+	captureInputTarget: CallableFunction = null;
+
+	bootCommands: Array<string> = [];
+
 	constructor() {
 		super({ html, css });
 
@@ -139,6 +143,16 @@ export class WebConsole extends CcHTMLElement {
 	static get observedAttributes(): Array<string> {
 		// a list of attributes that should be observed
 		return [];
+	}
+
+	registerBootCommand(command: string) {
+		this.bootCommands.push(command);
+	}
+
+	runBootCommands() {
+		for (let command of this.bootCommands) {
+			this.onCommand(new WebConsoleCommand(command));
+		}
 	}
 
 	attributeChangedCallback(name: string, oldValue: string, newValue: string): boolean {
@@ -159,6 +173,7 @@ export class WebConsole extends CcHTMLElement {
 		this.output = this._shadowRoot.querySelector('[data-for="output"]') as HTMLPreElement;
 		this.input = this._shadowRoot.querySelector('input[data-action="input"]') as HTMLInputElement;
 		this.inputButton = this._shadowRoot.querySelector('button[data-action="inputButton"]') as HTMLButtonElement;
+
 		if (this.inputButton) {
 			this.inputButton.addEventListener('click', this._resolveInputBuffer);
 		}
@@ -203,6 +218,14 @@ export class WebConsole extends CcHTMLElement {
 					e.stopPropagation();
 
 					this.onCommand(new WebConsoleCommand(target.innerText));
+				} else if (target.dataset.type !== undefined) {
+					console.log('type', target);
+					e.preventDefault();
+					e.stopPropagation();
+
+					this.input.value = target.innerText;
+					this.input.focus();
+
 				} else if (target.dataset.copy !== undefined) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -235,6 +258,15 @@ export class WebConsole extends CcHTMLElement {
 		}
 	}
 
+	captureInput(handlerFunction: CallableFunction) {
+		this.captureInputTarget = handlerFunction;
+		this.changeMode('normal');
+	}
+
+	releaseInput() {
+		this.captureInputTarget = null;
+	}
+
 	async requestInput() {
 		return new Promise((resolve) => {
 			this._resolveInputBuffer();
@@ -263,6 +295,8 @@ export class WebConsole extends CcHTMLElement {
 		this.printLn(`Welcome to the WebConsole on ${this.getDomain()}`, { class: 'info title' });
 		this.printLn('Type "<span data-run>help</span>" for a list of available commands.', { html: true });
 		this.printLn('Remember all commands are case-sensitive.');
+
+		this.runBootCommands();
 
 		this.input.focus();
 	}
@@ -352,8 +386,12 @@ export class WebConsole extends CcHTMLElement {
 			this.input.value = '';
 			let command = null;
 			try {
-				command = new WebConsoleCommand(commandString);
-				this.onCommand(command);
+				if (this.captureInputTarget !== null) {
+					this.captureInputTarget(commandString);
+				} else {
+					command = new WebConsoleCommand(commandString);
+					this.onCommand(command);
+				}
 			} catch (err) {
 				this.printLn(`syntax error: ${err.message}`, { class: 'error' });
 			}
