@@ -1,7 +1,7 @@
 
 import { RoomId, RoomConfig } from './types';
 import { ExitObjectList, ExitType } from '../Exits/types';
-import { ItemList } from "../GenericItem/types";
+import { ItemId, ItemList } from "../GenericItem/types";
 
 import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
@@ -12,6 +12,7 @@ import GenericExit from '../Exits';
 import GameState from '../GameState';
 import { Direction } from '../Location/types';
 import { lookupDirection } from '../Location/helpers';
+import Action from '../Action';
 
 
 export default class GenericRoom implements GameObject {
@@ -27,6 +28,10 @@ export default class GenericRoom implements GameObject {
 	constructor(gameState: GameState, config: RoomConfig) {
 		this._gameState = gameState;
 		this.fromObject(config);
+	}
+
+	get isUsable(): boolean {
+		return false;
 	}
 
 	toObject(): any {
@@ -134,5 +139,24 @@ export default class GenericRoom implements GameObject {
 			}
 		}
 		return null;
+	}
+
+	pickupItem(action: Action): GenericItem | null {
+		let itemId = action.targets[0].id;
+
+		let item = this.items[itemId];
+
+		if (!item.canBePickedUp) {
+			return null;
+		}
+
+		if (item) {
+			delete this.items[itemId];
+		}
+		return item;
+	}
+
+	use(action: Action): void {
+		// Do nothing
 	}
 }

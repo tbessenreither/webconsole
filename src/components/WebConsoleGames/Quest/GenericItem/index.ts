@@ -1,8 +1,8 @@
 import GameObject from '../GameObject';
 import { LocationDescriptor } from '../Descriptors/Location';
-import { Direction, Height } from '../Location/types';
-
 import { ItemId, ItemType, ItemConfig } from './types';
+import Action from '../Action';
+import Print from '../Print';
 
 export default class GenericItem implements GameObject {
 	id: ItemId;
@@ -13,11 +13,27 @@ export default class GenericItem implements GameObject {
 	description: string;
 	value: number;
 	weight: number;
+	uses: number;
+	timesUsed: number;
 	equippable: boolean;
 	equipped: boolean;
+	broken: boolean;
 
 	constructor(config: ItemConfig) {
 		this.fromObject(config);
+	}
+
+	get isUsable(): boolean {
+		return (
+			this.broken === false
+		);
+	}
+
+	get canBePickedUp(): boolean {
+		return (
+			this.weight !== null
+			&& this.weight < 20
+		);
 	}
 
 	toObject(): ItemConfig {
@@ -30,8 +46,11 @@ export default class GenericItem implements GameObject {
 			description: this.description,
 			value: this.value,
 			weight: this.weight,
+			uses: this.uses,
+			timesUsed: this.timesUsed,
 			equippable: this.equippable,
-			equipped: this.equipped
+			equipped: this.equipped,
+			broken: this.broken,
 		};
 	}
 
@@ -44,8 +63,11 @@ export default class GenericItem implements GameObject {
 		this.description = object.description;
 		this.value = object.value;
 		this.weight = object.weight;
+		this.uses = object.uses || null;
+		this.timesUsed = object.timesUsed || 0;
 		this.equippable = object.equippable;
 		this.equipped = object.equipped;
+		this.broken = object.broken || false;
 
 		return this;
 	}
@@ -85,7 +107,18 @@ export default class GenericItem implements GameObject {
 			description.push(this.description);
 		}
 
-		return this.capitalizeFirstLetter(`Du siehst ${description.join(', ').trim()}.`);
+		let brokenString = this.broken ? ' (kaputt)' : '';
+
+		return this.capitalizeFirstLetter(`Du siehst ${description.join(', ').trim()}${brokenString}.`);
 	}
 
+	use(action: Action): void {
+		this.timesUsed++;
+
+		if (this.timesUsed >= this.uses) {
+			this.broken = true;
+			Print.Line(`Du hast ${this.name} benutzt und es ist nun kaputt.`);
+		}
+
+	}
 }

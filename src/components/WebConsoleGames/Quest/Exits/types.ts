@@ -1,4 +1,5 @@
 import GenericExit from ".";
+import { ItemConfig, ItemId } from "../GenericItem/types";
 import { RoomId } from "../GenericRoom/types";
 import { Location, LocationList } from "../Location/types";
 
@@ -37,6 +38,7 @@ export type ExitConfig = {
 	unusableFrom: RoomId[];
 	closed: boolean;
 	locked: boolean;
+	unlockItemKey?: ItemId;
 }
 
 export type ExitLink = {

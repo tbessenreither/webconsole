@@ -7,8 +7,13 @@ import GameState from '../Gamestate';
 import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
 import { ItemList, ItemObjectList } from '../GenericItem/types';
+import Action from '../Action';
+import { ActionType } from '../Action/types';
+import { LocationDescriptor } from '../Descriptors/Location';
+import { Location, Direction, Height } from '../Location/types';
 
 export default class Player implements GameObject {
+	id: string = 'player';
 	_gameState: GameState;
 
 	playerName: string;
@@ -43,6 +48,10 @@ export default class Player implements GameObject {
 			armor: null,
 			accessory: null
 		};
+	}
+
+	get isUsable(): boolean {
+		return true;
 	}
 
 	toObject(): PlayerConfig {
@@ -108,7 +117,7 @@ export default class Player implements GameObject {
 			return this.openExit(command);
 		} else if (command.startsWith('schließe') && command.endsWith('tür')) {
 			return this.closeExit(command);
-		} else if ((command.startsWith('sperre ') || command.startsWith('schließe ')) && command.endsWith('tür zu')) {
+		} else if ((command.startsWith('sperre ') || command.startsWith('schließe ')) && (command.endsWith('tür zu') || command.endsWith('tür ab'))) {
 			return this.lockExit(command);
 		} else if (command.startsWith('sperre ') || command.startsWith('schließe ') && command.endsWith('tür auf')) {
 			return this.unlockExit(command);
@@ -116,6 +125,12 @@ export default class Player implements GameObject {
 			return this.goThroughLockable(command, [ExitType.Door, ExitType.Window]);
 		} else if (command.startsWith('gehe durch ') && command.endsWith('gang')) {
 			return this.goThroughWay(command, [ExitType.Hallway, ExitType.Alley, ExitType.Pathway]);
+		} else if (command.startsWith('nimm ')) {
+			return this.take(command);
+		} else if (command === 'inventar') {
+			return this.listInventory(false);
+		} else if (command === 'beschreibe inventar') {
+			return this.listInventory(true);
 		}
 	}
 
@@ -132,7 +147,14 @@ export default class Player implements GameObject {
 			return 'Die Tür ist bereits geöffnet.';
 		}
 
-		return lookedupExit.open() ? 'Die Tür ist nun geöffnet.' : 'Die Tür lässt sich nicht öffnen.';
+		let action = new Action({
+			type: ActionType.Open,
+			origin: this,
+			targets: [lookedupExit],
+			using: Object.values(this.inventory),
+			room: this._gameState.rooms[this.room],
+		});
+		return lookedupExit.open(action) ? 'Die Tür ist nun geöffnet.' : 'Die Tür lässt sich nicht öffnen.';
 	}
 
 	closeExit(command: string): string {
@@ -148,7 +170,14 @@ export default class Player implements GameObject {
 			return 'Die Tür ist bereits geschlossen.';
 		}
 
-		return lookedupExit.close() ? 'Die Tür ist nun geschlossen.' : 'Die Tür lässt sich nicht schließen.';
+		let action = new Action({
+			type: ActionType.Open,
+			origin: this,
+			targets: [lookedupExit],
+			using: Object.values(this.inventory),
+			room: this._gameState.rooms[this.room],
+		});
+		return lookedupExit.close(action) ? 'Die Tür ist nun geschlossen.' : 'Die Tür lässt sich nicht schließen.';
 	}
 
 	unlockExit(command: string): string {
@@ -164,7 +193,14 @@ export default class Player implements GameObject {
 			return 'Die Tür ist bereits aufgeschlossen.';
 		}
 
-		return lookedupExit.unlock() ? 'Die Tür ist nun aufgeschlossen.' : 'Die Tür lässt sich nicht aufschließen.';
+		let action = new Action({
+			type: ActionType.Open,
+			origin: this,
+			targets: [lookedupExit],
+			using: Object.values(this.inventory),
+			room: this._gameState.rooms[this.room],
+		});
+		return lookedupExit.unlock(action) ? 'Die Tür ist nun aufgeschlossen.' : 'Die Tür lässt sich nicht aufschließen.';
 	}
 
 	lockExit(command: string): string {
@@ -181,7 +217,14 @@ export default class Player implements GameObject {
 			return 'Die Tür ist bereits abgeschlossen.';
 		}
 
-		return lookedupExit.lock() ? 'Die Tür ist nun abgeschlossen.' : 'Die Tür lässt sich nicht abschließen.';
+		let action = new Action({
+			type: ActionType.Open,
+			origin: this,
+			targets: [lookedupExit],
+			using: Object.values(this.inventory),
+			room: this._gameState.rooms[this.room],
+		});
+		return lookedupExit.lock(action) ? 'Die Tür ist nun abgeschlossen.' : 'Die Tür lässt sich nicht abschließen.';
 	}
 
 	goThroughWay(command: string, exitType?: ExitType[]): string {
@@ -193,7 +236,6 @@ export default class Player implements GameObject {
 			return 'In dieser Richtung geht es nicht weiter.';
 		}
 		let lookedupLink = lookedupExit.locations.getLink(this.room);
-		console.log({ lookedupLink });
 
 		if (lookedupExit.closed) {
 			return `${nameExitThe(lookedupExit.type)} ist versperrt.`;
@@ -253,6 +295,73 @@ export default class Player implements GameObject {
 				return 'Du siehst nichts in dieser Richtung.';
 			}
 		}
+	}
+
+	addToInventory(item: GenericItem): void {
+		this.inventory[item.id] = item;
+	}
+
+	take(command: string): string {
+		let parts = command.trim().split(' ');
+		parts.shift();
+
+		let item = parts.join(' ');
+
+		if (item === '') {
+			return 'Was willst du nehmen?';
+		}
+
+		let lookedupItem = this._gameState.rooms[this.room].lookupItemByName(item);
+		if (!lookedupItem) {
+			return 'Auf diese Beschreibung passt nichts in diesem Raum.';
+		}
+
+		if (!lookedupItem.canBePickedUp) {
+			return 'Das kannst du nicht nehmen.';
+		}
+
+		let action = new Action({
+			type: ActionType.PickUp,
+			origin: this,
+			targets: [lookedupItem],
+			using: [],
+			room: this._gameState.rooms[this.room],
+		})
+
+		let itemObject = this._gameState.rooms[this.room].pickupItem(action);
+		itemObject.location = new LocationDescriptor(Direction.null, Height.null);
+		this.addToInventory(itemObject);
+
+		return `Du nimmst ${itemObject.name} auf.`;
+	}
+
+	listInventory(describe: boolean = false) {
+		let inventory = Object.values(this.inventory);
+		if (inventory.length === 0) {
+			return 'Du hast nichts dabei.';
+		}
+
+		let inventoryWeight = 0;
+
+		let inventoryString = 'Du hast dabei:';
+		inventory.forEach((item) => {
+			if (item.weight) {
+				inventoryWeight += item.weight;
+			}
+			inventoryString += `<br>${item.name} ${item.broken ? '- kaputt' : ''}`;
+			if (describe) {
+				inventoryString += `<br>  ${item.describe()}`;
+			}
+		});
+		inventoryString += `<br>Dein Gepäck wiegt ${inventoryWeight}kg.`;
+
+
+
+		return inventoryString;
+	}
+
+	use(action: Action): void {
+		// Do nothing
 	}
 
 }

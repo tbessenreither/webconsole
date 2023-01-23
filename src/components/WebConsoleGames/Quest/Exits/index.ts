@@ -1,12 +1,11 @@
 import GameObject from '../GameObject';
 
 import { ExitId, ExitConfig, ExitType, ExitLink } from './types';
-import { nameExitA } from './helpers';
+import { LocationsById, nameExitA } from './helpers';
 import { RoomId } from '../GenericRoom/types';
-import { LocationDescriptor } from '../Descriptors/Location';
-import { Location } from '../Location/types';
 import { directionToStringTo, inverseDirection } from '../Location/helpers';
-import { LocationsById } from './helpers';
+import { ItemId } from '../GenericItem/types';
+import Action from '../Action';
 
 
 export default class GenericExit implements GameObject {
@@ -18,10 +17,15 @@ export default class GenericExit implements GameObject {
 	description: string;
 	closed: boolean;
 	locked: boolean;
+	unlockItemKey?: string;
 
 	constructor(config: ExitConfig) {
 		this.locations = new LocationsById();
 		this.fromObject(config);
+	}
+
+	get isUsable(): boolean {
+		return !this.closed;
 	}
 
 	targetRooms(not?: RoomId): RoomId {
@@ -48,6 +52,7 @@ export default class GenericExit implements GameObject {
 			description: this.description,
 			closed: this.closed,
 			locked: this.locked,
+			unlockItemKey: this.unlockItemKey,
 		};
 	}
 
@@ -60,6 +65,7 @@ export default class GenericExit implements GameObject {
 		this.description = object.description;
 		this.closed = object.closed;
 		this.locked = object.locked;
+		this.unlockItemKey = object.unlockItemKey;
 
 		return this;
 	}
@@ -68,29 +74,51 @@ export default class GenericExit implements GameObject {
 		// Do nothing
 	}
 
-	open(): boolean {
-		console.log({ locked: this.locked, closed: this.closed });
-		if (this.locked) {
+	open(action: Action): boolean {
+		if (this.locked || !this.closed) {
 			return false;
 		}
+
 		this.closed = false;
 		return true;
 	}
 
-	close(): boolean {
-		if (this.locked) {
+	close(action: Action): boolean {
+		if (this.locked || this.closed) {
 			return false;
 		}
 		this.closed = true;
 		return true;
 	}
 
-	lock(): boolean {
+	lock(action: Action): boolean {
+		if (
+			this.unlockItemKey && !action.isUsingObjectKey(this.unlockItemKey)
+			|| this.locked
+		) {
+			return false;
+		}
+
 		this.locked = true;
 		return true;
 	}
 
-	unlock(): boolean {
+	unlock(action: Action): boolean {
+		let requiredKey = null;
+		if (this.unlockItemKey) {
+			requiredKey = action.isUsingObjectKey(this.unlockItemKey);
+		}
+		if (
+			this.unlockItemKey && !requiredKey
+			|| !this.locked
+		) {
+			return false;
+		}
+
+		if (requiredKey) {
+			requiredKey.use(action);
+		}
+
 		this.locked = false;
 		return true;
 	}
@@ -120,5 +148,9 @@ export default class GenericExit implements GameObject {
 		}
 
 		return exitDescriptions.join(', ').trim() + '.';
+	}
+
+	use(action: Action): void {
+		// Do nothing
 	}
 }

@@ -4,6 +4,7 @@ import { MonsterId, MonsterConfig } from './types';
 import { LocationDescriptor } from '../Descriptors/Location';
 import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
+import Action from '../Action';
 
 export default class GenericMonster implements GameObject {
 	id: MonsterId;
@@ -17,6 +18,10 @@ export default class GenericMonster implements GameObject {
 
 	constructor(config: MonsterConfig) {
 		this.fromObject(config);
+	}
+
+	get isUsable(): boolean {
+		return true;
 	}
 
 	toObject(): MonsterConfig {
@@ -49,6 +54,10 @@ export default class GenericMonster implements GameObject {
 
 	tick(): void {
 		this.loot.map(item => item.tick())
+	}
+
+	use(action: Action): void {
+		// Do nothing
 	}
 
 }

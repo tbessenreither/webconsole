@@ -3,6 +3,8 @@ import { WebConsole, WebConsoleCommand } from "../../WebConsole";
 
 import GameState from "./GameState";
 
+import Print from "./Print";
+
 export default class Quest extends WebConsolePlugin {
 	name = 'quest';
 
@@ -23,6 +25,8 @@ export default class Quest extends WebConsolePlugin {
 	onRegister() {
 		this._console.registerCommand('quest', this, this.execute.bind(this));
 		this._console.registerBootCommand('quest');
+
+		Print.setPrintLnFunction(this.printLn.bind(this));
 	}
 
 	async execute(command: WebConsoleCommand) {

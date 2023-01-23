@@ -23,6 +23,9 @@ export type ItemConfig = {
 	equippable: boolean;
 	equipped: boolean;
 	location: Location;
+	uses: number;
+	timesUsed?: number;
+	broken?: boolean;
 }
 
 export type ItemList = ItemConfig[];
