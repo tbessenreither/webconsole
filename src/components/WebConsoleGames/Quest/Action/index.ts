@@ -1,5 +1,6 @@
 import GameObject from "../GameObject";
 import GenericRoom from "../GenericRoom";
+import { Direction } from "../Location/types";
 import Player from "../Player";
 import { ActionConfig, ActionType } from "./types";
 
@@ -10,6 +11,8 @@ export default class Action {
 	private _targets: GameObject[];
 	private _using: GameObject[];
 	private _room: GenericRoom;
+	private _direction: Direction;
+	private _parsedData: { [key: string]: string };
 
 	constructor(config: ActionConfig) {
 		this._type = config.type;
@@ -17,6 +20,20 @@ export default class Action {
 		this._targets = config.targets;
 		this._using = config.using;
 		this._room = config.room;
+		this._direction = config.direction;
+		this._parsedData = config.parsedData;
+	}
+
+	toObject(): ActionConfig {
+		return {
+			type: this._type,
+			origin: this._origin,
+			targets: this._targets,
+			using: this._using,
+			room: this._room,
+			direction: this._direction,
+			parsedData: this._parsedData,
+		};
 	}
 
 	get type(): ActionType {
@@ -37,6 +54,10 @@ export default class Action {
 
 	get room(): GenericRoom {
 		return this._room;
+	}
+
+	get direction(): Direction {
+		return this._direction;
 	}
 
 	public getUsableObjects(): GameObject[] {

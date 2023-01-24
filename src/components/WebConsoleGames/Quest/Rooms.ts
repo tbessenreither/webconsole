@@ -25,7 +25,7 @@ let rooms: RoomList = [
 			{
 				id: 'KerkerSchlüssel',
 				name: 'kleiner rostiger Schlüssel',
-				keywords: ['schlüssel', 'kleiner schlüssel', 'kleiner rostiger schlüssel', 'rostiger schlüssel', 'rostiger kleiner schlüssel'],
+				keywords: ['schlüssel', 'kleinen schlüssel', 'kleinen rostigen schlüssel', 'rostigen schlüssel', 'rostigen kleinen schlüssel'],
 				type: ItemType.Key,
 				description: 'er ist klein und rostig',
 				value: 0,

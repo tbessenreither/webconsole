@@ -8,7 +8,8 @@ import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
 import { ItemList, ItemObjectList } from '../GenericItem/types';
 import Action from '../Action';
-import { ActionType } from '../Action/types';
+import ActionParser from '../Action/ActionParser';
+import { ActionConfig, ActionType } from '../Action/types';
 import { LocationDescriptor } from '../Descriptors/Location';
 import { Location, Direction, Height } from '../Location/types';
 
@@ -111,6 +112,19 @@ export default class Player implements GameObject {
 	action(command: string): string {
 		command = command.toLowerCase();
 
+		let actionConfigBlueprint: ActionConfig = {
+			type: null,
+			origin: this,
+			targets: null,
+			using: null,
+			room: this._gameState.rooms[this.room],
+			direction: Direction.null,
+		};
+		let actionParser = new ActionParser(actionConfigBlueprint);
+		let action = actionParser.parse(command);
+
+		console.log(action);
+
 		if (command.startsWith('untersuche')) {
 			return this.investigate(command.substr(11).trim());
 		} else if (command.startsWith('öffne') && command.endsWith('tür')) {
@@ -153,6 +167,7 @@ export default class Player implements GameObject {
 			targets: [lookedupExit],
 			using: Object.values(this.inventory),
 			room: this._gameState.rooms[this.room],
+			direction: Direction.null,
 		});
 		return lookedupExit.open(action) ? 'Die Tür ist nun geöffnet.' : 'Die Tür lässt sich nicht öffnen.';
 	}
@@ -176,6 +191,7 @@ export default class Player implements GameObject {
 			targets: [lookedupExit],
 			using: Object.values(this.inventory),
 			room: this._gameState.rooms[this.room],
+			direction: Direction.null,
 		});
 		return lookedupExit.close(action) ? 'Die Tür ist nun geschlossen.' : 'Die Tür lässt sich nicht schließen.';
 	}
@@ -199,6 +215,7 @@ export default class Player implements GameObject {
 			targets: [lookedupExit],
 			using: Object.values(this.inventory),
 			room: this._gameState.rooms[this.room],
+			direction: Direction.null,
 		});
 		return lookedupExit.unlock(action) ? 'Die Tür ist nun aufgeschlossen.' : 'Die Tür lässt sich nicht aufschließen.';
 	}
@@ -223,6 +240,7 @@ export default class Player implements GameObject {
 			targets: [lookedupExit],
 			using: Object.values(this.inventory),
 			room: this._gameState.rooms[this.room],
+			direction: Direction.null,
 		});
 		return lookedupExit.lock(action) ? 'Die Tür ist nun abgeschlossen.' : 'Die Tür lässt sich nicht abschließen.';
 	}
@@ -301,6 +319,18 @@ export default class Player implements GameObject {
 		this.inventory[item.id] = item;
 	}
 
+	searchInventoryByName(name: string): GenericItem | null {
+		for (let item of Object.values(this.inventory)) {
+			if (
+				item.name.toLowerCase() === name.toLowerCase()
+				|| item.keywords.some(keyword => keyword.toLowerCase() === name.toLowerCase())
+			) {
+				return item;
+			}
+		}
+		return null;
+	}
+
 	take(command: string): string {
 		let parts = command.trim().split(' ');
 		parts.shift();
@@ -326,6 +356,7 @@ export default class Player implements GameObject {
 			targets: [lookedupItem],
 			using: [],
 			room: this._gameState.rooms[this.room],
+			direction: Direction.null,
 		})
 
 		let itemObject = this._gameState.rooms[this.room].pickupItem(action);

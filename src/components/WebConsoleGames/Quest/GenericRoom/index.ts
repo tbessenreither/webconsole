@@ -116,8 +116,12 @@ export default class GenericRoom implements GameObject {
 		return this._describeRoom();
 	}
 
-	lookupItemByName(name: string): GenericItem | null {
-		for (let item of Object.values(this.items)) {
+	lookupItemByName(name: string, direction: Direction = null): GenericItem | null {
+		let itemsToLookup = Object.values(this.items);
+		if (direction) {
+			itemsToLookup = itemsToLookup.filter(item => item.location.direction === direction);
+		}
+		for (let item of itemsToLookup) {
 			for (let keyword of item.keywords) {
 				if (keyword.toLowerCase() === name.toLowerCase()) {
 					return item;
@@ -126,6 +130,45 @@ export default class GenericRoom implements GameObject {
 		}
 		return null;
 	}
+
+	lookupMonsterByName(name: string, direction: Direction = null): GenericMonster | null {
+		let monstersToLookup = Object.values(this.monsters);
+		if (direction) {
+			monstersToLookup = monstersToLookup.filter(monster => monster.location.direction === direction);
+		}
+		for (let monster of monstersToLookup) {
+			for (let keyword of monster.keywords) {
+				if (keyword.toLowerCase() === name.toLowerCase()) {
+					return monster;
+				}
+			}
+		}
+		return null;
+	}
+
+	lookupGameObjectByName(name: string, direction: Direction = null): GameObject | null {
+		// lookup monsters first
+		let lookedupMonster = this.lookupMonsterByName(name, direction);
+		if (lookedupMonster) {
+			return lookedupMonster;
+		}
+
+		// then lookup items
+		let lookedupItem = this.lookupItemByName(name, direction);
+		if (lookedupItem) {
+			return lookedupItem;
+		}
+
+		// then lookup exits
+		for (let exit of Object.values(this.exits).filter(exit => exit.type === ExitType.Door)) {
+			if (exit.id === name) {
+				return exit;
+			}
+		}
+
+		return null;
+	}
+
 
 	lookupExitByDirection(direction: string, onlyFilter?: ExitType[]): GenericExit | null {
 		let directionMapped = lookupDirection(direction);

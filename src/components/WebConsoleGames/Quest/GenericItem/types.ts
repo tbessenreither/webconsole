@@ -4,12 +4,12 @@ import { Location } from '../Location/types';
 export type ItemId = string;
 
 export enum ItemType {
-	Item,
-	Table,
-	Chair,
-	Weapon,
-	Stone,
-	Key,
+	Item = 'Item',
+	Table = 'Table',
+	Chair = 'Chair',
+	Weapon = 'Weapon',
+	Stone = 'Stone',
+	Key = 'Key',
 }
 
 export type ItemConfig = {

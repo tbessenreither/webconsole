@@ -1,21 +1,21 @@
 export enum Direction {
-	null,
-	Center,
-	North,
-	NorthEast,
-	East,
-	SouthEast,
-	South,
-	SouthWest,
-	West,
-	NorthWest,
+	null = 'null',
+	Center = 'Center',
+	North = 'North',
+	NorthEast = 'NorthEast',
+	East = 'East',
+	SouthEast = 'SouthEast',
+	South = 'South',
+	SouthWest = 'SouthWest',
+	West = 'West',
+	NorthWest = 'NorthWest',
 }
 
 export enum Height {
-	null,
-	Top,
-	Middle,
-	Bottom,
+	null = 'null',
+	Top = 'Top',
+	Middle = 'Middle',
+	Bottom = 'Bottom',
 }
 
 export type Location = {

@@ -6,6 +6,7 @@ export function lookupDirection(directionString: string): Direction {
 	switch (directionString) {
 		case 'nördliche':
 		case 'nördlichen':
+		case 'nordöstliches':
 		case 'nördlich':
 		case 'norden':
 		case 'nord':
@@ -16,6 +17,7 @@ export function lookupDirection(directionString: string): Direction {
 			break;
 		case 'nordöstliche':
 		case 'nordöstlichen':
+		case 'nordöstliches':
 		case 'nordöstlich':
 		case 'nordosten':
 		case 'nordost':
@@ -27,6 +29,7 @@ export function lookupDirection(directionString: string): Direction {
 			break;
 		case 'östliche':
 		case 'östlichen':
+		case 'östliches':
 		case 'östlich':
 		case 'osten':
 		case 'ost':
@@ -38,6 +41,7 @@ export function lookupDirection(directionString: string): Direction {
 			break;
 		case 'südöstliche':
 		case 'südöstlichen':
+		case 'südöstliches':
 		case 'südöstlich':
 		case 'südosten':
 		case 'südost':
@@ -50,6 +54,7 @@ export function lookupDirection(directionString: string): Direction {
 			break;
 		case 'südliche':
 		case 'südlichen':
+		case 'südliches':
 		case 'südlich':
 		case 'süden':
 		case 'süd':
@@ -60,6 +65,7 @@ export function lookupDirection(directionString: string): Direction {
 			break;
 		case 'südwestliche':
 		case 'südwestlichen':
+		case 'südwestliches':
 		case 'südwestlich':
 		case 'südwesten':
 		case 'südwest':
@@ -71,6 +77,7 @@ export function lookupDirection(directionString: string): Direction {
 			break;
 		case 'westliche':
 		case 'westlichen':
+		case 'westliches':
 		case 'westlich':
 		case 'westen':
 		case 'west':
@@ -81,6 +88,7 @@ export function lookupDirection(directionString: string): Direction {
 			break;
 		case 'nordwestliche':
 		case 'nordwestlichen':
+		case 'nordwestliches':
 		case 'nordwestlich':
 		case 'nordwesten':
 		case 'nordwest':

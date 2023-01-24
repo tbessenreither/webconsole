@@ -7,12 +7,13 @@ export type MonsterId = string;
 
 
 export enum MonsterType {
-	Monster,
+	Monster = 'Monster',
 }
 
 export type MonsterConfig = {
 	id: MonsterId;
 	name: string;
+	keywords: string[];
 	location: Location;
 	health: number;
 	maxHealth: number;

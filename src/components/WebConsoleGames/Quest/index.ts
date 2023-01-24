@@ -36,7 +36,6 @@ export default class Quest extends WebConsolePlugin {
 		this.printLn('Willkommen bei Quest', { class: 'title' });
 
 		this._gameState.load();
-		console.log(JSON.parse(JSON.stringify(this._gameState.toObject())));
 
 		if (this._gameState.gameInitiated) {
 			this.printLn(`Hallo ${this._gameState.player.playerName},<br>schön das du wieder hier bist. Bereit mit dem Abenteuer weiter zu machen? ${this._gameState.player.name} wartet schon.`, { html: true });

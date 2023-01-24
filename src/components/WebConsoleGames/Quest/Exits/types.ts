@@ -6,21 +6,21 @@ import { Location, LocationList } from "../Location/types";
 export type ExitId = string;
 
 export enum ExitType {
-	Door,
-	Stairs,
-	Portal,
-	Alley,
-	Pathway,
-	WallHole,
-	Ladder,
-	Window,
-	Hallway,
+	Door = 'Door',
+	Stairs = 'Stairs',
+	Portal = 'Portal',
+	Alley = 'Alley',
+	Pathway = 'Pathway',
+	WallHole = 'WallHole',
+	Ladder = 'Ladder',
+	Window = 'Window',
+	Hallway = 'Hallway',
 }
 
 export enum ExitDirection {
-	In,
-	Out,
-	Both,
+	In = "In",
+	Out = "Out",
+	Both = "Both",
 }
 
 export type ExitList = ExitConfig[];

@@ -9,7 +9,6 @@ import GenericRoom from "../GenericRoom";
 import GenericExit from "../Exits";
 
 import defaultRooms from "../Rooms";
-console.log(defaultRooms);
 
 
 export default class GameState {
@@ -68,7 +67,6 @@ export default class GameState {
 	}
 
 	fromObject(object: GameStateConfig): GameState {
-		console.log('object', object);
 		for (let exit of object.exits) {
 			this.exits[exit.id] = new GenericExit(exit);
 		}

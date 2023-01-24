@@ -9,6 +9,7 @@ import Action from '../Action';
 export default class GenericMonster implements GameObject {
 	id: MonsterId;
 	name: string;
+	keywords: string[];
 	location: LocationDescriptor;
 	health: number;
 	maxHealth: number;
@@ -28,6 +29,7 @@ export default class GenericMonster implements GameObject {
 		return {
 			id: this.id,
 			name: this.name,
+			keywords: this.keywords,
 			location: this.location.location,
 			health: this.health,
 			maxHealth: this.maxHealth,
@@ -40,6 +42,7 @@ export default class GenericMonster implements GameObject {
 	fromObject(object: MonsterConfig): GameObject {
 		this.id = object.id;
 		this.name = object.name;
+		this.keywords = object.keywords;
 		this.location = new LocationDescriptor(object.location.direction, object.location.height);
 		this.health = object.health;
 		this.maxHealth = object.maxHealth;
