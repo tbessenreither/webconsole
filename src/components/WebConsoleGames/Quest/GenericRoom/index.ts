@@ -1,6 +1,6 @@
 
 import { RoomId, RoomConfig } from './types';
-import { ExitObjectList, ExitType } from '../Exits/types';
+import { ExitObjectList, ExitType } from '../GenericExit/types';
 import { ItemId, ItemList } from "../GenericItem/types";
 
 import GameObject from '../GameObject';
@@ -8,11 +8,13 @@ import GenericItem from '../GenericItem';
 import { ItemObjectList } from '../GenericItem/types';
 import GenericMonster from '../GenericMonster';
 import { MonsterObjectList } from '../GenericMonster/types';
-import GenericExit from '../Exits';
+import GenericExit from '../GenericExit';
 import GameState from '../GameState';
-import { Direction } from '../Location/types';
+import { Direction, Height } from '../Location/types';
 import { lookupDirection } from '../Location/helpers';
 import Action from '../Action';
+import { lookupExitTypeByName } from '../GenericExit/helpers';
+import { LocationDescriptor } from '../Descriptors/Location';
 
 
 export default class GenericRoom implements GameObject {
@@ -80,7 +82,7 @@ export default class GenericRoom implements GameObject {
 		// Do nothing
 	}
 
-	_describeRoom(): string {
+	describe(): string {
 		let description = [];
 		description.push(`${this.description}<br>`);
 
@@ -113,7 +115,7 @@ export default class GenericRoom implements GameObject {
 	}
 
 	investigate(perception: number = 10): string {
-		return this._describeRoom();
+		return this.describe();
 	}
 
 	lookupItemByName(name: string, direction: Direction = null): GenericItem | null {
@@ -146,6 +148,27 @@ export default class GenericRoom implements GameObject {
 		return null;
 	}
 
+	lookupExitByName(name: string, direction: Direction = null): GenericExit | null {
+		let exitsToLookup = Object.values(this.exits);
+
+		if (direction) {
+			exitsToLookup = exitsToLookup.filter(exit => exit.locations.get(this.id).direction === direction);
+		}
+
+		let exitType = lookupExitTypeByName(name);
+		if (!exitType) {
+			return null;
+		}
+
+		for (let exit of exitsToLookup) {
+			if (exit.type === exitType) {
+				return exit;
+			}
+		}
+
+		return null;
+	}
+
 	lookupGameObjectByName(name: string, direction: Direction = null): GameObject | null {
 		// lookup monsters first
 		let lookedupMonster = this.lookupMonsterByName(name, direction);
@@ -160,10 +183,9 @@ export default class GenericRoom implements GameObject {
 		}
 
 		// then lookup exits
-		for (let exit of Object.values(this.exits).filter(exit => exit.type === ExitType.Door)) {
-			if (exit.id === name) {
-				return exit;
-			}
+		let lookedupExit = this.lookupExitByName(name, direction);
+		if (lookedupExit) {
+			return lookedupExit;
 		}
 
 		return null;
@@ -184,19 +206,36 @@ export default class GenericRoom implements GameObject {
 		return null;
 	}
 
-	pickupItem(action: Action): GenericItem | null {
-		let itemId = action.targets[0].id;
+	pickupItem(action: Action): GenericItem[] | null {
+		let items: GenericItem[] = [];
+		for (let targetIndex in action.targets) {
+			let target = action.targets[targetIndex];
+			let item = this.items[target.id];
 
-		let item = this.items[itemId];
+			if (!item.canBePickedUp) {
+				continue;
+			}
 
-		if (!item.canBePickedUp) {
-			return null;
+			if (item) {
+				delete this.items[target.id];
+				items.push(item);
+			}
 		}
 
-		if (item) {
-			delete this.items[itemId];
+		return items;
+	}
+
+	putdownItem(action: Action): GenericItem[] | null {
+		let items: GenericItem[] = [];
+		for (let targetIndex in action.targets) {
+			let target = action.targets[targetIndex] as GenericItem;
+			target.location = new LocationDescriptor(action.direction, Height.Bottom);
+
+			this.items[target.id] = target;
+			items.push(target);
 		}
-		return item;
+
+		return items;
 	}
 
 	use(action: Action): void {

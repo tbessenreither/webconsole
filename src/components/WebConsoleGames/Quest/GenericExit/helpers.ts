@@ -94,3 +94,44 @@ export function nameExitThe(type: ExitType): string {
 			return "den undefinierten Weg";
 	}
 }
+
+export function lookupExitTypeByName(name: string): ExitType {
+	switch (name.toLowerCase()) {
+		case 'tür':
+		case 'tuer':
+		case 'türe':
+		case 'tuere':
+		case 'door':
+			return ExitType.Door;
+		case 'treppe':
+		case 'treppen':
+		case 'stairs':
+			return ExitType.Stairs;
+		case 'portal':
+			return ExitType.Portal;
+		case 'gasse':
+		case 'alley':
+			return ExitType.Alley;
+		case 'pfad':
+		case 'pathway':
+			return ExitType.Pathway;
+		case 'loch':
+		case 'loch in der wand':
+		case 'durchbruch':
+		case 'wallhole':
+			return ExitType.WallHole;
+		case 'leiter':
+		case 'leitern':
+		case 'ladder':
+			return ExitType.Ladder;
+		case 'fenster':
+		case 'window':
+			return ExitType.Window;
+		case 'gang':
+		case 'flur':
+		case 'hallway':
+			return ExitType.Hallway;
+		default:
+			return null;
+	}
+}

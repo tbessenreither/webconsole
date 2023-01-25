@@ -63,4 +63,8 @@ export default class GenericMonster implements GameObject {
 		// Do nothing
 	}
 
+	describe(): string {
+		return 'Ein furchteinflößendes Monster';
+	}
+
 }

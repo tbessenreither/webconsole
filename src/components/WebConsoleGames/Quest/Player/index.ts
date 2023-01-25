@@ -1,7 +1,7 @@
 import { PlayerConfig } from './types';
 import { RoomId } from '../GenericRoom/types';
-import { nameExitThe } from '../Exits/helpers';
-import { ExitType } from '../Exits/types';
+import { nameExitThe } from '../GenericExit/helpers';
+import { ExitType } from '../GenericExit/types';
 
 import GameState from '../Gamestate';
 import GameObject from '../GameObject';
@@ -12,6 +12,9 @@ import ActionParser from '../Action/ActionParser';
 import { ActionConfig, ActionType } from '../Action/types';
 import { LocationDescriptor } from '../Descriptors/Location';
 import { Location, Direction, Height } from '../Location/types';
+import Print from '../Print';
+import { directionToStringTo, lookupDirection } from '../Location/helpers';
+import GenericExit from '../GenericExit';
 
 export default class Player implements GameObject {
 	id: string = 'player';
@@ -97,6 +100,17 @@ export default class Player implements GameObject {
 			accessory: object.equipped.accessory ? new GenericItem(object.equipped.accessory) : null
 		};
 
+
+		let actionConfigBlueprint: ActionConfig = {
+			type: null,
+			origin: this,
+			targets: null,
+			using: null,
+			room: this._gameState.rooms[this.room],
+			direction: Direction.null,
+		};
+		let actionParser = new ActionParser(actionConfigBlueprint);
+
 		return this;
 	}
 
@@ -112,6 +126,12 @@ export default class Player implements GameObject {
 	action(command: string): string {
 		command = command.toLowerCase();
 
+		if (command === 'inventar') {
+			return this.listInventory(false);
+		} else if (command === 'beschreibe inventar') {
+			return this.listInventory(true);
+		}
+
 		let actionConfigBlueprint: ActionConfig = {
 			type: null,
 			origin: this,
@@ -123,200 +143,241 @@ export default class Player implements GameObject {
 		let actionParser = new ActionParser(actionConfigBlueprint);
 		let action = actionParser.parse(command);
 
-		console.log(action);
+		if (!action) {
+			return 'Das verstehe ich nicht.';
+		}
 
-		if (command.startsWith('untersuche')) {
-			return this.investigate(command.substr(11).trim());
-		} else if (command.startsWith('öffne') && command.endsWith('tür')) {
-			return this.openExit(command);
-		} else if (command.startsWith('schließe') && command.endsWith('tür')) {
-			return this.closeExit(command);
-		} else if ((command.startsWith('sperre ') || command.startsWith('schließe ')) && (command.endsWith('tür zu') || command.endsWith('tür ab'))) {
-			return this.lockExit(command);
-		} else if (command.startsWith('sperre ') || command.startsWith('schließe ') && command.endsWith('tür auf')) {
-			return this.unlockExit(command);
-		} else if (command.startsWith('gehe durch ') && (command.endsWith('tür') || command.endsWith('fenster'))) {
-			return this.goThroughLockable(command, [ExitType.Door, ExitType.Window]);
-		} else if (command.startsWith('gehe durch ') && command.endsWith('gang')) {
-			return this.goThroughWay(command, [ExitType.Hallway, ExitType.Alley, ExitType.Pathway]);
-		} else if (command.startsWith('nimm ')) {
-			return this.take(command);
-		} else if (command === 'inventar') {
-			return this.listInventory(false);
-		} else if (command === 'beschreibe inventar') {
-			return this.listInventory(true);
+		this.actionHandler(action);
+		return '';
+	}
+
+	actionHandler(action: Action): void {
+		console.log('handle action', action);
+		switch (action.type) {
+			case ActionType.Look:
+				return this.look(action);
+			case ActionType.PickUp:
+				return this.pickUp(action);
+			case ActionType.PutDown:
+				return this.putDown(action);
+			case ActionType.Open:
+				return this.open(action);
+			case ActionType.Close:
+				return this.close(action);
+			case ActionType.Lock:
+				return this.lock(action);
+			case ActionType.Unlock:
+				return this.unlock(action);
+			case ActionType.Exit:
+				return this.exit(action);
+			default:
+				Print.Line('Das kannst du nicht tun.');
+				return;
 		}
 	}
 
-	openExit(command: string): string {
-		let parts = command.split(' ');
-
-		let direction = parts[1];
-		let lookedupExit = this._gameState.rooms[this.room].lookupExitByDirection(direction);
-		if (!lookedupExit) {
-			return 'Du siehst keine Tür in dieser Richtung.';
+	actionDefaultCheck(action: Action): boolean {
+		if (action.targets.length === 0 && action.parsedData.target === null) {
+			Print.Line('Das geht so leider nicht.');
+			return false;
+		} else if (action.targets.length === 0 && action.parsedData.target !== null) {
+			let directionPart = '';
+			if (action.parsedData.targetDirection) {
+				let directionParsed = lookupDirection(action.parsedData.targetDirection);
+				directionPart = ` im ${directionToStringTo(directionParsed)}`;
+			}
+			Print.Line(`Du siehst${directionPart} nichts auf das die Beschreibung '${action.parsedData.target}' passt.`);
+			return false;
 		}
-
-		if (!lookedupExit.closed) {
-			return 'Die Tür ist bereits geöffnet.';
-		}
-
-		let action = new Action({
-			type: ActionType.Open,
-			origin: this,
-			targets: [lookedupExit],
-			using: Object.values(this.inventory),
-			room: this._gameState.rooms[this.room],
-			direction: Direction.null,
-		});
-		return lookedupExit.open(action) ? 'Die Tür ist nun geöffnet.' : 'Die Tür lässt sich nicht öffnen.';
+		return true;
 	}
 
-	closeExit(command: string): string {
-		let parts = command.split(' ');
-
-		let direction = parts[1];
-		let lookedupExit = this._gameState.rooms[this.room].lookupExitByDirection(direction);
-		if (!lookedupExit) {
-			return 'Du siehst keine Tür in dieser Richtung.';
+	look(action: Action): void {
+		if (action.targets.length === 0 && action.parsedData.target !== null) {
+			Print.Line(`Du siehst nichts auf das die Beschreibung '${action.parsedData.target}'`);
+			return;
+		} else if (action.targets.length === 0 && action.parsedData.target === null) {
+			Print.Line('Du siehst dich um.');
+			Print.Line(this._gameState.rooms[this.room].describe(), { html: true });
+			return;
 		}
 
-		if (lookedupExit.closed) {
-			return 'Die Tür ist bereits geschlossen.';
+		for (let target of action.targets) {
+			Print.Line(`Du untersuchst ${target.name}.`);
+			Print.Line(target.describe());
+			return;
 		}
-
-		let action = new Action({
-			type: ActionType.Open,
-			origin: this,
-			targets: [lookedupExit],
-			using: Object.values(this.inventory),
-			room: this._gameState.rooms[this.room],
-			direction: Direction.null,
-		});
-		return lookedupExit.close(action) ? 'Die Tür ist nun geschlossen.' : 'Die Tür lässt sich nicht schließen.';
 	}
 
-	unlockExit(command: string): string {
-		let parts = command.split(' ');
-
-		let direction = parts[1];
-		let lookedupExit = this._gameState.rooms[this.room].lookupExitByDirection(direction);
-		if (!lookedupExit) {
-			return 'Du siehst keine Tür in dieser Richtung.';
+	pickUp(action: Action): void {
+		if (!this.actionDefaultCheck(action)) {
+			return;
 		}
 
-		if (!lookedupExit.locked) {
-			return 'Die Tür ist bereits aufgeschlossen.';
-		}
+		let pickedUpItems = this._gameState.rooms[this.room].pickupItem(action);
+		let pickedUpItemIds = pickedUpItems.map(item => item.id);
 
-		let action = new Action({
-			type: ActionType.Open,
-			origin: this,
-			targets: [lookedupExit],
-			using: Object.values(this.inventory),
-			room: this._gameState.rooms[this.room],
-			direction: Direction.null,
-		});
-		return lookedupExit.unlock(action) ? 'Die Tür ist nun aufgeschlossen.' : 'Die Tür lässt sich nicht aufschließen.';
-	}
-
-	lockExit(command: string): string {
-		command = command.toLowerCase();
-		let parts = command.split(' ');
-
-		let direction = parts[1];
-		let lookedupExit = this._gameState.rooms[this.room].lookupExitByDirection(direction);
-		if (!lookedupExit) {
-			return 'Du siehst keine Tür in dieser Richtung.';
-		}
-
-		if (lookedupExit.locked) {
-			return 'Die Tür ist bereits abgeschlossen.';
-		}
-
-		let action = new Action({
-			type: ActionType.Open,
-			origin: this,
-			targets: [lookedupExit],
-			using: Object.values(this.inventory),
-			room: this._gameState.rooms[this.room],
-			direction: Direction.null,
-		});
-		return lookedupExit.lock(action) ? 'Die Tür ist nun abgeschlossen.' : 'Die Tür lässt sich nicht abschließen.';
-	}
-
-	goThroughWay(command: string, exitType?: ExitType[]): string {
-		let parts = command.split(' ');
-
-		let direction = parts[2];
-		let lookedupExit = this._gameState.rooms[this.room].lookupExitByDirection(direction, exitType);
-		if (!lookedupExit) {
-			return 'In dieser Richtung geht es nicht weiter.';
-		}
-		let lookedupLink = lookedupExit.locations.getLink(this.room);
-
-		if (lookedupExit.closed) {
-			return `${nameExitThe(lookedupExit.type)} ist versperrt.`;
-		}
-
-		this.room = lookedupExit.targetRooms(this.room);
-
-		let message = `Du gehst durch ${nameExitThe(lookedupExit.type)}`;
-
-		if (lookedupLink && lookedupLink.transitionMessage) {
-			message += `<br>${lookedupLink.transitionMessage}`;
-		}
-		return message;
-	}
-
-	goThroughLockable(command: string, exitType?: ExitType[]): string {
-		let parts = command.split(' ');
-
-		let direction = parts[2];
-		let lookedupExit = this._gameState.rooms[this.room].lookupExitByDirection(direction, exitType);
-		if (!lookedupExit) {
-			return 'In dieser Richtung geht es nicht weiter.';
-		}
-
-		if (lookedupExit.closed) {
-			return `${nameExitThe(lookedupExit.type)} ist geschlossen.`;
-		}
-
-		this.room = lookedupExit.targetRooms(this.room);
-
-		return `Du gehst durch ${nameExitThe(lookedupExit.type)}`;
-	}
-
-	investigate(command: string): string {
-		if (command === '') {
-			return this._gameState.rooms[this.room].investigate(this.perception);
-		} else if (command.includes('tür')) {
-			let parts = command.split(' ');
-			let direction = parts[0];
-
-			let lookedupExit = this._gameState.rooms[this.room].lookupExitByDirection(direction);
-
-			if (lookedupExit) {
-				return lookedupExit.describe(this.room);
+		for (let target of action.targets) {
+			if (pickedUpItemIds.includes(target.id)) {
+				Print.Line(`Du nimmst ${target.name} auf.`);
+				this.addToInventory(target as GenericItem);
 			} else {
-				return 'Du siehst keine Tür in dieser Richtung.';
+				Print.Line(`Du kannst ${target.name} nicht aufheben.`);
+			}
+		}
+	}
+
+	putDown(action: Action): void {
+		if (!this.actionDefaultCheck(action)) {
+			return;
+		}
+
+		if (action.using.length > 0) {
+			//todo: implement putting down on a target
+			Print.Line('Das kannst du "noch" nicht tun.');
+		} else {
+			let putDownItems = this._gameState.rooms[this.room].putdownItem(action);
+			let putDownItemIds = putDownItems.map(item => item.id);
+
+			for (let target of action.targets) {
+				if (putDownItemIds.includes(target.id)) {
+					Print.Line(`Du legst ${target.name} ab.`);
+					this.removeFromInventory(target as GenericItem);
+				} else {
+					Print.Line(`Du kannst ${target.name} nicht ablegen.`);
+				}
+			}
+		}
+	}
+
+	open(action: Action): void {
+		if (!this.actionDefaultCheck(action)) {
+			return;
+		}
+
+		let target = action.targets[0];
+
+		if (target instanceof GenericExit) {
+			if (target.closed) {
+				if (target.open(action)) {
+					Print.Line(`Du öffnest ${nameExitThe(target.type)}.`);
+				} else {
+					Print.Line(`${nameExitThe(target.type)} lässt sich nicht öffnen.`);
+				}
+			} else {
+				Print.Line(`${nameExitThe(target.type)} ist bereits geöffnet.`);
 			}
 		} else {
-			let parts = command.split(' ');
-			let item = parts[0];
+			Print.Line('Das kannst du nicht öffnen.');
+		}
+	}
 
-			let lookedupItem = this._gameState.rooms[this.room].lookupItemByName(item);
+	close(action: Action): void {
+		if (!this.actionDefaultCheck(action)) {
+			return;
+		}
 
-			if (lookedupItem) {
-				return lookedupItem.describe();
+		let target = action.targets[0];
+
+		if (target instanceof GenericExit) {
+			if (!target.closed) {
+				if (target.close(action)) {
+					Print.Line(`Du schließt ${nameExitThe(target.type)}.`);
+				} else {
+					Print.Line(`${nameExitThe(target.type)} lässt sich nicht schließen.`);
+				}
 			} else {
-				return 'Du siehst nichts in dieser Richtung.';
+				Print.Line(`${nameExitThe(target.type)} ist bereits geschlossen.`);
+			}
+		} else {
+			Print.Line('Das kannst du nicht schließen.');
+		}
+	}
+
+	unlock(action: Action): void {
+		if (!this.actionDefaultCheck(action)) {
+			return;
+		}
+
+		let target = action.targets[0];
+
+		if (target instanceof GenericExit) {
+			if (target.locked) {
+				// try every item in the inventory
+				action.using = this.getUsableInventory();
+				if (target.unlock(action)) {
+					Print.Line(`Du schließt ${nameExitThe(target.type)} auf.`);
+				} else {
+					Print.Line(`${nameExitThe(target.type)} lässt sich nicht aufschließen.`);
+				}
+			} else {
+				Print.Line(`${nameExitThe(target.type)} ist bereits aufgeschlossen.`);
+			}
+		} else {
+			Print.Line('Das kannst du nicht aufschließen.');
+		}
+	}
+
+	lock(action: Action): void {
+		if (!this.actionDefaultCheck(action)) {
+			return;
+		}
+
+		let target = action.targets[0];
+
+		if (target instanceof GenericExit) {
+			if (!target.locked) {
+				// try every item in the inventory
+				action.using = this.getUsableInventory();
+				if (target.lock(action)) {
+					Print.Line(`Du schließt ${nameExitThe(target.type)} ab.`);
+				} else {
+					Print.Line(`${nameExitThe(target.type)} lässt sich nicht abschließen.`);
+				}
+			} else {
+				Print.Line(`${nameExitThe(target.type)} ist bereits abgeschlossen.`);
+			}
+		} else {
+			Print.Line('Das kannst du nicht abschließen.');
+		}
+	}
+
+	exit(action: Action): void {
+		if (!this.actionDefaultCheck(action)) {
+			return;
+		}
+
+		let exit = action.targets[0] as GenericExit;
+
+		if (exit.closed) {
+			if (!exit.open(action)) {
+				Print.Line(`Du versuchst ${nameExitThe(exit.type)} zu öffnen.`);
+				Print.Line(`${nameExitThe(exit.type)} lässt sich nicht öffnen.`);
+				return;
+			} else {
+				Print.Line(`Du öffnest ${nameExitThe(exit.type)}.`);
 			}
 		}
+
+		let newRoom = exit.targetRooms(this.room);
+		Print.Line(`Du gehst durch ${nameExitThe(exit.type)}`);
+
+		this.room = newRoom;
 	}
 
 	addToInventory(item: GenericItem): void {
 		this.inventory[item.id] = item;
+	}
+
+	removeFromInventory(item: GenericItem): void {
+		delete this.inventory[item.id];
+	}
+
+	getUsableInventory(): GenericItem[] {
+		let usableInventory = Object.values(this.inventory);
+		usableInventory = usableInventory.filter(itemObject => itemObject.isUsable);
+
+		return usableInventory;
 	}
 
 	searchInventoryByName(name: string): GenericItem | null {
@@ -329,41 +390,6 @@ export default class Player implements GameObject {
 			}
 		}
 		return null;
-	}
-
-	take(command: string): string {
-		let parts = command.trim().split(' ');
-		parts.shift();
-
-		let item = parts.join(' ');
-
-		if (item === '') {
-			return 'Was willst du nehmen?';
-		}
-
-		let lookedupItem = this._gameState.rooms[this.room].lookupItemByName(item);
-		if (!lookedupItem) {
-			return 'Auf diese Beschreibung passt nichts in diesem Raum.';
-		}
-
-		if (!lookedupItem.canBePickedUp) {
-			return 'Das kannst du nicht nehmen.';
-		}
-
-		let action = new Action({
-			type: ActionType.PickUp,
-			origin: this,
-			targets: [lookedupItem],
-			using: [],
-			room: this._gameState.rooms[this.room],
-			direction: Direction.null,
-		})
-
-		let itemObject = this._gameState.rooms[this.room].pickupItem(action);
-		itemObject.location = new LocationDescriptor(Direction.null, Height.null);
-		this.addToInventory(itemObject);
-
-		return `Du nimmst ${itemObject.name} auf.`;
 	}
 
 	listInventory(describe: boolean = false) {
@@ -393,6 +419,10 @@ export default class Player implements GameObject {
 
 	use(action: Action): void {
 		// Do nothing
+	}
+
+	describe(): string {
+		return `Du bist ${this.name}.`;
 	}
 
 }

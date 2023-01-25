@@ -2,6 +2,7 @@ import Action from "../Action";
 
 export default interface GameObject {
 	id: string;
+	name: string;
 
 	get isUsable(): boolean;
 
@@ -10,4 +11,5 @@ export default interface GameObject {
 
 	tick(): void;
 	use(action: Action): void;
+	describe(): string;
 }

@@ -1,6 +1,6 @@
 
 import { RoomList } from "../GenericRoom/types";
-import { ExitList } from "../Exits/types";
+import { ExitList } from "../GenericExit/types";
 import { PlayerConfig } from "../Player/types";
 
 

@@ -2,12 +2,10 @@ import { GameStateConfig } from "./types";
 import { WebConsole } from "../../../WebConsole";
 
 import { RoomList, RoomObjectList } from "../GenericRoom/types";
-import { ExitId, ExitList, ExitObjectList } from "../Exits/types";
-
+import { ExitId, ExitList, ExitObjectList } from "../GenericExit/types";
+import GenericExit from "../GenericExit";
 import Player from "../Player";
 import GenericRoom from "../GenericRoom";
-import GenericExit from "../Exits";
-
 import defaultRooms from "../Rooms";
 
 
@@ -132,9 +130,8 @@ export default class GameState {
 	}
 
 	command(command: string): void {
-		if (command.startsWith('tu dinge')) {
-		} else {
-			let response = this.player.action(command);
+		let response = this.player.action(command);
+		if (response.trim() !== '') {
 			this._console.printLn(response, { html: true });
 		}
 	}

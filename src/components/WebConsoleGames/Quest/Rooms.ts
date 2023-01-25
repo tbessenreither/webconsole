@@ -1,5 +1,5 @@
 import { RoomList } from "./GenericRoom/types";
-import { ExitType, ExitList } from "./Exits/types";
+import { ExitType, ExitList } from "./GenericExit/types";
 import { Direction, Height } from "./Location/types";
 import { ItemType } from "./GenericItem/types";
 
@@ -89,7 +89,7 @@ let exits: ExitList = [
 		type: ExitType.Door,
 		locations: {},
 		description: 'Sie ist sehr alt und aus Holz',
-		closed: false,
+		closed: true,
 		locked: true,
 		unlockItemKey: 'KerkerSchlüssel',
 	},

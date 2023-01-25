@@ -52,12 +52,20 @@ export default class Action {
 		return this._using;
 	}
 
+	set using(value: GameObject[]) {
+		this._using = value;
+	}
+
 	get room(): GenericRoom {
 		return this._room;
 	}
 
 	get direction(): Direction {
 		return this._direction;
+	}
+
+	get parsedData(): { [key: string]: string } {
+		return this._parsedData;
 	}
 
 	public getUsableObjects(): GameObject[] {
@@ -71,12 +79,6 @@ export default class Action {
 	public isUsingObjectKey(objectId: string): GameObject {
 
 		let result = this.getUsableObjects().find(obj => obj.id === objectId);
-
-		console.log({
-			result,
-			inventory: this._using.map(obj => obj.id),
-			objectId,
-		});
 
 		return result;
 	}

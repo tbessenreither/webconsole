@@ -28,6 +28,10 @@ export default class GenericExit implements GameObject {
 		return !this.closed;
 	}
 
+	get name(): string {
+		return nameExitA(this.type);
+	}
+
 	targetRooms(not?: RoomId): RoomId {
 		let rooms = this.rooms;
 
@@ -92,11 +96,19 @@ export default class GenericExit implements GameObject {
 	}
 
 	lock(action: Action): boolean {
+		let requiredKey = null;
+		if (this.unlockItemKey) {
+			requiredKey = action.isUsingObjectKey(this.unlockItemKey);
+		}
 		if (
-			this.unlockItemKey && !action.isUsingObjectKey(this.unlockItemKey)
+			this.unlockItemKey && !requiredKey
 			|| this.locked
 		) {
 			return false;
+		}
+
+		if (requiredKey) {
+			requiredKey.use(action);
 		}
 
 		this.locked = true;
@@ -123,7 +135,7 @@ export default class GenericExit implements GameObject {
 		return true;
 	}
 
-	describe(fromRoom: RoomId): string {
+	describe(fromRoom?: RoomId): string {
 		let exitDescriptions: string[] = [];
 
 		exitDescriptions.push(`Du siehst ${this.locations.getDescriptor(fromRoom).describeObjectLocation()} ${nameExitA(this.type)}. ${this.description}`);

@@ -3,7 +3,7 @@ import GenericRoom from ".";
 import { ItemList } from "../GenericItem/types";
 import { MonsterList } from "../GenericMonster/types";
 
-import { ExitLinkList } from "../Exits/types";
+import { ExitLinkList } from "../GenericExit/types";
 
 export type RoomId = string;
 
