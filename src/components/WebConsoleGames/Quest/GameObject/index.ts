@@ -10,6 +10,7 @@ export default interface GameObject {
 	fromObject(object: any): GameObject;
 
 	tick(): void;
-	use(action: Action): void;
 	describe(): string;
+	use?(action: Action): void;
+	markUsage?(action: Action): void;
 }

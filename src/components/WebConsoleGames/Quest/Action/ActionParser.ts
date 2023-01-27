@@ -4,12 +4,13 @@ import GameObject from "../GameObject";
 import { lookupDirection } from "../Location/helpers";
 import { Direction } from "../Location/types";
 import Player from "../Player";
-import { ActionType, ActionConfig, ActionParsed } from "./types";
+import { ActionType, ActionConfig, ActionParsed, LookupIn } from "./types";
 import GenericItem from "../GenericItem";
 
 
 const directionRegex = '(?:n[oö]rd|nord[oö]st|[oö]st|süd[oö]st|süd|südwest|west|nordwest)(?:lich(?:e[sn]?)?)?';
 const singleWordRegex = '[\\wöäüß]+';
+const articlesRegex = '(?:den|die|das|der|dem|des|ein|eine|einen|einem|eines)';
 
 export default class ActionParser {
 	_blueprint: ActionConfig = null;
@@ -35,34 +36,37 @@ export default class ActionParser {
 	}
 
 	actionRegexParser: { [key: string]: RegExp[] } = {
-		[ActionType.Look]: [
-			new RegExp(`^Untersuche(?: das Zimmer| den Raum| die Umgebung)$`, 'i'),
-			new RegExp(`Schau (?:(?:den|die|das) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) an`, 'i'),
-			new RegExp(`Untersuche (?:(?:den|die|das) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
+		[ActionType.Investigate]: [
+			new RegExp(`^Untersuche(?: (?:das )?Zimmer| (?:den )?Raum| (?:die )?Umgebung)$`, 'i'),
+			new RegExp(`Schau (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) an`, 'i'),
+			new RegExp(`Untersuche (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
 		],
 		[ActionType.Attack]: [
-			new RegExp(`Greife (?:(?:den|das|die) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) (?:mit (?:dem|meinem|einem)?(?<using>${singleWordRegex}) )?an`, 'i'),
+			new RegExp(`Greife (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) (?:mit (?:dem|meinem|einem)?(?<using>${singleWordRegex}) )?an`, 'i'),
 		],
 		[ActionType.PickUp]: [
-			new RegExp(`(?:Nimm|Hebe) (?:(?:den|die|das) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
+			new RegExp(`(?:Nimm|Hebe) (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
 		],
 		[ActionType.PutDown]: [
-			new RegExp(`Lege (?:(?:den|das|die) )?(?<target>${singleWordRegex})(?: (?:(?:auf|in) (?:(?:den|die|dem|der) )?)(?:(?<targetDirection>${directionRegex}) )?(?<using>${singleWordRegex})(?: (?:ab))?| (?:(?<direction>${directionRegex}) )?(?:ab))`, 'i'),
+			new RegExp(`Lege (?:${articlesRegex} )?(?<target>${singleWordRegex})(?: (?:(?:auf|in) (?:(?:den|die|dem|der) )?)(?:(?<targetDirection>${directionRegex}) )?(?<using>${singleWordRegex})(?: (?:ab))?| (?:(?<direction>${directionRegex}) )?(?:ab))`, 'i'),
 		],
 		[ActionType.Open]: [
-			new RegExp(`Öffne (?:(?:den|die|das) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
+			new RegExp(`Öffne (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
 		],
 		[ActionType.Close]: [
-			new RegExp(`^Schließe (?:(?:den|die|das) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})$`, 'i'), // ^ und $ sind hier wichtig, da sonst ActionType.Lock und ActionType.Unlock auch als ActionType.Close erkannt wird
+			new RegExp(`^Schließe (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})$`, 'i'), // ^ und $ sind hier wichtig, da sonst ActionType.Lock und ActionType.Unlock auch als ActionType.Close erkannt wird
 		],
 		[ActionType.Lock]: [
-			new RegExp(`(?:Schließe|Sperre) (?:(?:den|die|das) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) (?:ab|zu)`, 'i'),
+			new RegExp(`(?:Schließe|Sperre) (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) (?:ab|zu)`, 'i'),
 		],
 		[ActionType.Unlock]: [
-			new RegExp(`(?:Schließe|Sperre) (?:(?:den|die|das) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) (?:auf)`, 'i'),
+			new RegExp(`(?:Schließe|Sperre) (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) (?:auf)`, 'i'),
 		],
 		[ActionType.Exit]: [
-			new RegExp(`(?:Gehe|Verlasse den Raum) durch (?:(?:den|die|das) )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
+			new RegExp(`(?:Gehe|Verlasse den Raum) durch (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
+		],
+		[ActionType.Use]: [
+			new RegExp(`(?:Benutze|Kombiniere) (?:${articlesRegex} )?(?<using>${singleWordRegex}) mit (?:${articlesRegex} )?(?<target>${singleWordRegex})`, 'i'),
 		],
 	}
 
@@ -97,54 +101,40 @@ export default class ActionParser {
 			return null;
 		}
 
-		let directionObj: Direction = null;
-		if (match.direction) {
-			directionObj = lookupDirection(match.direction);
-		}
-
 		let targetDirectionObj: Direction = null;
 		if (match.targetDirection) {
 			targetDirectionObj = lookupDirection(match.targetDirection);
 		}
 
+		let directionObj: Direction = null;
+		if (match.direction) {
+			directionObj = lookupDirection(match.direction);
+		}
+
 		let targetObj: GameObject = null;
-		if (match.type === ActionType.PutDown) {
-			if (match.target) {
-				let player = this._blueprint.origin as Player;
-				let target = player.searchInventoryByName(match.target);
-
-				if (target) {
-					targetObj = target;
-				}
-			}
-		} else if (match.type === ActionType.Open) {
-			if (match.target) {
-				let player = this._blueprint.origin as Player;
-				let target: GameObject | GenericItem = player.searchInventoryByName(match.target);
-
-				if (target) {
-					targetObj = target;
-				}
-
-				target = this._blueprint.room.lookupGameObjectByName(match.target, targetDirectionObj);
-				if (target) {
-					targetObj = target;
-				}
-			}
-		} else {
-			if (match.target) {
-				let target = this._blueprint.room.lookupGameObjectByName(match.target, targetDirectionObj);
-				if (target) {
-					targetObj = target;
-				}
+		if (match.target) {
+			switch (match.type) {
+				case ActionType.PutDown:
+					targetObj = this.lookupGameObjectsIn(match.target, targetDirectionObj, [LookupIn.Inventory]);
+					break;
+				case ActionType.Open:
+				case ActionType.Use:
+					targetObj = this.lookupGameObjectsIn(match.target, targetDirectionObj, [LookupIn.Inventory, LookupIn.CurrentRoom]);
+					break;
+				case ActionType.PickUp:
+				default:
+					targetObj = this.lookupGameObjectsIn(match.target, targetDirectionObj, [LookupIn.CurrentRoom]);
 			}
 		}
 
 		let usingObj: GameObject = null;
 		if (match.using) {
-			let using = this._blueprint.room.lookupGameObjectByName(match.using, targetDirectionObj);
-			if (using) {
-				usingObj = using;
+			switch (match.type) {
+				case ActionType.Use:
+					usingObj = this.lookupGameObjectsIn(match.using, targetDirectionObj, [LookupIn.Inventory, LookupIn.CurrentRoom]);
+					break;
+				default:
+					usingObj = this.lookupGameObjectsIn(match.using, targetDirectionObj, [LookupIn.CurrentRoom]);
 			}
 		}
 
@@ -154,11 +144,30 @@ export default class ActionParser {
 			targets: targetObj ? [targetObj] : [],
 			using: usingObj ? [usingObj] : [],
 			room: this._blueprint.room,
+			targetDirection: targetDirectionObj ? targetDirectionObj : Direction.Center,
 			direction: directionObj ? directionObj : Direction.Center,
-			parsedData: match
+			parsedData: match,
 		};
 
 		return new Action(actionConfig);
+	}
+
+	lookupGameObjectsIn(phrase: string, direction: Direction = null, targets: string[] = [LookupIn.Inventory, LookupIn.CurrentRoom]): GameObject {
+		let item: GameObject = null;
+
+		for (let target of targets) {
+			if (target === LookupIn.Inventory) {
+				let player = this._blueprint.origin as Player;
+				item = player.searchInventoryByName(phrase);
+			} else if (target === LookupIn.CurrentRoom) {
+				item = this._blueprint.room.lookupGameObjectByName(phrase, direction);
+			}
+			if (item) {
+				return item;
+			}
+		}
+
+		return null;
 	}
 }
 

@@ -1,7 +1,8 @@
 
-import { Location, LocationList } from '../Location/types';
+import { Direction, Location, LocationList } from '../Location/types';
 import { LocationDescriptor } from '../Descriptors/Location';
 import { ExitType, ExitLink } from './types';
+import { directionToStringIs } from '../Location/helpers';
 
 export class LocationsById {
 	locations: LocationList = {};
@@ -70,28 +71,63 @@ export function nameExitA(type: ExitType): string {
 	}
 }
 
-export function nameExitThe(type: ExitType): string {
+export function nameExitThe(type: ExitType, direction: Direction = Direction.null): string {
+	let directionString = '';
+	if (direction !== Direction.null) {
+		directionString = `${directionToStringIs(direction)} `;
+	}
+
 	switch (type) {
 		case ExitType.Door:
-			return "die Tür";
+			return `die ${directionString}Tür`;
 		case ExitType.Stairs:
-			return "die Treppen";
+			return `die ${directionString}Treppen`;
 		case ExitType.Portal:
-			return "das Portal";
+			return `das ${directionString}Portal`;
 		case ExitType.Alley:
-			return "die Gasse";
+			return `die ${directionString}Gasse`;
 		case ExitType.Pathway:
-			return "den Pfad";
+			return `den ${directionString}Pfad`;
 		case ExitType.WallHole:
-			return "das Loch in der Wand";
+			return `das ${directionString}Loch in der Wand`;
 		case ExitType.Ladder:
-			return "die Leiter";
+			return `die ${directionString}Leiter`;
 		case ExitType.Window:
-			return "das Fenster";
+			return `das ${directionString}Fenster`;
 		case ExitType.Hallway:
-			return "den Gang";
+			return `den ${directionString}Gang`;
 		default:
-			return "den undefinierten Weg";
+			return `den ${directionString}undefinierten Weg`;
+	}
+}
+
+export function nameExitThe2(type: ExitType, direction: Direction = Direction.null): string {
+	let directionString = '';
+	if (direction !== Direction.null) {
+		directionString = `${directionToStringIs(direction)} `;
+	}
+
+	switch (type) {
+		case ExitType.Door:
+			return `der ${directionString}Tür`;
+		case ExitType.Stairs:
+			return `der ${directionString}Treppe`;
+		case ExitType.Portal:
+			return `dem ${directionString}Portal`;
+		case ExitType.Alley:
+			return `der ${directionString}Gasse`;
+		case ExitType.Pathway:
+			return `dem ${directionString}Pfad`;
+		case ExitType.WallHole:
+			return `dem ${directionString}Loch in der Wand`;
+		case ExitType.Ladder:
+			return `der ${directionString}Leiter`;
+		case ExitType.Window:
+			return `dem ${directionString}Fenster`;
+		case ExitType.Hallway:
+			return `dem ${directionString}Gang`;
+		default:
+			return `dem ${directionString}undefinierten Weg`;
 	}
 }
 

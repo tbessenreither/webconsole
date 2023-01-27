@@ -18,6 +18,13 @@ export enum Height {
 	Bottom = 'Bottom',
 }
 
+export enum RotationDirection {
+	null = 'null',
+	Left = 'Left',
+	Right = 'Right',
+	uTurn = 'uTurn',
+}
+
 export type Location = {
 	direction: Direction;
 	height: Height;

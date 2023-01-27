@@ -1,4 +1,5 @@
-import { Direction } from './types';
+import Rotation from './Rotation';
+import { Direction, RotationDirection } from './types';
 
 export function lookupDirection(directionString: string): Direction {
 	let direction = Direction.null;
@@ -199,4 +200,92 @@ export function directionToStringTo(direction: Direction): string {
 	}
 
 	return directionString;
+}
+
+export function mapDirectionToDegree(direction: Direction): number {
+	switch (direction) {
+		case Direction.North:
+			return 0;
+		case Direction.NorthEast:
+			return 45;
+		case Direction.East:
+			return 90;
+		case Direction.SouthEast:
+			return 135;
+		case Direction.South:
+			return 180;
+		case Direction.SouthWest:
+			return 225;
+		case Direction.West:
+			return 270;
+		case Direction.NorthWest:
+			return 315;
+		default:
+			return 0;
+	}
+}
+
+
+let directionReference = Direction.North;
+
+let directionsTarget = [
+	Direction.North,
+	Direction.NorthEast,
+	Direction.East,
+	Direction.SouthEast,
+	Direction.South,
+	Direction.SouthWest,
+	Direction.West,
+	Direction.NorthWest,
+];
+
+directionsTarget.forEach((directionTarget) => {
+	let directionChange = Rotation.getDirectionChange(directionReference, directionTarget);
+	console.log({ directionReference, directionTarget, degree: directionChange.degrees });
+});
+
+
+export function getDirectionChangeInDegrees(directionReference: Direction, directionTarget: Direction): number {
+	// with 8 directions on a compass
+	// get change in rotation in degree between directionRefference and directionTarget
+
+	if (directionReference === directionTarget) {
+		return 0;
+	}
+
+	let directionReferenceDegree = mapDirectionToDegree(directionReference);
+	let directionTargetDegree = mapDirectionToDegree(directionTarget);
+
+	let directionChangeDegree = directionTargetDegree - directionReferenceDegree;
+
+	if (directionChangeDegree > 180) {
+		directionChangeDegree = directionChangeDegree - 360;
+	} else if (directionChangeDegree < -180) {
+		directionChangeDegree = directionChangeDegree + 360;
+	}
+
+	return directionChangeDegree;
+}
+
+export function describeDirectionChange(directionReference: Direction, directionOut: Direction): string {
+	let rotation = Rotation.getDirectionChange(directionReference, directionOut);
+
+	let directionChangeString = '';
+
+	switch (rotation.direction) {
+		case RotationDirection.Left:
+			directionChangeString = `${rotation.degreeAbs}° nach links`;
+			break;
+		case RotationDirection.Right:
+			directionChangeString = `${rotation.degreeAbs}° nach rechts`;
+			break;
+		case RotationDirection.null:
+			directionChangeString = 'geradeaus';
+			break;
+		case RotationDirection.uTurn:
+			directionChangeString = 'in einer 180° Wende in die entgegengesetzte Richtung';
+			break;
+	}
+
+	return directionChangeString;
 }

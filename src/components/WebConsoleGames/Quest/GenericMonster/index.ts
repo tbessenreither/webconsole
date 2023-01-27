@@ -59,10 +59,6 @@ export default class GenericMonster implements GameObject {
 		this.loot.map(item => item.tick())
 	}
 
-	use(action: Action): void {
-		// Do nothing
-	}
-
 	describe(): string {
 		return 'Ein furchteinflößendes Monster';
 	}

@@ -112,13 +112,12 @@ export default class GenericItem implements GameObject {
 		return this.capitalizeFirstLetter(`Du siehst ${description.join(', ').trim()}${brokenString}.`);
 	}
 
-	use(action: Action): void {
+	markUsage(action: Action): void {
 		this.timesUsed++;
 
-		if (this.timesUsed >= this.uses) {
+		if (this.uses !== null && this.timesUsed >= this.uses) {
 			this.broken = true;
-			Print.Line(`Du hast ${this.name} benutzt und es ist nun kaputt.`);
+			action.addEvent(`Du hast ${this.name} benutzt und es ist nun kaputt.`);
 		}
-
 	}
 }

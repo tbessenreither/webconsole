@@ -237,8 +237,4 @@ export default class GenericRoom implements GameObject {
 
 		return items;
 	}
-
-	use(action: Action): void {
-		// Do nothing
-	}
 }

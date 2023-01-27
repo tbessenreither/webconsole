@@ -4,7 +4,6 @@ import { Direction } from "../Location/types";
 
 
 export enum ActionType {
-	Look = 'look',
 	Investigate = 'investigate',
 	Open = 'open',
 	Close = 'close',
@@ -17,6 +16,11 @@ export enum ActionType {
 	Exit = 'exit',
 	Attack = 'attack',
 	NOOP = 'noop',
+}
+
+export enum LookupIn {
+	Inventory = 'inventory',
+	CurrentRoom = 'room',
 }
 
 export type ActionConfig = {

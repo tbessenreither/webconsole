@@ -13,6 +13,7 @@ export default class Action {
 	private _room: GenericRoom;
 	private _direction: Direction;
 	private _parsedData: { [key: string]: string };
+	private _events: string[];
 
 	constructor(config: ActionConfig) {
 		this._type = config.type;
@@ -68,6 +69,10 @@ export default class Action {
 		return this._parsedData;
 	}
 
+	get events(): string[] {
+		return this._events;
+	}
+
 	public getUsableObjects(): GameObject[] {
 		return this._using.filter(obj => obj.isUsable);
 	}
@@ -82,4 +87,12 @@ export default class Action {
 
 		return result;
 	}
+
+	public addEvent(event: string) {
+		if (!this._events) {
+			this._events = [];
+		}
+		this._events.push(event);
+	}
+
 }
