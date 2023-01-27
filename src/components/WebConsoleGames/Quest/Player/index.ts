@@ -15,6 +15,7 @@ import { Location, Direction, Height } from '../Location/types';
 import Print from '../Print';
 import { directionToStringTo, lookupDirection } from '../Location/helpers';
 import GenericExit from '../GenericExit';
+import { nameItemTypeThe, nameItemTypeThe2 } from '../GenericItem/helpers';
 
 export default class Player implements GameObject {
 	id: string = 'player';
@@ -176,6 +177,8 @@ export default class Player implements GameObject {
 				return this.performExit(action);
 			case ActionType.Use:
 				return this.performUse(action);
+			case ActionType.Read:
+				return this.performRead(action);
 			default:
 				action.addEvent('Diese Aktion kannst du nicht durchführen.');
 				return;
@@ -220,13 +223,19 @@ export default class Player implements GameObject {
 			return;
 		}
 
-		let pickedUpItems = this._gameState.rooms[this.room].pickupItem(action);
-		let pickedUpItemIds = pickedUpItems.map(item => item.id);
-
 		for (let target of action.targets) {
-			if (pickedUpItemIds.includes(target.id)) {
-				action.addEvent(`Du nimmst ${target.name} auf.`);
-				this.addToInventory(target as GenericItem);
+			if (target instanceof GenericItem) {
+				let pickedUpItem = target.pickUp(action);
+				if (pickedUpItem) {
+					this.addToInventory(pickedUpItem);
+					action.addEvent(`Du hast ${nameItemTypeThe2(target.type)} aufgehoben.`);
+
+					if (target.meta.messageOnPickup) {
+						action.addEvent(target.meta.messageOnPickup.toString());
+					}
+				} else {
+					action.addEvent(`Du konntest ${target.name} nicht aufheben.`);
+				}
 			} else {
 				action.addEvent(`Du kannst ${target.name} nicht aufheben.`);
 			}
@@ -239,8 +248,11 @@ export default class Player implements GameObject {
 		}
 
 		if (action.using.length > 0) {
-			//todo: implement putting down on a target
-			Print.Line('Das kannst du "noch" nicht tun.');
+			for (let target of action.targets) {
+				this.removeFromInventory(target as GenericItem);
+				action.using[0].addToInventory(target as GenericItem);
+				Print.Line(`Du legst ${target.name} ab.`);
+			}
 		} else {
 			let putDownItems = this._gameState.rooms[this.room].putdownItem(action);
 			let putDownItemIds = putDownItems.map(item => item.id);
@@ -364,16 +376,28 @@ export default class Player implements GameObject {
 			return;
 		}
 
-		console.log(action);
 		action.addEvent(`Du benutzt ${action.using[0].name} mit ${action.targets[0].name}.`)
 		action.targets[0].use(action);
 	}
 
+	performRead(action: Action): void {
+		if (!this.actionDefaultCheck(action)) {
+			return;
+		}
+
+		let target = action.targets[0] as GenericItem;
+		if (target.read) {
+			target.read(action);
+		}
+	}
+
 	addToInventory(item: GenericItem): void {
 		this.inventory[item.id] = item;
+		item.parent = this;
 	}
 
 	removeFromInventory(item: GenericItem): void {
+		item.parent = null;
 		delete this.inventory[item.id];
 	}
 

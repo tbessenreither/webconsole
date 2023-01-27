@@ -225,26 +225,6 @@ export function mapDirectionToDegree(direction: Direction): number {
 	}
 }
 
-
-let directionReference = Direction.North;
-
-let directionsTarget = [
-	Direction.North,
-	Direction.NorthEast,
-	Direction.East,
-	Direction.SouthEast,
-	Direction.South,
-	Direction.SouthWest,
-	Direction.West,
-	Direction.NorthWest,
-];
-
-directionsTarget.forEach((directionTarget) => {
-	let directionChange = Rotation.getDirectionChange(directionReference, directionTarget);
-	console.log({ directionReference, directionTarget, degree: directionChange.degrees });
-});
-
-
 export function getDirectionChangeInDegrees(directionReference: Direction, directionTarget: Direction): number {
 	// with 8 directions on a compass
 	// get change in rotation in degree between directionRefference and directionTarget

@@ -68,6 +68,9 @@ export default class ActionParser {
 		[ActionType.Use]: [
 			new RegExp(`(?:Benutze|Kombiniere) (?:${articlesRegex} )?(?<using>${singleWordRegex}) mit (?:${articlesRegex} )?(?<target>${singleWordRegex})`, 'i'),
 		],
+		[ActionType.Read]: [
+			new RegExp(`(?:Lese) (?:${articlesRegex} )?(?<target>${singleWordRegex})`, 'i'),
+		]
 	}
 
 	findMatch(action: string): ActionParsed {
@@ -119,6 +122,7 @@ export default class ActionParser {
 					break;
 				case ActionType.Open:
 				case ActionType.Use:
+				case ActionType.Read:
 					targetObj = this.lookupGameObjectsIn(match.target, targetDirectionObj, [LookupIn.Inventory, LookupIn.CurrentRoom]);
 					break;
 				case ActionType.PickUp:

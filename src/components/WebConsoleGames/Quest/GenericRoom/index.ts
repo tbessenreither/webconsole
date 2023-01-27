@@ -57,7 +57,7 @@ export default class GenericRoom implements GameObject {
 		this.description = object.description;
 
 		for (let itemConfig of Object.values(object.items)) {
-			this.items[itemConfig.id] = new GenericItem(itemConfig);
+			this.items[itemConfig.id] = new GenericItem(itemConfig, this);
 		}
 		for (let monsterConfig of Object.values(object.monsters)) {
 			this.monsters[monsterConfig.id] = new GenericMonster(monsterConfig);
@@ -127,6 +127,12 @@ export default class GenericRoom implements GameObject {
 			for (let keyword of item.keywords) {
 				if (keyword.toLowerCase() === name.toLowerCase()) {
 					return item;
+				}
+			}
+			if (item.hasInventory) {
+				let inventoryItem = item.searchInventoryByName(name);
+				if (inventoryItem) {
+					return inventoryItem;
 				}
 			}
 		}
@@ -224,6 +230,16 @@ export default class GenericRoom implements GameObject {
 
 		return items;
 	}
+
+	removeFromInventory(item: GenericItem): void {
+		item.parent = null;
+		delete this.items[item.id];
+	}
+	addToInventory(item: GenericItem): void {
+		this.items[item.id] = item;
+		item.parent = this;
+	}
+
 
 	putdownItem(action: Action): GenericItem[] | null {
 		let items: GenericItem[] = [];

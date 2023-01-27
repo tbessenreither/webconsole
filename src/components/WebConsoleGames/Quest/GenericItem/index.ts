@@ -1,8 +1,9 @@
 import GameObject from '../GameObject';
 import { LocationDescriptor } from '../Descriptors/Location';
-import { ItemId, ItemType, ItemConfig } from './types';
+import { ItemId, ItemType, ItemConfig, ItemObjectList, ItemMeta, ItemList } from './types';
 import Action from '../Action';
-import Print from '../Print';
+import { capitalizeFirstLetter, joinSentences, joinWithCommaAndAnd } from '../Descriptors/Text';
+import { nameItemTypeA } from './helpers';
 
 export default class GenericItem implements GameObject {
 	id: ItemId;
@@ -18,9 +19,15 @@ export default class GenericItem implements GameObject {
 	equippable: boolean;
 	equipped: boolean;
 	broken: boolean;
+	hasInventory: boolean;
+	inventory: ItemObjectList;
+	meta: ItemMeta;
+	canBeOpened: boolean;
+	isOpen: boolean;
+	parent: GameObject;
 
-	constructor(config: ItemConfig) {
-		this.fromObject(config);
+	constructor(config: ItemConfig, parent: GameObject = null) {
+		this.fromObject(config, parent);
 	}
 
 	get isUsable(): boolean {
@@ -51,10 +58,17 @@ export default class GenericItem implements GameObject {
 			equippable: this.equippable,
 			equipped: this.equipped,
 			broken: this.broken,
+			hasInventory: this.hasInventory,
+			inventory: Object.values(this.inventory).map(item => item.toObject()),
+			meta: this.meta,
+			canBeOpened: this.canBeOpened,
+			isOpen: this.isOpen,
 		};
 	}
 
-	fromObject(object: ItemConfig): GameObject {
+	fromObject(object: ItemConfig, parent: GameObject = null): GameObject {
+		this.parent = parent;
+
 		this.id = object.id;
 		this.name = object.name;
 		this.keywords = object.keywords;
@@ -68,48 +82,148 @@ export default class GenericItem implements GameObject {
 		this.equippable = object.equippable;
 		this.equipped = object.equipped;
 		this.broken = object.broken || false;
+		this.hasInventory = object.hasInventory || false;
+		this.meta = object.meta || {};
+		this.canBeOpened = object.canBeOpened || false;
+		this.isOpen = object.isOpen || true;
+
+		this.inventory = {};
+		if (object.inventory) {
+			for (let item of object.inventory) {
+				this.inventory[item.id] = new GenericItem(item, this);
+			}
+		}
 
 		return this;
+	}
+
+	read(action: Action): void {
+		if (!this.meta.text) {
+			action.addEvent(`Es gibt nichts zu lesen`);
+			return;
+		}
+
+		action.addEvent(`Du liest ${nameItemTypeA(this.type)}`);
+		action.addEvent(this.meta.text.toString());
+
+		if (this.meta.attached) {
+			action.addEvent(`An den Brief ist etwas angeheftet:`);
+			for (let attachement of this.meta.attached as ItemList) {
+				let itemObject = new GenericItem(attachement, action.origin);
+				action.addEvent(`Du erhältst ${nameItemTypeA(itemObject.type)}`);
+				action.origin.addToInventory(itemObject);
+			}
+			delete this.meta.attached;
+		}
+
+		if (this.meta.nameAfterReading) {
+			this.name = this.meta.nameAfterReading.toString();
+		} else {
+			this.name = `${this.name} (gelesen)`;
+		}
 	}
 
 	tick(): void {
 		// Do nothing
 	}
 
-	describeType(): string {
-		switch (this.type) {
-			case ItemType.Table:
-				return 'einen Tisch';
-			case ItemType.Chair:
-				return 'einen Stuhl';
-			case ItemType.Weapon:
-				return 'eine Waffe';
-			case ItemType.Stone:
-				return 'einen Stein';
-			case ItemType.Key:
-				return 'einen Schlüssel';
-			case ItemType.Item:
-			default:
-				return 'ein undefinierbares Etwas';
+	addToInventory?(item: GenericItem): void {
+		this.inventory[item.id] = item;
+		item.parent = this;
+	}
+
+	removeFromInventory(item: GenericItem): void {
+		item.parent = null;
+		delete this.inventory[item.id];
+	}
+
+	searchInventoryByName(name: string): GenericItem | null {
+		for (let item of Object.values(this.inventory)) {
+			for (let keyword of item.keywords) {
+				if (keyword.toLowerCase() === name.toLowerCase()) {
+					return item;
+				}
+			}
+			if (item.hasInventory) {
+				let inventoryItem = item.searchInventoryByName(name);
+				if (inventoryItem) {
+					return inventoryItem;
+				}
+			}
 		}
-	}
-
-	capitalizeFirstLetter(string: string): string {
-		return string.charAt(0).toUpperCase() + string.slice(1);
+		return null;
 	}
 
 
-	describe(): string {
+	pickUp(action: Action = null): GenericItem | null {
+		if (!this.canBePickedUp) {
+			return null;
+		}
+
+		if (!this.parent || !this.parent.removeFromInventory) {
+			return null;
+		}
+
+		this.parent.removeFromInventory(this);
+		return this;
+	}
+
+	describeGeneral(): string {
 		let description: string[] = [];
 
-		description.push(`${this.location.describeObjectLocation()} ${this.describeType()}`);
+		description.push(`${this.location.describeObjectLocation()} ${nameItemTypeA(this.type)}`);
 		if (this.description) {
 			description.push(this.description);
 		}
 
 		let brokenString = this.broken ? ' (kaputt)' : '';
 
-		return this.capitalizeFirstLetter(`Du siehst ${description.join(', ').trim()}${brokenString}.`);
+		return capitalizeFirstLetter(`Du siehst ${description.join(', ').trim()}${brokenString}`);
+	}
+
+	describeInventory(): string {
+		if (!this.hasInventory) {
+			return '';
+		}
+		if (!this.isOpen) {
+			return 'Es ist verschlossen. Du kannst den Inhalt nicht sehen.';
+		}
+
+		let description: string[] = [];
+
+		switch (this.type) {
+			case ItemType.Table:
+				description.push('Auf dem Tisch siehst du ');
+				break;
+			default:
+				description.push('Darauf liegt ');
+		}
+
+		let items: string[] = [];
+		for (let item of Object.values(this.inventory)) {
+			items.push(`${nameItemTypeA(item.type)}`);
+		}
+
+		if (items.length === 0) {
+			description.push('nichts');
+		} else {
+			description.push(joinWithCommaAndAnd(items));
+		}
+
+
+		return description.join('');
+	}
+
+	describe(): string {
+		let description: string[] = [];
+
+		description.push(this.describeGeneral());
+
+		if (this.hasInventory) {
+			description.push(this.describeInventory());
+		}
+
+		return joinSentences(description);
 	}
 
 	markUsage(action: Action): void {
@@ -120,4 +234,6 @@ export default class GenericItem implements GameObject {
 			action.addEvent(`Du hast ${this.name} benutzt und es ist nun kaputt.`);
 		}
 	}
+
+
 }

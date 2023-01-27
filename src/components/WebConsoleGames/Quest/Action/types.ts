@@ -15,6 +15,7 @@ export enum ActionType {
 	Enter = 'enter',
 	Exit = 'exit',
 	Attack = 'attack',
+	Read = 'read',
 	NOOP = 'noop',
 }
 
@@ -30,6 +31,7 @@ export type ActionConfig = {
 	using: GameObject[];
 	room: GenericRoom;
 	direction: Direction;
+	events?: string[];
 	parsedData?: { [key: string]: string };
 }
 

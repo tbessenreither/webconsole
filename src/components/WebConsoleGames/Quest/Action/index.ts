@@ -23,6 +23,7 @@ export default class Action {
 		this._room = config.room;
 		this._direction = config.direction;
 		this._parsedData = config.parsedData;
+		this._events = config.events || [];
 	}
 
 	toObject(): ActionConfig {
@@ -34,6 +35,7 @@ export default class Action {
 			room: this._room,
 			direction: this._direction,
 			parsedData: this._parsedData,
+			events: this._events,
 		};
 	}
 

@@ -5,12 +5,16 @@ export type ItemId = string;
 
 export enum ItemType {
 	Item = 'Item',
+	Inventory = 'Inventory',
 	Table = 'Table',
 	Chair = 'Chair',
 	Weapon = 'Weapon',
 	Stone = 'Stone',
 	Key = 'Key',
+	Letter = 'Letter',
 }
+
+export type ItemMeta = { [key: string]: string | number | ItemList };
 
 export type ItemConfig = {
 	id: ItemId;
@@ -18,14 +22,19 @@ export type ItemConfig = {
 	keywords: string[];
 	type: ItemType;
 	description: string;
-	value: number;
+	value?: number;
 	weight: number;
-	equippable: boolean;
-	equipped: boolean;
+	equippable?: boolean;
+	equipped?: boolean;
 	location: Location;
-	uses: number;
+	uses?: number;
 	timesUsed?: number;
 	broken?: boolean;
+	hasInventory?: boolean;
+	inventory?: ItemConfig[];
+	meta?: ItemMeta;
+	canBeOpened?: boolean;
+	isOpen?: boolean;
 }
 
 export type ItemList = ItemConfig[];
