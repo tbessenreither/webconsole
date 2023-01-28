@@ -5,6 +5,7 @@ import { LocationDescriptor } from '../Descriptors/Location';
 import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
 import Action from '../Action';
+import gameTick from '../GameTick';
 
 export default class GenericMonster implements GameObject {
 	id: MonsterId;
@@ -19,6 +20,12 @@ export default class GenericMonster implements GameObject {
 
 	constructor(config: MonsterConfig) {
 		this.fromObject(config);
+
+		gameTick.add(this);
+	}
+
+	destruct(): void {
+		gameTick.remove(this);
 	}
 
 	get isUsable(): boolean {
@@ -56,7 +63,7 @@ export default class GenericMonster implements GameObject {
 	}
 
 	tick(): void {
-		this.loot.map(item => item.tick())
+		// Do nothing
 	}
 
 	describe(): string {

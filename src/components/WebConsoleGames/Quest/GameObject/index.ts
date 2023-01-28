@@ -15,11 +15,13 @@ export default interface GameObject {
 
 	get isUsable(): boolean;
 
+	destruct(): void;
+
 	toObject(): any;
 	fromObject(object: any): GameObject;
 
 	tick(): void;
-	describe(): string;
+	describe(action?: Action): string;
 	use?(action: Action): void;
 	markUsage?(action: Action): void;
 

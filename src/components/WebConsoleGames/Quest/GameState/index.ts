@@ -1,13 +1,15 @@
 import { GameStateConfig } from "./types";
 import { WebConsole } from "../../../WebConsole";
-
 import { RoomList, RoomObjectList } from "../GenericRoom/types";
 import { ExitId, ExitList, ExitObjectList } from "../GenericExit/types";
 import GenericExit from "../GenericExit";
 import Player from "../Player";
 import GenericRoom from "../GenericRoom";
 import defaultRooms from "../Rooms";
-
+import gameTick from "../GameTick";
+import gameEvents from "../GameEvents";
+import Print from "../Print";
+import RoomLookup from "../GenericRoom/RoomLookup";
 
 export default class GameState {
 	_console: WebConsole;
@@ -17,6 +19,7 @@ export default class GameState {
 	player: Player;
 	messages: string[];
 	gameOver: boolean;
+	gameTick = gameTick;
 
 	savegameName: string = '1';
 
@@ -37,6 +40,36 @@ export default class GameState {
 		for (let room of defaultRooms.rooms) {
 			this.rooms[room.id] = new GenericRoom(this, room);
 		}
+
+		this.player.room = this.getStartingRoom().id;
+
+		RoomLookup.gameState = this;
+
+		gameEvents.on('afterTick', this.eventHandlerAfterTick.bind(this));
+	}
+
+	eventHandlerAfterTick(ticksPassed: number) {
+		// transition to the real game
+		if (ticksPassed === 6) {
+			Print.Type('Es wird schwarz vor deinen Augen. Du fühlst dich schwach und hast das Gefühl, dass du gleich ohnmächtig wirst.');
+			Print.Type('Du fällst zu Boden.');
+			Print.Type('.....................');
+			Print.Type('Du wachst auf und findest dich in einem Kerker wieder. Du hast keine Erinnerung an die letzten Stunden oder Tage.');
+			Print.Type('Du musst dich schnellstmöglich befreien.');
+			this.player.room = 'Kerker';
+			this.player.clearInventory();
+			this.save();
+		}
+	}
+
+	getStartingRoom(): GenericRoom {
+		for (let room of Object.values(this.rooms)) {
+			if (room.startingRoom) {
+				return room;
+			}
+		}
+
+		return Object.values(this.rooms)[0];
 	}
 
 	getExitById(id: ExitId): GenericExit {
@@ -60,22 +93,33 @@ export default class GameState {
 			exits: [],//exitList,
 			player: this.player.toObject(),
 			messages: this.messages,
-			gameOver: this.gameOver
+			gameOver: this.gameOver,
+			ticksPassed: gameTick.ticksPassed,
 		};
 	}
 
 	fromObject(object: GameStateConfig): GameState {
 		for (let exit of object.exits) {
+			if (this.exits[exit.id]) {
+				this.exits[exit.id].destruct();
+			}
 			this.exits[exit.id] = new GenericExit(exit);
 		}
 		for (let room of object.rooms) {
+			if (this.rooms[room.id]) {
+				this.rooms[room.id].destruct();
+			}
 			this.rooms[room.id] = new GenericRoom(this, room);
 		}
 		this.gameInitiated = object.gameInitiated;
+		if (this.player) {
+			this.player.destruct();
+		}
 		this.player = new Player(this);
 		this.player.fromObject(object.player);
 		this.messages = object.messages;
 		this.gameOver = object.gameOver;
+		gameTick.ticksPassed = object.ticksPassed;
 
 		return this;
 	}
@@ -85,7 +129,6 @@ export default class GameState {
 
 		this.player.name = characterName;
 		this.player.playerName = playerName;
-		this.player.room = 'Kerker';
 
 		this.gameInitiated = true;
 
@@ -130,10 +173,7 @@ export default class GameState {
 	}
 
 	command(command: string): void {
-		let response = this.player.action(command);
-		if (response.trim() !== '') {
-			this._console.printLn(response, { html: true });
-		}
+		this.player.action(command);
 	}
 
 	printLn(message: string, options?: any) {
@@ -141,10 +181,7 @@ export default class GameState {
 	}
 
 	tick(): void {
-		for (let room of Object.values(this.rooms)) {
-			room.tick();
-		}
-		this.player.tick();
+		gameTick.execute();
 	}
 
 	getLocalStorageName(): string {

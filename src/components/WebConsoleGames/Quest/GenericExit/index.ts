@@ -7,6 +7,8 @@ import { describeDirectionChange, directionToStringTo, inverseDirection } from '
 import Action from '../Action';
 import { LocationDescriptor } from '../Descriptors/Location';
 import { ObjectMeta } from '../GameObject/types';
+import gameTick from '../GameTick';
+import RoomLookup from '../GenericRoom/RoomLookup';
 
 
 export default class GenericExit implements GameObject {
@@ -27,12 +29,25 @@ export default class GenericExit implements GameObject {
 	constructor(config: ExitConfig) {
 		this.locations = new LocationsById();
 		this.fromObject(config);
+
+		gameTick.add(this);
+	}
+
+	get used(): boolean {
+		return this.meta.used === true || false;
+	}
+
+	set used(value: boolean) {
+		this.meta.used = value;
+	}
+
+	destruct(): void {
+		gameTick.remove(this);
 	}
 
 	toObject(): ExitConfig {
 		return {
 			id: this.id,
-			rooms: this.rooms,
 			keywords: this.keywords,
 			type: this.type,
 			isHidden: this.isHidden,
@@ -49,7 +64,7 @@ export default class GenericExit implements GameObject {
 	fromObject(object: ExitConfig): GenericExit {
 		this.id = object.id;
 		this.keywords = object.keywords || [];
-		this.rooms = object.rooms;
+		this.rooms = object.rooms || [];
 		this.type = object.type;
 		this.isHidden = object.isHidden || false;
 		this.unusableFrom = object.unusableFrom;
@@ -71,6 +86,10 @@ export default class GenericExit implements GameObject {
 		return nameExitA(this.type);
 	}
 
+	tick(): void {
+		// do nothing
+	}
+
 	targetRooms(not?: RoomId): RoomId {
 		let rooms = this.rooms;
 
@@ -87,10 +106,10 @@ export default class GenericExit implements GameObject {
 
 	addRoomLocation(id: string, exitLink: ExitLink): void {
 		this.locations.add(id, exitLink.location, exitLink);
-	}
 
-	tick(): void {
-		// Do nothing
+		if (!this.rooms.includes(id)) {
+			this.rooms.push(id);
+		}
 	}
 
 	open(action: Action): boolean {
@@ -173,10 +192,22 @@ export default class GenericExit implements GameObject {
 		return true;
 	}
 
-	describe(fromRoom?: RoomId): string {
+	describe(action: Action): string {
 		let exitDescriptions: string[] = [];
 
-		let initialDescription = `Du siehst ${this.locations.getDescriptor(fromRoom).describeObjectLocation()} ${nameExitA(this.type)}`;
+		let locationDescriptorThis = this.locations.getDescriptor(action.room.id);
+		let locationThis = this.locations.get(action.room.id);
+		let locationOther = this.locations.getNot(action.room.id);
+
+
+		let targetString = '';
+		if (this.used) {
+			let targetRoomId = this.rooms.filter(roomId => roomId !== action.room.id)[0];
+			let targetRoom = RoomLookup.getById(targetRoomId);
+			targetString = ` (<span class="info">${targetRoom.name}</span>)`;
+		}
+
+		let initialDescription = `Du siehst ${locationDescriptorThis.describeObjectLocation()} ${nameExitA(this.type)}${targetString}`;
 		if (this.description) {
 			initialDescription += `, ${this.description}`;
 		}
@@ -195,9 +226,9 @@ export default class GenericExit implements GameObject {
 			exitDescriptions.push('Es ist aktiv');
 		}
 
-		if (ExitType.Hallway === this.type && this.locations.getNot(fromRoom)) {
-			let targetRoomSourceDirection = this.locations.getNot(fromRoom).direction;
-			let thisRoomDirection = this.locations.get(fromRoom).direction;
+		if (ExitType.Hallway === this.type && locationOther) {
+			let targetRoomSourceDirection = locationOther.direction;
+			let thisRoomDirection = locationThis.direction;
 			let targetInverseDirection = inverseDirection(targetRoomSourceDirection);
 
 			let describedirectionChange = describeDirectionChange(thisRoomDirection, targetInverseDirection);

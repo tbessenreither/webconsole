@@ -5,6 +5,71 @@ import { ItemType } from "./GenericItem/types";
 
 let rooms: RoomList = [
 	{
+		startingRoom: true,
+		id: 'homeLivingRoom',
+		name: 'Wohnzimmer',
+		description: 'Du bist in deinem Wohnzimmer. Es ist sehr hell und gemütlich',
+		items: [
+			{
+				id: 'homeLivingRoomTable',
+				name: 'Tisch',
+				keywords: ['tisch', 'glastisch', 'glasplatte', 'holztisch'],
+				description: 'er ist aus Holz und hat eine Glasplatte. Du hast es vor ein paar Jahren von deiner Oma geerbt',
+				type: ItemType.Table,
+				weight: 50,
+				location: { direction: Direction.Center, height: Height.Bottom },
+			},
+			{
+				id: 'homeLivingRoomCouch',
+				name: 'Couch',
+				keywords: ['Couch', 'Sofa'],
+				description: 'sie ist aus Leder und sehr bequem',
+				type: ItemType.Couch,
+				weight: 100,
+				location: { direction: Direction.North, height: Height.null },
+			},
+			{
+				id: 'homeLivingRoomTvSet',
+				name: 'TV-Schrank',
+				keywords: ['Couch', 'Sofa'],
+				description: 'er ist von Ikea. Du hast ihn gekauft als du noch alleine gewohnt hast',
+				type: ItemType.Shelf,
+				weight: 200,
+				location: { direction: Direction.South, height: Height.null },
+			},
+			{
+				id: 'homeLivingRoomTv',
+				name: 'TV',
+				keywords: ['Fernseher', 'TV'],
+				description: 'ein Plasma-Fernseher. Nicht deine beste Investition',
+				type: ItemType.Tv,
+				weight: 40,
+				location: { direction: Direction.South, height: Height.Middle },
+			},
+		],
+		monsters: [],
+		exits: [
+			{
+				id: 'door-home-livingroom-kitchen',
+				location: { direction: Direction.West, height: Height.null },
+			},
+		],
+	},
+	{
+		id: 'homeLivingKitchen',
+		name: 'Küche',
+		description: 'Du stehst in der Küche. Sie ist relativ neu. Du und deine Frau haben sie vor ein paar Jahren renoviert.',
+		items: [
+		],
+		monsters: [],
+		exits: [
+			{
+				id: 'door-home-livingroom-kitchen',
+				location: { direction: Direction.West, height: Height.null },
+			},
+		],
+	},
+	{
 		id: 'Kerker',
 		name: 'Kerker',
 		description: 'Du stehst in einem dunklen Kerker. Es ist sehr kalt und du kannst kaum etwas erkennen.',
@@ -110,6 +175,16 @@ let rooms: RoomList = [
 
 let exits: ExitList = [
 	{
+		id: 'door-home-livingroom-kitchen',
+		unusableFrom: [],
+		type: ExitType.Door,
+		locations: {},
+		description: 'am Türrahmen sind Markierungen mit Jahreszahlen',
+		closed: false,
+		locked: false,
+		unlockItemKey: 'key-door-home-livingroom-kitchen',
+	},
+	{
 		id: 'door-kerker-kerkervorraum',
 		rooms: ['Kerker', 'KerkerVorraum'],
 		unusableFrom: [],
@@ -123,7 +198,6 @@ let exits: ExitList = [
 	},
 	{
 		id: 'hallway-kerkerVorraum-kerkervorraum2',
-		rooms: ['KerkerVorraum', 'KerkerVorraum2'],
 		unusableFrom: [],
 		type: ExitType.Hallway,
 		locations: {},
@@ -133,7 +207,7 @@ let exits: ExitList = [
 	},
 	{
 		id: 'hallway-kerkervorraum2-kerker',
-		rooms: ['KerkerVorraum2', 'Kerker'],
+		rooms: ['Kerker'],
 		unusableFrom: [],
 		type: ExitType.Hallway,
 		locations: {},

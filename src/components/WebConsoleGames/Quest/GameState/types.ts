@@ -11,4 +11,5 @@ export type GameStateConfig = {
 	player: PlayerConfig;
 	messages: string[];
 	gameOver: boolean;
+	ticksPassed: number;
 }

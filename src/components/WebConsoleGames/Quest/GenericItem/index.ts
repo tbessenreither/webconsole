@@ -5,6 +5,7 @@ import Action from '../Action';
 import { capitalizeFirstLetter, handleMessageEvent, joinSentences, joinWithCommaAndAnd } from '../Descriptors/Text';
 import { nameItemTypeA } from './helpers';
 import { MessageEventConfig, MessageEventList } from '../GameObject/types';
+import gameTick from '../GameTick';
 
 export default class GenericItem implements GameObject {
 	id: ItemId;
@@ -32,6 +33,12 @@ export default class GenericItem implements GameObject {
 		this.fromObject(config, parent);
 
 		this.pickUp = this.pickUp.bind(this);
+
+		gameTick.add(this);
+	}
+
+	destruct(): void {
+		gameTick.remove(this);
 	}
 
 	get isUsable(): boolean {
@@ -140,6 +147,35 @@ export default class GenericItem implements GameObject {
 		}
 	}
 
+	pickUp(action: Action = null): GenericItem | null {
+		if (!this.canBePickedUp) {
+			return null;
+		}
+
+		if (!this.parent || !this.parent.removeFromInventory) {
+			return null;
+		}
+
+		if (this.messageEvents.onPickUp) {
+			this.messageEvents.onPickUp = handleMessageEvent(action, this.messageEvents.onPickUp as MessageEventConfig);
+		}
+
+		this.parent.removeFromInventory(this);
+
+		if (this.meta.roomActionsAfterPickUp && Array.isArray(this.meta.roomActionsAfterPickUp)) {
+			for (let roomAction of this.meta.roomActionsAfterPickUp) {
+				action.room.performRoomAction(roomAction.toString());
+			}
+			delete this.meta.roomActionsAfterReading;
+		}
+
+		if (this.messageEvents.afterPickUp) {
+			this.messageEvents.afterPickUp = handleMessageEvent(action, this.messageEvents.afterPickUp);
+		}
+
+		return this;
+	}
+
 	tick(): void {
 		// Do nothing
 	}
@@ -169,36 +205,6 @@ export default class GenericItem implements GameObject {
 			}
 		}
 		return null;
-	}
-
-
-	pickUp(action: Action = null): GenericItem | null {
-		if (!this.canBePickedUp) {
-			return null;
-		}
-
-		if (!this.parent || !this.parent.removeFromInventory) {
-			return null;
-		}
-
-		if (this.messageEvents.onPickUp) {
-			this.messageEvents.onPickUp = handleMessageEvent(action, this.messageEvents.onPickUp as MessageEventConfig);
-		}
-
-		this.parent.removeFromInventory(this);
-
-		if (this.meta.roomActionsAfterPickUp && Array.isArray(this.meta.roomActionsAfterPickUp)) {
-			for (let roomAction of this.meta.roomActionsAfterPickUp) {
-				action.room.performRoomAction(roomAction.toString());
-			}
-			delete this.meta.roomActionsAfterReading;
-		}
-
-		if (this.messageEvents.afterPickUp) {
-			this.messageEvents.afterPickUp = handleMessageEvent(action, this.messageEvents.afterPickUp);
-		}
-
-		return this;
 	}
 
 	describeGeneral(): string {

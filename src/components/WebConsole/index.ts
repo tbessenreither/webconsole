@@ -126,6 +126,9 @@ export class WebConsole extends CcHTMLElement {
 
 	bootCommands: Array<string> = [];
 
+	isTyping: boolean = false;
+	typingBuffer: string[] = [];
+
 	constructor() {
 		super({ html, css });
 
@@ -143,6 +146,14 @@ export class WebConsole extends CcHTMLElement {
 	static get observedAttributes(): Array<string> {
 		// a list of attributes that should be observed
 		return [];
+	}
+
+	async pause(ms: number): Promise<boolean> {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve(true);
+			}, ms);
+		});
 	}
 
 	registerBootCommand(command: string) {
@@ -244,6 +255,7 @@ export class WebConsole extends CcHTMLElement {
 	}
 
 	changeMode(mode: 'normal' | 'input') {
+		this.unblockInput();
 		if (mode === 'input') {
 			this.input.parentElement.classList.add('inputMode');
 			this.inputButton.innerText = 'Enter';
@@ -254,6 +266,17 @@ export class WebConsole extends CcHTMLElement {
 			this.mode = 'normal';
 			this.inputButton.style.display = 'none';
 		}
+	}
+
+	blockInput() {
+		this.input.disabled = true;
+		this.inputButton.disabled = true;
+	}
+
+	unblockInput() {
+		this.input.disabled = false;
+		this.inputButton.disabled = false;
+		this.input.focus();
 	}
 
 	captureInput(handlerFunction: CallableFunction) {
@@ -554,13 +577,7 @@ export class WebConsole extends CcHTMLElement {
 		}
 
 		if (options.clearKey) {
-			let obj = null;
-			do {
-				obj = this.output.querySelector(`[data-key="${options.clearKey}"]`);
-				if (obj) {
-					obj.remove();
-				}
-			} while (obj);
+			this.removeClearKey(options.clearKey);
 		}
 
 		this.output.innerHTML += `<span ${keyAttribute} ${copyAttribute} class="${options.direction} ${options.class}">${text}</span>`;
@@ -568,8 +585,50 @@ export class WebConsole extends CcHTMLElement {
 		this.contentObject.scrollTop = this.contentObject.scrollHeight;
 	}
 
+	removeClearKey(key: string) {
+		let obj = null;
+		do {
+			obj = this.output.querySelector(`[data-key="${key}"]`);
+			if (obj) {
+				obj.remove();
+			}
+		} while (obj);
+	}
+
 	printLn(text: string, options: WebConsolePrintOptions = {}) {
 		this.print(text + '\n', options);
+	}
+
+	typeLn(text: string) {
+		this.typingBuffer.push(text);
+		this.startTyping();
+	}
+
+	async startTyping() {
+		if (this.isTyping) {
+			return;
+		}
+		this.isTyping = true;
+		this.blockInput();
+
+		while (this.typingBuffer.length > 0) {
+			let text = this.typingBuffer.shift();
+			await this.performTyping(text);
+		}
+
+		this.unblockInput();
+		this.isTyping = false;
+	}
+
+	async performTyping(text: string) {
+		let letters = text.split('');
+		let lettersPrinted = '';
+		for (let letter of letters) {
+			lettersPrinted = `${lettersPrinted}${letter}`;
+			this.printLn(lettersPrinted, { clearKey: 'typing', key: 'typing' });
+			await this.pause(Math.random() * 10 + 40);
+		}
+		this.printLn(text, { clearKey: 'typing' });
 	}
 
 	clear() {

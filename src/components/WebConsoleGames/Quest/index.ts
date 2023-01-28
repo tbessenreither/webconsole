@@ -27,6 +27,7 @@ export default class Quest extends WebConsolePlugin {
 		this._console.registerBootCommand('quest');
 
 		Print.setPrintLnFunction(this.printLn.bind(this));
+		Print.setTypeFunction(this.typeLn.bind(this));
 	}
 
 	async execute(command: WebConsoleCommand) {
@@ -78,7 +79,6 @@ export default class Quest extends WebConsolePlugin {
 		} else {
 			this._gameState.command(input);
 		}
-		console.info('capturedInput', { input });
 	}
 
 	printHelp(commandString?: string) {

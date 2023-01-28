@@ -14,6 +14,7 @@ export type RoomObjectList = {
 }
 
 export type RoomConfig = {
+	startingRoom?: boolean;
 	id: RoomId;
 	name: string;
 	description: string;

@@ -19,7 +19,7 @@ export default class WebConsolePlugin {
 
 	register() {
 		this._console = document.querySelector('web-console');
-		
+
 		this.onRegister();
 	}
 
@@ -41,6 +41,10 @@ export default class WebConsolePlugin {
 
 	printLn(text: string, options: WebConsolePrintOptions = {}) {
 		this._console.printLn(text, options);
+	}
+
+	typeLn(text: string): void {
+		this._console.typeLn(text);
 	}
 
 	autocompleteOptionsForCommand(command: WebConsoleCommand): Array<string> {

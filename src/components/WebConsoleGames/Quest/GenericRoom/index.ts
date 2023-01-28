@@ -16,11 +16,13 @@ import Action from '../Action';
 import { lookupExitTypeByName } from '../GenericExit/helpers';
 import { LocationDescriptor } from '../Descriptors/Location';
 import { filterGameObjectList } from '../GameObject/helpers';
+import gameTick from '../GameTick';
 
 
 export default class GenericRoom implements GameObject {
 	_gameState: GameState;
 
+	startingRoom: boolean = false;
 	id: RoomId;
 	name: string;
 	description: string;
@@ -31,6 +33,12 @@ export default class GenericRoom implements GameObject {
 	constructor(gameState: GameState, config: RoomConfig) {
 		this._gameState = gameState;
 		this.fromObject(config);
+
+		gameTick.add(this);
+	}
+
+	destruct(): void {
+		gameTick.remove(this);
 	}
 
 	get isUsable(): boolean {
@@ -43,6 +51,7 @@ export default class GenericRoom implements GameObject {
 			itemsAsObjects.push(itemObject.toObject());
 		}
 		return {
+			startingRoom: this.startingRoom,
 			id: this.id,
 			name: this.name,
 			description: this.description,
@@ -53,6 +62,7 @@ export default class GenericRoom implements GameObject {
 	}
 
 	fromObject(object: RoomConfig): GameObject {
+		this.startingRoom = object.startingRoom || false;
 		this.id = object.id;
 		this.name = object.name;
 		this.description = object.description;
@@ -90,7 +100,7 @@ export default class GenericRoom implements GameObject {
 		// Do nothing
 	}
 
-	describe(): string {
+	describe(action: Action): string {
 		let description = [];
 		description.push(`${this.description}<br>`);
 
@@ -117,7 +127,7 @@ export default class GenericRoom implements GameObject {
 		} else {
 			let exitDescriptions: string[] = [];
 			for (const exit of exits) {
-				exitDescriptions.push(`${exit.describe(this.id)}`);
+				exitDescriptions.push(`${exit.describe(action)}`);
 			}
 			description.push(exitDescriptions.join('<br>')); /** */
 		}
@@ -134,10 +144,6 @@ export default class GenericRoom implements GameObject {
 				exit.isHidden = false;
 			}
 		}
-	}
-
-	investigate(perception: number = 10): string {
-		return this.describe();
 	}
 
 	pickupItem(action: Action): GenericItem[] | null {

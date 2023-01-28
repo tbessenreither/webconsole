@@ -13,6 +13,13 @@ export enum ItemType {
 	Stone = 'Stone',
 	Key = 'Key',
 	Letter = 'Letter',
+	Couch = 'Couch',
+	Shelf = 'Shelf',
+	Tv = 'Tv',
+	ImageFrame = 'ImageFrame',
+	Book = 'Book',
+	Vase = 'Vase',
+	Bed = 'Bed',
 }
 
 export type ItemMeta = { [key: string]: ObjectMetaTypes | ItemList };

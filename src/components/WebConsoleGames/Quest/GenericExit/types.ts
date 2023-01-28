@@ -1,6 +1,7 @@
 import GenericExit from ".";
 import { ObjectMeta } from "../GameObject/types";
 import { ItemConfig, ItemId } from "../GenericItem/types";
+import GenericRoom from "../GenericRoom";
 import { RoomId } from "../GenericRoom/types";
 import { Location, LocationList } from "../Location/types";
 
@@ -32,7 +33,7 @@ export type ExitObjectList = {
 
 export type ExitConfig = {
 	id: ExitId;
-	rooms: RoomId[];
+	rooms?: RoomId[];
 	keywords?: string[];
 	type: ExitType;
 	isHidden?: boolean;

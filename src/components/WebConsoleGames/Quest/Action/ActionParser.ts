@@ -30,7 +30,7 @@ export default class ActionParser {
 			new RegExp(`Greife (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) (?:mit (?:dem|meinem|einem)?(?<using>${singleWordRegex}) )?an`, 'i'),
 		],
 		[ActionType.PickUp]: [
-			new RegExp(`(?:Nimm|Hebe) (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
+			new RegExp(`(?:Nimm|Nehme|Hebe) (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
 		],
 		[ActionType.PutDown]: [
 			new RegExp(`Lege (?:${articlesRegex} )?(?<target>${singleWordRegex})(?: (?:(?:auf|in) (?:(?:den|die|dem|der) )?)(?:(?<targetDirection>${directionRegex}) )?(?<using>${singleWordRegex})(?: (?:ab))?| (?:(?<direction>${directionRegex}) )?(?:ab))`, 'i'),
@@ -65,7 +65,6 @@ export default class ActionParser {
 			for (let regex of this.actionRegexParser[type]) {
 				let match = regex.exec(action);
 				if (match) {
-					console.log(regex);
 					if (match.groups === undefined) {
 						match.groups = {
 							type: null,
@@ -85,7 +84,6 @@ export default class ActionParser {
 
 	parse(action: string): Action {
 		let match = this.findMatch(action);
-		console.log(action, match);
 		if (!match) {
 			return null;
 		}
@@ -116,17 +114,18 @@ export default class ActionParser {
 					break;
 				case ActionType.Use:
 				case ActionType.Read:
-					targetObj = this.lookupGameObjectsIn(match.target, targetDirectionObj, [LookupIn.Inventory, LookupIn.CurrentRoom, LookupIn.Exit]);
-					break;
 				case ActionType.Open:
 				case ActionType.Close:
 				case ActionType.Lock:
 				case ActionType.Unlock:
+				case ActionType.Investigate:
 					targetObj = this.lookupGameObjectsIn(match.target, targetDirectionObj, [LookupIn.Inventory, LookupIn.CurrentRoom, LookupIn.Exit]);
 					break;
 				case ActionType.PickUp:
-				default:
 					targetObj = this.lookupGameObjectsIn(match.target, targetDirectionObj, [LookupIn.CurrentRoom]);
+					break;
+				default:
+					targetObj = this.lookupGameObjectsIn(match.target, targetDirectionObj, [LookupIn.Inventory, LookupIn.CurrentRoom]);
 			}
 		} else {
 			switch (match.type) {
@@ -153,7 +152,7 @@ export default class ActionParser {
 			targets: targetObj ? [targetObj] : [],
 			using: usingObj ? [usingObj] : [],
 			room: this._blueprint.room,
-			targetDirection: targetDirectionObj ? targetDirectionObj : Direction.Center,
+			targetDirection: targetDirectionObj ? targetDirectionObj : null,
 			direction: directionObj ? directionObj : Direction.Center,
 			parsedData: match,
 		};
@@ -181,6 +180,7 @@ export default class ActionParser {
 				let room = this._blueprint.room;
 				if (phrase) {
 					let exitType = lookupExitTypeByName(phrase);
+					console.log('lookup exit by phrase', phrase, exitType, direction);
 					item = lookupGameObjectByType(room.getExits(), exitType, direction);
 				} else {
 					item = lookupGameObjectByDirection(room.getExits(), direction);

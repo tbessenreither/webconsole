@@ -16,6 +16,8 @@ import Print from '../Print';
 import { directionToStringTo, lookupDirection } from '../Location/helpers';
 import GenericExit from '../GenericExit';
 import { nameItemTypeThe, nameItemTypeThe2 } from '../GenericItem/helpers';
+import gameTick from '../GameTick';
+import GenericRoom from '../GenericRoom';
 
 export default class Player implements GameObject {
 	id: string = 'player';
@@ -53,6 +55,12 @@ export default class Player implements GameObject {
 			armor: null,
 			accessory: null
 		};
+
+		gameTick.add(this);
+	}
+
+	destruct(): void {
+		gameTick.remove(this);
 	}
 
 	get isUsable(): boolean {
@@ -101,36 +109,19 @@ export default class Player implements GameObject {
 			accessory: object.equipped.accessory ? new GenericItem(object.equipped.accessory) : null
 		};
 
-
-		let actionConfigBlueprint: ActionConfig = {
-			type: null,
-			origin: this,
-			targets: null,
-			using: null,
-			room: this._gameState.rooms[this.room],
-			direction: Direction.null,
-		};
-		let actionParser = new ActionParser(actionConfigBlueprint);
-
 		return this;
 	}
 
 	tick(): void {
-		for (let itemObject of Object.values(this.inventory)) {
-			itemObject.tick();
-		}
-		this.equipped.weapon && this.equipped.weapon.tick();
-		this.equipped.armor && this.equipped.armor.tick();
-		this.equipped.accessory && this.equipped.accessory.tick();
 	}
 
-	action(command: string): string {
+	action(command: string) {
 		command = command.toLowerCase();
 
 		if (command === 'inventar') {
-			return this.listInventory(false);
+			Print.Line(this.listInventory(false), { html: true });
 		} else if (command === 'beschreibe inventar') {
-			return this.listInventory(true);
+			Print.Line(this.listInventory(true), { html: true });
 		}
 
 		let actionConfigBlueprint: ActionConfig = {
@@ -144,8 +135,11 @@ export default class Player implements GameObject {
 		let actionParser = new ActionParser(actionConfigBlueprint);
 		let action = actionParser.parse(command);
 
+		console.log(action);
+
 		if (!action) {
-			return 'Das verstehe ich nicht.';
+			Print.Line('Das verstehe ich nicht.');
+			return;
 		}
 
 		this.actionHandler(action);
@@ -153,36 +147,50 @@ export default class Player implements GameObject {
 		for (let event of actionEvents) {
 			Print.Line(event, { html: true });
 		}
-		return '';
 	}
 
 	actionHandler(action: Action): void {
-		console.log('handle action', action);
+		if (!action) {
+			return;
+		}
+
 		switch (action.type) {
 			case ActionType.Investigate:
-				return this.performInvestigate(action);
+				this.performInvestigate(action);
+				break;
 			case ActionType.PickUp:
-				return this.performPickUp(action);
+				this.performPickUp(action);
+				break;
 			case ActionType.PutDown:
-				return this.performPutDown(action);
+				this.performPutDown(action);
+				break;
 			case ActionType.Open:
-				return this.performOpen(action);
+				this.performOpen(action);
+				break;
 			case ActionType.Close:
-				return this.performClose(action);
+				this.performClose(action);
+				break;
 			case ActionType.Lock:
-				return this.performLock(action);
+				this.performLock(action);
+				break;
 			case ActionType.Unlock:
-				return this.performUnlock(action);
+				this.performUnlock(action);
+				break;
 			case ActionType.Exit:
-				return this.performExit(action);
+				this.performExit(action);
+				break;
 			case ActionType.Use:
-				return this.performUse(action);
+				this.performUse(action);
+				break;
 			case ActionType.Read:
-				return this.performRead(action);
+				this.performRead(action);
+				break;
 			default:
 				action.addEvent('Diese Aktion kannst du nicht durchführen.');
-				return;
+				break;
 		}
+
+		gameTick.execute();
 	}
 
 	actionDefaultCheck(action: Action): boolean {
@@ -207,13 +215,14 @@ export default class Player implements GameObject {
 			return;
 		} else if (action.targets.length === 0 && action.parsedData.target === null) {
 			action.addEvent('Du siehst dich um.');
-			action.addEvent(this._gameState.rooms[this.room].describe());
+			let room = this._gameState.rooms[this.room] as GenericRoom;
+			action.addEvent(room.describe(action));
 			return;
 		}
 
 		for (let target of action.targets) {
 			action.addEvent(`Du untersuchst ${target.name}.`);
-			action.addEvent(target.describe());
+			action.addEvent(target.describe(action));
 			return;
 		}
 	}
@@ -333,6 +342,7 @@ export default class Player implements GameObject {
 
 		if (exit.closed) {
 			action.addEvent(`${nameExitThe(exit.type)} ist noch geschlossen. Du versuchst sie zu öffnen.`);
+			gameTick.execute();
 			if (!exit.open(action)) {
 				return;
 			}
@@ -347,6 +357,12 @@ export default class Player implements GameObject {
 			action.addEvent(exitLink.transitionMessage);
 		}
 
+		if (newRoom === undefined) {
+			Print.Type(`Als du durch ${nameExitThe(exit.type)} gehst, stürzt du in die Tiefe in den Void. Da hat der Programmierer wohl etwas falsch gemacht.`);
+			Print.Type(`Du wirst durch die Magie des Spiels wieder in den letzten Raum zurück teleportiert.`);
+			return;
+		}
+		exit.used = true;
 		this.room = newRoom;
 	}
 
@@ -422,7 +438,7 @@ export default class Player implements GameObject {
 			if (item.weight) {
 				inventoryWeight += item.weight;
 			}
-			inventoryString += `<br>${item.name} ${item.broken ? '- kaputt' : ''}`;
+			inventoryString += `<br>- ${item.name} ${item.broken ? '- <span class="info">kaputt</span>' : ''}`;
 			if (describe) {
 				inventoryString += `<br>  ${item.describe()}`;
 			}
@@ -432,6 +448,15 @@ export default class Player implements GameObject {
 
 
 		return inventoryString;
+	}
+
+	clearInventory(): void {
+		// we trash the items so we need to properly destruct them
+		for (let inventoryItem of Object.values(this.inventory)) {
+			inventoryItem.parent = null;
+			inventoryItem.destruct();
+		}
+		this.inventory = {};
 	}
 
 	describe(): string {

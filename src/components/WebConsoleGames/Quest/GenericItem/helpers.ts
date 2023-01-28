@@ -8,69 +8,66 @@ export function ItemObjectListToGameObjectArray(itemObjectList: ItemObjectList):
 	return Object.values(itemObjectList);
 }
 
+let articlesMapping: { [key: string]: { [key: string]: string } } = {
+	der: {
+		a: 'einen',
+		the2: 'den',
+	},
+	die: {
+		a: 'eine',
+		the2: 'die',
+	},
+	das: {
+		a: 'ein',
+		the2: 'das',
+	},
+};
 
+
+
+export function articleItemTypeThe(itemType: ItemType): string {
+	switch (itemType) {
+		case ItemType.Table:
+		case ItemType.Chair:
+		case ItemType.Stone:
+		case ItemType.Key:
+		case ItemType.Letter:
+		case ItemType.Tv:
+			return 'der';
+		case ItemType.Weapon:
+		case ItemType.Couch:
+		case ItemType.ImageFrame:
+		case ItemType.Vase:
+			return 'die';
+		case ItemType.Item:
+		case ItemType.Inventory:
+		case ItemType.Shelf:
+		case ItemType.Book:
+		case ItemType.Bed:
+		default:
+			return 'das';
+	}
+}
 export function articleItemTypeA(itemType: ItemType): string {
+	let articleThe = articleItemTypeThe(itemType);
 	switch (itemType) {
-		case ItemType.Table:
-			return 'einen';
-		case ItemType.Chair:
-			return 'einen';
-		case ItemType.Weapon:
-			return 'eine';
-		case ItemType.Stone:
-			return 'einen';
-		case ItemType.Key:
-			return 'einen';
-		case ItemType.Letter:
-			return 'einen';
-		case ItemType.Item:
 		default:
-			return 'ein';
+			return articlesMapping[articleThe].a;
 	}
 }
 
-export function articleItemThe(itemType: ItemType): string {
+export function articleItemTypeThe2(itemType: ItemType): string {
+	let articleThe = articleItemTypeThe(itemType);
 	switch (itemType) {
-		case ItemType.Table:
-			return 'der';
-		case ItemType.Chair:
-			return 'der';
-		case ItemType.Weapon:
-			return 'die';
-		case ItemType.Stone:
-			return 'der';
-		case ItemType.Key:
-			return 'der';
-		case ItemType.Letter:
-			return 'der';
-		case ItemType.Item:
 		default:
-			return 'das';
-	}
-}
-
-export function articleItemThe2(itemType: ItemType): string {
-	switch (itemType) {
-		case ItemType.Table:
-			return 'den';
-		case ItemType.Chair:
-			return 'den';
-		case ItemType.Weapon:
-			return 'die';
-		case ItemType.Stone:
-			return 'den';
-		case ItemType.Key:
-			return 'den';
-		case ItemType.Letter:
-			return 'den';
-		case ItemType.Item:
-		default:
-			return 'das';
+			return articlesMapping[articleThe].the2;
 	}
 }
 
 export function nameItemType(itemType: ItemType): string {
 	switch (itemType) {
+		case ItemType.Inventory:
+			return 'Inventar';
 		case ItemType.Table:
 			return 'Tisch';
 		case ItemType.Chair:
@@ -83,6 +80,20 @@ export function nameItemType(itemType: ItemType): string {
 			return 'Schlüssel';
 		case ItemType.Letter:
 			return 'Brief';
+		case ItemType.Couch:
+			return 'Sofa';
+		case ItemType.Shelf:
+			return 'Regal';
+		case ItemType.Tv:
+			return 'Fernseher';
+		case ItemType.ImageFrame:
+			return 'Bilderrahmen';
+		case ItemType.Book:
+			return 'Buch';
+		case ItemType.Vase:
+			return 'Vase';
+		case ItemType.Bed:
+			return 'Bett';
 		case ItemType.Item:
 		default:
 			return 'undefinierbares Etwas';
@@ -97,14 +108,14 @@ export function nameItemTypeA(itemType: ItemType): string {
 }
 
 export function nameItemTypeThe(itemType: ItemType): string {
-	let article = articleItemThe(itemType);
+	let article = articleItemTypeThe(itemType);
 	let name = nameItemType(itemType);
 
 	return `${article} ${name}`;
 }
 
 export function nameItemTypeThe2(itemType: ItemType): string {
-	let article = articleItemThe2(itemType);
+	let article = articleItemTypeThe2(itemType);
 	let name = nameItemType(itemType);
 
 	return `${article} ${name}`;
