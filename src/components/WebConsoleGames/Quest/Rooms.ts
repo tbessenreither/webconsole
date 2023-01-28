@@ -29,8 +29,10 @@ let rooms: RoomList = [
 						weight: 0.005,
 						meta: {
 							text: 'Hallo, du kennst mich nicht aber ich kenne dich. Ich habe dich beobachtet und ich weiß, dass du hier bist. Ich weiß auch, dass du hier raus willst. Ich kann dir helfen. Ich habe einen Schlüssel, der dich hier raus bringt. Ich werde ihn dir geben, aber du schuldest mir was. Dein Freund, der Unbekannte',
-							messageOnPickup: 'Er ist schwerer als du dachtest.',
 							nameAfterReading: 'Brief von unbekanntem (gelesen)',
+							roomActionsAfterReading: [
+								'unhide door-kerker-kerkervorraum',
+							],
 							attached: [
 								{
 									id: 'KerkerSchlüssel',
@@ -44,6 +46,19 @@ let rooms: RoomList = [
 								},
 							],
 						},
+						messageEvents: {
+							onPickUp: {
+								message: 'Er ist schwerer als du dachtest.',
+								playTimes: 1,
+								timesPlayed: 0,
+							},
+							afterPickUp: 'Du spürst einen kalten luftzug, als du den Brief aufhebst.',
+							afterReading: {
+								message: 'Als du den Brief zuende gelesen hast hörst du ein kratzendes Geräusch. Du blickst in die Richtung und vor dir erscheint eine Tür.',
+								playTimes: 1,
+								timesPlayed: 0,
+							},
+						}
 					},
 				],
 			},
@@ -99,6 +114,7 @@ let exits: ExitList = [
 		rooms: ['Kerker', 'KerkerVorraum'],
 		unusableFrom: [],
 		type: ExitType.Door,
+		isHidden: true,
 		locations: {},
 		description: 'sie ist sehr alt und aus Holz',
 		closed: true,

@@ -229,10 +229,6 @@ export default class Player implements GameObject {
 				if (pickedUpItem) {
 					this.addToInventory(pickedUpItem);
 					action.addEvent(`Du hast ${nameItemTypeThe2(target.type)} aufgehoben.`);
-
-					if (target.meta.messageOnPickup) {
-						action.addEvent(target.meta.messageOnPickup.toString());
-					}
 				} else {
 					action.addEvent(`Du konntest ${target.name} nicht aufheben.`);
 				}
@@ -254,16 +250,9 @@ export default class Player implements GameObject {
 				Print.Line(`Du legst ${target.name} ab.`);
 			}
 		} else {
-			let putDownItems = this._gameState.rooms[this.room].putdownItem(action);
-			let putDownItemIds = putDownItems.map(item => item.id);
-
 			for (let target of action.targets) {
-				if (putDownItemIds.includes(target.id)) {
-					Print.Line(`Du legst ${target.name} ab.`);
-					this.removeFromInventory(target as GenericItem);
-				} else {
-					Print.Line(`Du kannst ${target.name} nicht ablegen.`);
-				}
+				action.room.addToInventory(target as GenericItem, action.direction);
+				Print.Line(`Du legst ${target.name} ab.`);
 			}
 		}
 	}

@@ -15,6 +15,7 @@ import { lookupDirection } from '../Location/helpers';
 import Action from '../Action';
 import { lookupExitTypeByName } from '../GenericExit/helpers';
 import { LocationDescriptor } from '../Descriptors/Location';
+import { filterGameObjectList } from '../GameObject/helpers';
 
 
 export default class GenericRoom implements GameObject {
@@ -93,32 +94,46 @@ export default class GenericRoom implements GameObject {
 		let description = [];
 		description.push(`${this.description}<br>`);
 
-		if (Object.keys(this.monsters).length > 0) {
+		let monsters = filterGameObjectList(this.monsters) as GenericMonster[];
+		if (monsters.length > 0) {
 			description.push('Du bist nicht allein in diesem Raum.<br>');
 			description.push('[Monsterbeschreibung'); //todo: add monster description
 		}
 
-		if (Object.keys(this.items).length === 0) {
+		let items = filterGameObjectList(this.items) as GenericItem[];
+		if (items.length === 0) {
 			//description.push('Es befinden sich keine Gegenstände in diesem Raum.<br>');
 		} else {
 			let itemDescriptions = [];
-			for (let item of Object.values(this.items)) {
+			for (let item of items) {
 				itemDescriptions.push(`${item.describe()}`);
 			}
 			description.push(itemDescriptions.join('<br>').trim() + '<br>');
 		}
 
-		if (Object.keys(this.exits).length === 0) {
+		let exits = filterGameObjectList(this.exits) as GenericExit[];
+		if (exits.length === 0) {
 			description.push('Es gibt keine sichtbaren Ausgänge aus diesem Raum.<br>');
 		} else {
 			let exitDescriptions: string[] = [];
-			for (const exit of Object.values(this.exits)) {
+			for (const exit of exits) {
 				exitDescriptions.push(`${exit.describe(this.id)}`);
 			}
 			description.push(exitDescriptions.join('<br>')); /** */
 		}
 
 		return description.join('');
+	}
+
+	performRoomAction(roomAction: string) {
+		let actionParts = roomAction.split(' ');
+
+		if (actionParts[0] === 'unhide') {
+			let exit = this.exits[actionParts[1]];
+			if (exit) {
+				exit.isHidden = false;
+			}
+		}
 	}
 
 	investigate(perception: number = 10): string {
@@ -148,22 +163,13 @@ export default class GenericRoom implements GameObject {
 		item.parent = null;
 		delete this.items[item.id];
 	}
-	addToInventory(item: GenericItem): void {
-		this.items[item.id] = item;
-		item.parent = this;
-	}
 
-
-	putdownItem(action: Action): GenericItem[] | null {
-		let items: GenericItem[] = [];
-		for (let targetIndex in action.targets) {
-			let target = action.targets[targetIndex] as GenericItem;
-			target.location = new LocationDescriptor(action.direction, Height.Bottom);
-
-			this.items[target.id] = target;
-			items.push(target);
+	addToInventory(item: GenericItem, direction: Direction = null): void {
+		if (direction !== null) {
+			item.location = new LocationDescriptor(direction, Height.Bottom);
 		}
 
-		return items;
+		this.items[item.id] = item;
+		item.parent = this;
 	}
 }

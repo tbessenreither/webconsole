@@ -1,6 +1,6 @@
 import GameObject from ".";
 import { Direction } from "../Location/types";
-import { GameObjectList } from "./types";
+import { GameObjectList, MessageEventConfig } from "./types";
 
 
 export function filterGameObjectList(list: GameObjectList, direction: Direction = null) {

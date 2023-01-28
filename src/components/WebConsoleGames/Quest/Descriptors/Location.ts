@@ -68,8 +68,8 @@ export class LocationDescriptor {
 				part = 'nordwestlich';
 				break;
 		}
-
-		let versions = [
+		let versions: string[] = [];
+		versions = [
 			`${part} von dir`,
 			`in ${part}er Richtung`,
 			`in ${part}er Richtung von dir`,
@@ -88,6 +88,13 @@ export class LocationDescriptor {
 				versions.push(`in der ${part}en ${cornerPhrase}`);
 				versions.push(`in der ${part}en ${cornerPhrase} von dir`);
 				versions.push(`in der ${part}en ${cornerPhrase} von dir aus`);
+				break;
+			case Direction.Center:
+				versions = [
+					`mittig im Raum`,
+					`vor dir`,
+				];
+				break;
 		}
 
 		return versions[this.random(versions.length - 1)];

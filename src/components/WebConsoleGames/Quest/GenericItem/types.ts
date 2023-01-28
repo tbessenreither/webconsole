@@ -1,5 +1,5 @@
 import GenericItem from '.';
-import { ObjectMetaTypes } from '../GameObject/types';
+import { MessageEventConfig, MessageEventList, ObjectMetaTypes } from '../GameObject/types';
 import { Location } from '../Location/types';
 
 export type ItemId = string;
@@ -36,6 +36,7 @@ export type ItemConfig = {
 	meta?: ItemMeta;
 	canBeOpened?: boolean;
 	isOpen?: boolean;
+	messageEvents?: MessageEventList;
 }
 
 export type ItemList = ItemConfig[];

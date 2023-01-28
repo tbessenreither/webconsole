@@ -2,8 +2,9 @@ import GameObject from '../GameObject';
 import { LocationDescriptor } from '../Descriptors/Location';
 import { ItemId, ItemType, ItemConfig, ItemObjectList, ItemMeta, ItemList } from './types';
 import Action from '../Action';
-import { capitalizeFirstLetter, joinSentences, joinWithCommaAndAnd } from '../Descriptors/Text';
+import { capitalizeFirstLetter, handleMessageEvent, joinSentences, joinWithCommaAndAnd } from '../Descriptors/Text';
 import { nameItemTypeA } from './helpers';
+import { MessageEventConfig, MessageEventList } from '../GameObject/types';
 
 export default class GenericItem implements GameObject {
 	id: ItemId;
@@ -25,9 +26,12 @@ export default class GenericItem implements GameObject {
 	canBeOpened: boolean;
 	isOpen: boolean;
 	parent: GameObject;
+	messageEvents: MessageEventList;
 
 	constructor(config: ItemConfig, parent: GameObject = null) {
 		this.fromObject(config, parent);
+
+		this.pickUp = this.pickUp.bind(this);
 	}
 
 	get isUsable(): boolean {
@@ -63,6 +67,7 @@ export default class GenericItem implements GameObject {
 			meta: this.meta,
 			canBeOpened: this.canBeOpened,
 			isOpen: this.isOpen,
+			messageEvents: this.messageEvents,
 		};
 	}
 
@@ -86,6 +91,7 @@ export default class GenericItem implements GameObject {
 		this.meta = object.meta || {};
 		this.canBeOpened = object.canBeOpened || false;
 		this.isOpen = object.isOpen || true;
+		this.messageEvents = object.messageEvents || {};
 
 		this.inventory = {};
 		if (object.inventory) {
@@ -116,10 +122,21 @@ export default class GenericItem implements GameObject {
 			delete this.meta.attached;
 		}
 
+		if (this.meta.roomActionsAfterReading && Array.isArray(this.meta.roomActionsAfterReading)) {
+			for (let roomAction of this.meta.roomActionsAfterReading) {
+				action.room.performRoomAction(roomAction.toString());
+			}
+			delete this.meta.roomActionsAfterReading;
+		}
+
 		if (this.meta.nameAfterReading) {
 			this.name = this.meta.nameAfterReading.toString();
 		} else {
 			this.name = `${this.name} (gelesen)`;
+		}
+
+		if (this.messageEvents.afterReading) {
+			this.messageEvents.afterReading = handleMessageEvent(action, this.messageEvents.afterReading);
 		}
 	}
 
@@ -164,7 +181,23 @@ export default class GenericItem implements GameObject {
 			return null;
 		}
 
+		if (this.messageEvents.onPickUp) {
+			this.messageEvents.onPickUp = handleMessageEvent(action, this.messageEvents.onPickUp as MessageEventConfig);
+		}
+
 		this.parent.removeFromInventory(this);
+
+		if (this.meta.roomActionsAfterPickUp && Array.isArray(this.meta.roomActionsAfterPickUp)) {
+			for (let roomAction of this.meta.roomActionsAfterPickUp) {
+				action.room.performRoomAction(roomAction.toString());
+			}
+			delete this.meta.roomActionsAfterReading;
+		}
+
+		if (this.messageEvents.afterPickUp) {
+			this.messageEvents.afterPickUp = handleMessageEvent(action, this.messageEvents.afterPickUp);
+		}
+
 		return this;
 	}
 
