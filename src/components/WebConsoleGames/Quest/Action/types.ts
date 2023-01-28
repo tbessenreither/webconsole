@@ -22,12 +22,14 @@ export enum ActionType {
 export enum LookupIn {
 	Inventory = 'inventory',
 	CurrentRoom = 'room',
+	Exit = 'exit',
 }
 
 export type ActionConfig = {
 	type: ActionType;
 	origin: GameObject;
 	targets: GameObject[];
+	targetDirection?: Direction;
 	using: GameObject[];
 	room: GenericRoom;
 	direction: Direction;

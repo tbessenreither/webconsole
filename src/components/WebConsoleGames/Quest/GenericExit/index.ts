@@ -4,25 +4,63 @@ import { ExitId, ExitConfig, ExitType, ExitLink } from './types';
 import { LocationsById, nameExitA, nameExitThe } from './helpers';
 import { RoomId } from '../GenericRoom/types';
 import { describeDirectionChange, directionToStringTo, inverseDirection } from '../Location/helpers';
-import { ItemId } from '../GenericItem/types';
 import Action from '../Action';
-import Print from '../Print';
+import { LocationDescriptor } from '../Descriptors/Location';
+import { ObjectMeta } from '../GameObject/types';
 
 
 export default class GenericExit implements GameObject {
 	id: ExitId;
+	keywords: string[];
 	rooms: RoomId[];
 	type: ExitType;
+	isHidden: boolean;
 	unusableFrom: RoomId[];
 	locations: LocationsById;
+	location: LocationDescriptor;
 	description: string;
 	closed: boolean;
 	locked: boolean;
 	unlockItemKey?: string;
+	meta: ObjectMeta;
 
 	constructor(config: ExitConfig) {
 		this.locations = new LocationsById();
 		this.fromObject(config);
+	}
+
+	toObject(): ExitConfig {
+		return {
+			id: this.id,
+			rooms: this.rooms,
+			keywords: this.keywords,
+			type: this.type,
+			isHidden: this.isHidden,
+			unusableFrom: this.unusableFrom,
+			locations: this.locations.locations,
+			description: this.description,
+			closed: this.closed,
+			locked: this.locked,
+			unlockItemKey: this.unlockItemKey,
+			meta: this.meta,
+		};
+	}
+
+	fromObject(object: ExitConfig): GenericExit {
+		this.id = object.id;
+		this.keywords = object.keywords || [];
+		this.rooms = object.rooms;
+		this.type = object.type;
+		this.isHidden = object.isHidden || false;
+		this.unusableFrom = object.unusableFrom;
+		this.locations = new LocationsById(object.locations);
+		this.description = object.description;
+		this.closed = object.closed;
+		this.locked = object.locked;
+		this.unlockItemKey = object.unlockItemKey;
+		this.meta = object.meta || {};
+
+		return this;
 	}
 
 	get isUsable(): boolean {
@@ -43,36 +81,12 @@ export default class GenericExit implements GameObject {
 		return rooms[0];
 	}
 
-	setRoomLocation(id: string, exitLink: ExitLink): void {
+	setRoomLocation(id: string): void {
+		this.location = new LocationDescriptor(this.locations.get(id).direction, this.locations.get(id).height);
+	}
+
+	addRoomLocation(id: string, exitLink: ExitLink): void {
 		this.locations.add(id, exitLink.location, exitLink);
-	}
-
-	toObject(): ExitConfig {
-		return {
-			id: this.id,
-			rooms: this.rooms,
-			type: this.type,
-			unusableFrom: this.unusableFrom,
-			locations: this.locations.locations,
-			description: this.description,
-			closed: this.closed,
-			locked: this.locked,
-			unlockItemKey: this.unlockItemKey,
-		};
-	}
-
-	fromObject(object: ExitConfig): GenericExit {
-		this.id = object.id;
-		this.rooms = object.rooms;
-		this.type = object.type;
-		this.unusableFrom = object.unusableFrom;
-		this.locations = new LocationsById(object.locations);
-		this.description = object.description;
-		this.closed = object.closed;
-		this.locked = object.locked;
-		this.unlockItemKey = object.unlockItemKey;
-
-		return this;
 	}
 
 	tick(): void {
@@ -194,7 +208,6 @@ export default class GenericExit implements GameObject {
 	}
 
 	use(action: Action): void {
-		console.log(action);
 		if (!this.closed) {
 			this.close(action);
 		} else if (this.locked) {

@@ -1,4 +1,6 @@
+import GenericItem from ".";
 import GameObject from "../GameObject";
+import { Direction } from "../Location/types";
 import { ItemList, ItemObjectList, ItemType } from "./types";
 
 

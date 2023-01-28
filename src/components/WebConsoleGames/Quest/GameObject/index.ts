@@ -1,9 +1,17 @@
 import Action from "../Action";
+import { LocationDescriptor } from "../Descriptors/Location";
 import GenericItem from "../GenericItem";
+import { GameObjectList } from "./types";
 
 export default interface GameObject {
 	id: string;
 	name: string;
+	type?: string;
+	keywords?: string[];
+	isHidden?: boolean;
+	hasInventory?: boolean;
+	inventory?: GameObjectList
+	location?: LocationDescriptor;
 
 	get isUsable(): boolean;
 

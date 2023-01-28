@@ -47,7 +47,7 @@ export default class GenericItem implements GameObject {
 		return {
 			id: this.id,
 			name: this.name,
-			keywords: [],
+			keywords: this.keywords,
 			type: this.type,
 			location: this.location.location,
 			description: this.description,

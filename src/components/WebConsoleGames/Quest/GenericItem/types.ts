@@ -1,4 +1,5 @@
 import GenericItem from '.';
+import { ObjectMetaTypes } from '../GameObject/types';
 import { Location } from '../Location/types';
 
 export type ItemId = string;
@@ -14,7 +15,7 @@ export enum ItemType {
 	Letter = 'Letter',
 }
 
-export type ItemMeta = { [key: string]: string | number | ItemList };
+export type ItemMeta = { [key: string]: ObjectMetaTypes | ItemList };
 
 export type ItemConfig = {
 	id: ItemId;

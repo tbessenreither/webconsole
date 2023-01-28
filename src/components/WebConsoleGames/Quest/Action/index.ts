@@ -9,6 +9,7 @@ export default class Action {
 	private _type: ActionType;
 	private _origin: GameObject;
 	private _targets: GameObject[];
+	private _targetDirection: Direction;
 	private _using: GameObject[];
 	private _room: GenericRoom;
 	private _direction: Direction;
@@ -19,6 +20,7 @@ export default class Action {
 		this._type = config.type;
 		this._origin = config.origin;
 		this._targets = config.targets;
+		this._targetDirection = config.targetDirection || Direction.null;
 		this._using = config.using;
 		this._room = config.room;
 		this._direction = config.direction;
@@ -31,6 +33,7 @@ export default class Action {
 			type: this._type,
 			origin: this._origin,
 			targets: this._targets,
+			targetDirection: this._targetDirection,
 			using: this._using,
 			room: this._room,
 			direction: this._direction,

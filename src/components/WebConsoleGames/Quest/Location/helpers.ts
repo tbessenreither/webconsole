@@ -4,7 +4,7 @@ import { Direction, RotationDirection } from './types';
 export function lookupDirection(directionString: string): Direction {
 	let direction = Direction.null;
 
-	switch (directionString) {
+	switch (directionString.toLowerCase()) {
 		case 'nördliche':
 		case 'nördlichen':
 		case 'nordöstliches':
