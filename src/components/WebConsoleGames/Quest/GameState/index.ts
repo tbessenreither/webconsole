@@ -7,9 +7,13 @@ import Player from "../Player";
 import GenericRoom from "../GenericRoom";
 import defaultRooms from "../Rooms";
 import gameTick from "../GameTick";
-import gameEvents from "../GameEvents";
+import gameEvent from "../GameEvent";
 import Print from "../Print";
 import RoomLookup from "../GenericRoom/RoomLookup";
+import { GameTickEventList } from "../GameTick/types";
+import { GameEvent, GameEventTarget, GameEventType } from "../GameEvent/types";
+import GenericItem from "../GenericItem";
+import { ItemType } from "../GenericItem/types";
 
 export default class GameState {
 	_console: WebConsole;
@@ -17,20 +21,44 @@ export default class GameState {
 	rooms: RoomObjectList;
 	exits: ExitObjectList;
 	player: Player;
+	gameTickEvents: GameTickEventList;
 	messages: string[];
 	gameOver: boolean;
-	gameTick = gameTick;
 
 	savegameName: string = '1';
 
 	constructor(webConsole: WebConsole) {
 		this._console = webConsole;
 		this.gameInitiated = false;
-		this.player = new Player(this);
 		this.rooms = {};
 		this.exits = {};
 		this.messages = [];
 		this.gameOver = false;
+
+		RoomLookup.gameState = this;
+
+		this.loadDefaultState();
+
+		gameEvent.on('afterTick', this.eventHandlerAfterTick.bind(this));
+	}
+
+	loadDefaultState() {
+		gameTick.reset();
+
+		if (this.player) {
+			this.player.destruct();
+		}
+		this.player = new Player(this);
+
+		for (let exit of Object.values(this.exits)) {
+			exit.destruct();
+		}
+		this.exits = {};
+
+		for (let room of Object.values(this.rooms)) {
+			room.destruct();
+		}
+		this.rooms = {};
 
 		// load default Exits and Rooms
 		// Exits need to be loaded first, because Rooms need to be able to reference them
@@ -41,24 +69,90 @@ export default class GameState {
 			this.rooms[room.id] = new GenericRoom(this, room);
 		}
 
+		this.gameTickEvents = defaultRooms.gameEvents.tick;
+
 		this.player.room = this.getStartingRoom().id;
-
-		RoomLookup.gameState = this;
-
-		gameEvents.on('afterTick', this.eventHandlerAfterTick.bind(this));
 	}
 
 	eventHandlerAfterTick(ticksPassed: number) {
-		// transition to the real game
-		if (ticksPassed === 6) {
-			Print.Type('Es wird schwarz vor deinen Augen. Du fühlst dich schwach und hast das Gefühl, dass du gleich ohnmächtig wirst.');
-			Print.Type('Du fällst zu Boden.');
-			Print.Type('.....................');
-			Print.Type('Du wachst auf und findest dich in einem Kerker wieder. Du hast keine Erinnerung an die letzten Stunden oder Tage.');
-			Print.Type('Du musst dich schnellstmöglich befreien.');
-			this.player.room = 'Kerker';
-			this.player.clearInventory();
-			this.save();
+		if (this.gameTickEvents[ticksPassed]) {
+			for (let event of this.gameTickEvents[ticksPassed]) {
+				this.executeGameEvent(event);
+			}
+		}
+	}
+
+	executeGameEvent(event: GameEvent) {
+		switch (event.type) {
+			case GameEventType.warpToRoom:
+				this.performGameEventWarpToRoom(event);
+				break;
+			case GameEventType.clearInventory:
+				this.performGameEventClearInventory(event);
+				break;
+			case GameEventType.addToInventory:
+				this.performGameEventAddToInventory(event);
+				break;
+			case GameEventType.removeFromInventory:
+				this.performGameEventRemoveFromInventory(event);
+			case GameEventType.saveGame:
+				this.save();
+				break;
+		}
+		if (event.messages) {
+			for (let message of event.messages) {
+				Print.Message(message);
+			}
+		}
+	}
+
+	performGameEventWarpToRoom(event: GameEvent): void {
+		switch (event.targetType) {
+			case GameEventTarget.player:
+				this.player.room = event.targetIds[0];
+				break;
+			case GameEventTarget.monster:
+				// TODO
+				break;
+		}
+	}
+
+	performGameEventClearInventory(event: GameEvent): void {
+		switch (event.targetType) {
+			case GameEventTarget.player:
+				this.player.clearInventory();
+				break;
+			case GameEventTarget.monster:
+				// TODO
+				break;
+		}
+	}
+
+	performGameEventRemoveFromInventory(event: GameEvent): void {
+		for (let itemId of event.targetIds) {
+			let item = new GenericItem({ id: itemId, name: 'tmp', keywords: [], type: ItemType.Item, description: '', weight: 0 });
+			switch (event.targetType) {
+				case GameEventTarget.player:
+					this.player.removeFromInventory(item);
+					break;
+				case GameEventTarget.monster:
+					// TODO
+					break;
+			}
+		}
+	}
+
+	performGameEventAddToInventory(event: GameEvent): void {
+		for (let itemConfig of event.items) {
+			let item = new GenericItem(itemConfig);
+			switch (event.targetType) {
+				case GameEventTarget.player:
+					this.player.addToInventory(item);
+					break;
+				case GameEventTarget.monster:
+					// TODO
+					break;
+			}
 		}
 	}
 
@@ -158,6 +252,25 @@ export default class GameState {
 		}
 	}
 
+	deleteSavegame(name: string): boolean {
+		try {
+			let existingSavegames = localStorage.getItem('quest-savegames');
+			if (!existingSavegames) {
+				existingSavegames = '{}';
+			}
+
+			const savegames = JSON.parse(existingSavegames);
+			if (savegames[name]) {
+				delete savegames[name];
+				localStorage.setItem('quest-savegames', JSON.stringify(savegames));
+			}
+
+			return true;
+		} catch (e) {
+			return false;
+		}
+	}
+
 	loadLatestSavegame(): boolean {
 		try {
 			const savegame = localStorage.getItem('quest-last-savegame');
@@ -172,8 +285,21 @@ export default class GameState {
 		}
 	}
 
+	resetGame(): void {
+		// store old player Data
+		const playerName = this.player.playerName;
+		const characterName = this.player.name;
+
+		// reset game
+		this.deleteSavegame(this.savegameName);
+
+		this.loadDefaultState();
+		this.initiate(playerName, characterName);
+	}
+
 	command(command: string): void {
 		this.player.action(command);
+		gameTick.execute();
 	}
 
 	printLn(message: string, options?: any) {

@@ -1,11 +1,12 @@
 import GameObject from '../GameObject';
 import { LocationDescriptor } from '../Descriptors/Location';
-import { ItemId, ItemType, ItemConfig, ItemObjectList, ItemMeta, ItemList } from './types';
+import { ItemId, ItemType, ItemConfig, ItemObjectList, ItemMeta, ItemConfigList } from './types';
 import Action from '../Action';
 import { capitalizeFirstLetter, handleMessageEvent, joinSentences, joinWithCommaAndAnd } from '../Descriptors/Text';
-import { nameItemTypeA } from './helpers';
+import { nameItemType, nameItemTypeA } from './helpers';
 import { MessageEventConfig, MessageEventList } from '../GameObject/types';
 import gameTick from '../GameTick';
+import { Direction, Height } from '../Location/types';
 
 export default class GenericItem implements GameObject {
 	id: ItemId;
@@ -85,7 +86,7 @@ export default class GenericItem implements GameObject {
 		this.name = object.name;
 		this.keywords = object.keywords;
 		this.type = object.type;
-		this.location = new LocationDescriptor(object.location.direction, object.location.height);
+		this.location = object.location ? new LocationDescriptor(object.location.direction, object.location.height) : new LocationDescriptor(Direction.null, Height.null);
 		this.description = object.description;
 		this.value = object.value;
 		this.weight = object.weight;
@@ -107,6 +108,11 @@ export default class GenericItem implements GameObject {
 			}
 		}
 
+		let itemTypeName = nameItemType(this.type);
+		if (!this.keywords.includes(itemTypeName)) {
+			this.keywords.push(itemTypeName);
+		}
+
 		return this;
 	}
 
@@ -116,12 +122,16 @@ export default class GenericItem implements GameObject {
 			return;
 		}
 
+		if (this.messageEvents.beforeReading) {
+			this.messageEvents.beforeReading = handleMessageEvent(action, this.messageEvents.beforeReading);
+		}
+
 		action.addEvent(`Du liest ${nameItemTypeA(this.type)}`);
 		action.addEvent(this.meta.text.toString());
 
 		if (this.meta.attached) {
 			action.addEvent(`An den Brief ist etwas angeheftet:`);
-			for (let attachement of this.meta.attached as ItemList) {
+			for (let attachement of this.meta.attached as ItemConfigList) {
 				let itemObject = new GenericItem(attachement, action.origin);
 				action.addEvent(`Du erhältst ${nameItemTypeA(itemObject.type)}`);
 				action.origin.addToInventory(itemObject);

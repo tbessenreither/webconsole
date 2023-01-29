@@ -1,8 +1,7 @@
 
 import { RoomId, RoomConfig } from './types';
-import { ExitObjectList, ExitType } from '../GenericExit/types';
-import { ItemId, ItemList } from "../GenericItem/types";
-
+import { ExitObjectList } from '../GenericExit/types';
+import { ItemConfigList } from "../GenericItem/types";
 import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
 import { ItemObjectList } from '../GenericItem/types';
@@ -11,9 +10,7 @@ import { MonsterObjectList } from '../GenericMonster/types';
 import GenericExit from '../GenericExit';
 import GameState from '../GameState';
 import { Direction, Height } from '../Location/types';
-import { lookupDirection } from '../Location/helpers';
 import Action from '../Action';
-import { lookupExitTypeByName } from '../GenericExit/helpers';
 import { LocationDescriptor } from '../Descriptors/Location';
 import { filterGameObjectList } from '../GameObject/helpers';
 import gameTick from '../GameTick';
@@ -46,7 +43,7 @@ export default class GenericRoom implements GameObject {
 	}
 
 	toObject(): any {
-		let itemsAsObjects: ItemList = [];
+		let itemsAsObjects: ItemConfigList = [];
 		for (let itemObject of Object.values(this.items)) {
 			itemsAsObjects.push(itemObject.toObject());
 		}

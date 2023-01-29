@@ -1,21 +1,18 @@
 import { PlayerConfig } from './types';
 import { RoomId } from '../GenericRoom/types';
 import { nameExitThe, nameExitThe2 } from '../GenericExit/helpers';
-import { ExitType } from '../GenericExit/types';
-
 import GameState from '../Gamestate';
 import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
-import { ItemList, ItemObjectList } from '../GenericItem/types';
+import { ItemConfigList, ItemObjectList } from '../GenericItem/types';
 import Action from '../Action';
 import ActionParser from '../Action/ActionParser';
 import { ActionConfig, ActionType } from '../Action/types';
-import { LocationDescriptor } from '../Descriptors/Location';
-import { Location, Direction, Height } from '../Location/types';
+import { Direction } from '../Location/types';
 import Print from '../Print';
 import { directionToStringTo, lookupDirection } from '../Location/helpers';
 import GenericExit from '../GenericExit';
-import { nameItemTypeThe, nameItemTypeThe2 } from '../GenericItem/helpers';
+import { nameItemTypeThe2 } from '../GenericItem/helpers';
 import gameTick from '../GameTick';
 import GenericRoom from '../GenericRoom';
 
@@ -68,7 +65,7 @@ export default class Player implements GameObject {
 	}
 
 	toObject(): PlayerConfig {
-		let playerInventory: ItemList = [];
+		let playerInventory: ItemConfigList = [];
 		for (let itemObject of Object.values(this.inventory)) {
 			playerInventory.push(itemObject.toObject());
 		}
@@ -138,14 +135,13 @@ export default class Player implements GameObject {
 		console.log(action);
 
 		if (!action) {
-			Print.Line('Das verstehe ich nicht.');
-			return;
+			return 'Das verstehe ich nicht.';
 		}
 
 		this.actionHandler(action);
 		let actionEvents = action.events;
 		for (let event of actionEvents) {
-			Print.Line(event, { html: true });
+			Print.Line(event);
 		}
 	}
 
@@ -189,8 +185,6 @@ export default class Player implements GameObject {
 				action.addEvent('Diese Aktion kannst du nicht durchführen.');
 				break;
 		}
-
-		gameTick.execute();
 	}
 
 	actionDefaultCheck(action: Action): boolean {
@@ -393,6 +387,9 @@ export default class Player implements GameObject {
 		let target = action.targets[0] as GenericItem;
 		if (target.read) {
 			target.read(action);
+		} else if (target.meta && target.meta.text) {
+			action.addEvent('Du liest:')
+			action.addEvent(target.meta.text.toString());
 		}
 	}
 

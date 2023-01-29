@@ -1,7 +1,5 @@
-import GenericItem from ".";
 import GameObject from "../GameObject";
-import { Direction } from "../Location/types";
-import { ItemList, ItemObjectList, ItemType } from "./types";
+import { ItemObjectList, ItemType } from "./types";
 
 
 export function ItemObjectListToGameObjectArray(itemObjectList: ItemObjectList): GameObject[] {
@@ -35,15 +33,17 @@ export function articleItemTypeThe(itemType: ItemType): string {
 		case ItemType.Tv:
 			return 'der';
 		case ItemType.Weapon:
-		case ItemType.Couch:
 		case ItemType.ImageFrame:
 		case ItemType.Vase:
+		case ItemType.Magazine:
+		case ItemType.Note:
 			return 'die';
 		case ItemType.Item:
 		case ItemType.Inventory:
 		case ItemType.Shelf:
 		case ItemType.Book:
 		case ItemType.Bed:
+		case ItemType.Couch:
 		default:
 			return 'das';
 	}
@@ -94,6 +94,10 @@ export function nameItemType(itemType: ItemType): string {
 			return 'Vase';
 		case ItemType.Bed:
 			return 'Bett';
+		case ItemType.Magazine:
+			return 'Zeitschrift';
+		case ItemType.Note:
+			return 'Notiz';
 		case ItemType.Item:
 		default:
 			return 'undefinierbares Etwas';

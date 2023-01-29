@@ -1,5 +1,5 @@
 import { RoomId } from "../GenericRoom/types";
-import { ItemList, ItemConfig } from "../GenericItem/types";
+import { ItemConfigList, ItemConfig } from "../GenericItem/types";
 
 export type PlayerConfig = {
 	playerName: string;
@@ -10,7 +10,7 @@ export type PlayerConfig = {
 	strength: number;
 	defense: number;
 	perception: number;
-	inventory: ItemList,
+	inventory: ItemConfigList,
 	equipped: {
 		weapon: ItemConfig | null;
 		armor: ItemConfig | null;

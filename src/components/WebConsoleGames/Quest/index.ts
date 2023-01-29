@@ -25,9 +25,6 @@ export default class Quest extends WebConsolePlugin {
 	onRegister() {
 		this._console.registerCommand('quest', this, this.execute.bind(this));
 		this._console.registerBootCommand('quest');
-
-		Print.setPrintLnFunction(this.printLn.bind(this));
-		Print.setTypeFunction(this.typeLn.bind(this));
 	}
 
 	async execute(command: WebConsoleCommand) {

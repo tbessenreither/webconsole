@@ -20,9 +20,11 @@ export enum ItemType {
 	Book = 'Book',
 	Vase = 'Vase',
 	Bed = 'Bed',
+	Magazine = 'Magazine',
+	Note = 'Note',
 }
 
-export type ItemMeta = { [key: string]: ObjectMetaTypes | ItemList };
+export type ItemMeta = { [key: string]: ObjectMetaTypes | ItemConfigList };
 
 export type ItemConfig = {
 	id: ItemId;
@@ -34,7 +36,7 @@ export type ItemConfig = {
 	weight: number;
 	equippable?: boolean;
 	equipped?: boolean;
-	location: Location;
+	location?: Location;
 	uses?: number;
 	timesUsed?: number;
 	broken?: boolean;
@@ -46,7 +48,7 @@ export type ItemConfig = {
 	messageEvents?: MessageEventList;
 }
 
-export type ItemList = ItemConfig[];
+export type ItemConfigList = ItemConfig[];
 
 export type ItemObjectList = {
 	[key: ItemId]: GenericItem;

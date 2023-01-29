@@ -4,6 +4,7 @@ import css from './style.scss';
 import { CcHTMLElement } from '../CcHTMLElement';
 import WebConsolePlugin from '../WebConsolePlugin';
 import { WebConsolePluginStore, WebConsoleCommandTargets, WebConsoleArguments, WebConsolePrintOptions, WebConsoleCommandOptions, WebConsoleAutocompleteResponse } from './types';
+import MessageQueue from './MessageQueue';
 
 const PACKAGE = require('../../../package.json');
 const version = PACKAGE.version;
@@ -127,7 +128,7 @@ export class WebConsole extends CcHTMLElement {
 	bootCommands: Array<string> = [];
 
 	isTyping: boolean = false;
-	typingBuffer: string[] = [];
+	typingBuffer: { text: string, resolve: Function }[] = [];
 
 	constructor() {
 		super({ html, css });
@@ -140,7 +141,11 @@ export class WebConsole extends CcHTMLElement {
 		this.init = this.init.bind(this);
 		this.print = this.print.bind(this);
 		this.printLn = this.printLn.bind(this);
+		this.typeLn = this.typeLn.bind(this);
 		this.clear = this.clear.bind(this);
+
+		MessageQueue.functionPrint = this.printLn;
+		MessageQueue.functionType = this.typeLn;
 	}
 
 	static get observedAttributes(): Array<string> {
@@ -595,13 +600,21 @@ export class WebConsole extends CcHTMLElement {
 		} while (obj);
 	}
 
-	printLn(text: string, options: WebConsolePrintOptions = {}) {
-		this.print(text + '\n', options);
+	printLn(text: string, options: WebConsolePrintOptions = {}): Promise<true> {
+		return new Promise((resolve) => {
+			this.print(text + '\n', options);
+			resolve(true);
+		});
 	}
 
-	typeLn(text: string) {
-		this.typingBuffer.push(text);
-		this.startTyping();
+	typeLn(text: string, options: WebConsolePrintOptions = {}): Promise<true> {
+		return new Promise((resolve) => {
+			this.typingBuffer.push({
+				text: text,
+				resolve: resolve,
+			});
+			this.startTyping();
+		});
 	}
 
 	async startTyping() {
@@ -609,14 +622,13 @@ export class WebConsole extends CcHTMLElement {
 			return;
 		}
 		this.isTyping = true;
-		this.blockInput();
 
 		while (this.typingBuffer.length > 0) {
-			let text = this.typingBuffer.shift();
-			await this.performTyping(text);
+			let item = this.typingBuffer.shift();
+			await this.performTyping(item.text);
+			item.resolve(true);
 		}
 
-		this.unblockInput();
 		this.isTyping = false;
 	}
 
@@ -625,10 +637,10 @@ export class WebConsole extends CcHTMLElement {
 		let lettersPrinted = '';
 		for (let letter of letters) {
 			lettersPrinted = `${lettersPrinted}${letter}`;
-			this.printLn(lettersPrinted, { clearKey: 'typing', key: 'typing' });
+			this.printLn(lettersPrinted, { clearKey: 'typing', key: 'typing', html: true });
 			await this.pause(Math.random() * 10 + 40);
 		}
-		this.printLn(text, { clearKey: 'typing' });
+		this.printLn(text, { clearKey: 'typing', html: true });
 	}
 
 	clear() {

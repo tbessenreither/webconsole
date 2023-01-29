@@ -1,5 +1,5 @@
 
-class GameEvents {
+class GameEvent {
 	listeners: { [key: string]: Function[] } = {};
 
 	on(event: string, callback: Function) {
@@ -26,6 +26,6 @@ class GameEvents {
 	}
 }
 
-let gameEvents = new GameEvents();
+let gameEvent = new GameEvent();
 
-export default gameEvents;
+export default gameEvent;

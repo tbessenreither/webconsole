@@ -2,6 +2,9 @@ import { RoomList } from "./GenericRoom/types";
 import { ExitType, ExitList } from "./GenericExit/types";
 import { Direction, Height } from "./Location/types";
 import { ItemType } from "./GenericItem/types";
+import { GameEventTarget, GameEventType } from "./GameEvent/types";
+import { GameTickEventList } from "./GameTick/types";
+import { MessageQueueMethods } from "../../WebConsole/MessageQueue/types";
 
 let rooms: RoomList = [
 	{
@@ -14,16 +17,30 @@ let rooms: RoomList = [
 				id: 'homeLivingRoomTable',
 				name: 'Tisch',
 				keywords: ['tisch', 'glastisch', 'glasplatte', 'holztisch'],
-				description: 'er ist aus Holz und hat eine Glasplatte. Du hast es vor ein paar Jahren von deiner Oma geerbt',
+				description: 'er ist aus Holz und hat eine Glasplatte. Du hast ihn vor ein paar Jahren von deiner Oma geerbt',
 				type: ItemType.Table,
 				weight: 50,
 				location: { direction: Direction.Center, height: Height.Bottom },
+				hasInventory: true,
+				inventory: [
+					{
+						id: 'homeLivingRoomTvGuide',
+						name: 'Fernsehzeitschrift',
+						keywords: ['TV-Guide', 'TV-Programm', 'Fernsehprogramm', 'Fernsehzeitschrift'],
+						description: 'du hast ihn vor ein paar Tagen gekauft obwohl du eigentlich nie fernsiehst.',
+						type: ItemType.Magazine,
+						weight: 0.150,
+						meta: {
+							text: 'Oh, heute Abend läuft eine neue Folge Bobs Burgers!',
+						},
+					}
+				],
 			},
 			{
 				id: 'homeLivingRoomCouch',
 				name: 'Couch',
 				keywords: ['Couch', 'Sofa'],
-				description: 'sie ist aus Leder und sehr bequem',
+				description: 'es ist aus Leder und sehr bequem',
 				type: ItemType.Couch,
 				weight: 100,
 				location: { direction: Direction.North, height: Height.null },
@@ -41,10 +58,11 @@ let rooms: RoomList = [
 				id: 'homeLivingRoomTv',
 				name: 'TV',
 				keywords: ['Fernseher', 'TV'],
-				description: 'ein Plasma-Fernseher. Nicht deine beste Investition',
+				description: 'es ist ein Plasma-Fernseher. Nicht deine beste Investition',
 				type: ItemType.Tv,
 				weight: 40,
 				location: { direction: Direction.South, height: Height.Middle },
+
 			},
 		],
 		monsters: [],
@@ -69,7 +87,7 @@ let rooms: RoomList = [
 			},
 		],
 	},
-	{
+	{ // Kerker
 		id: 'Kerker',
 		name: 'Kerker',
 		description: 'Du stehst in einem dunklen Kerker. Es ist sehr kalt und du kannst kaum etwas erkennen.',
@@ -93,7 +111,7 @@ let rooms: RoomList = [
 						description: 'Die Schrift ist schon stark verblichen aber gerade noch lesbar',
 						weight: 0.005,
 						meta: {
-							text: 'Hallo, du kennst mich nicht aber ich kenne dich. Ich habe dich beobachtet und ich weiß, dass du hier bist. Ich weiß auch, dass du hier raus willst. Ich kann dir helfen. Ich habe einen Schlüssel, der dich hier raus bringt. Ich werde ihn dir geben, aber du schuldest mir was. Dein Freund, der Unbekannte',
+							text: 'Hallo, du kennst mich nicht aber ich kenne dich. Ich habe dich beobachtet. Ich weiß dass du hier raus willst und ich kann dir dabei helfen. Ich habe einen Schlüssel, der dich hier raus bringt. Ich werde ihn dir geben, aber du schuldest mir was. Ein Freund',
 							nameAfterReading: 'Brief von unbekanntem (gelesen)',
 							roomActionsAfterReading: [
 								'unhide door-kerker-kerkervorraum',
@@ -136,7 +154,7 @@ let rooms: RoomList = [
 			},
 		],
 	},
-	{
+	{ // KerkerVorraum
 		id: 'KerkerVorraum',
 		name: 'Kerker Vorraum',
 		description: 'Du stehst in einem Flur. Scheinbar ist das hier ein Kerker',
@@ -153,7 +171,7 @@ let rooms: RoomList = [
 			},
 		],
 	},
-	{
+	{ // KerkerVorraum2
 		id: 'KerkerVorraum2',
 		name: 'Kerker Vorraum',
 		description: 'Du stehst in einem weiteren Flur.',
@@ -183,6 +201,9 @@ let exits: ExitList = [
 		closed: false,
 		locked: false,
 		unlockItemKey: 'key-door-home-livingroom-kitchen',
+		meta: {
+			text: 'Julien, 2021: 1,10m, 2022: 1,23m, 2023: 1,45m',
+		}
 	},
 	{
 		id: 'door-kerker-kerkervorraum',
@@ -217,7 +238,69 @@ let exits: ExitList = [
 	},
 ];
 
+
+let gameTickEvents: GameTickEventList = {
+	2: [
+		{
+			type: GameEventType.addToInventory,
+			targetType: GameEventTarget.player,
+			items: [
+				{
+					id: 'home-note-getTheCake',
+					type: ItemType.Note,
+					name: 'Erinnerung',
+					description: 'ein Handgeschriebener Zettel den dir deine Frau gegeben hat',
+					keywords: ['Zettel', 'Erinnerung'],
+					weight: 0.005,
+					meta: {
+						text: 'Guten Morgen<br>Denkst du daran das du heute den Kuchen für die Kinder abholen sollst?<br>Sarah',
+					},
+					messageEvents: {
+						beforeReading: {
+							message: 'Du erinnerst dich wieder.',
+							playTimes: 1,
+						},
+						afterReading: {
+							message: 'Sie weiß eben das ich es vergessen würde.',
+							playTimes: 1,
+						},
+					},
+				},
+			],
+			messages: [
+				{ method: MessageQueueMethods.type, text: 'Du fasst in deine Tasche und bemerkst einen Zettel. Nutze <span data-type>inventar</span> um dein Inventar anzuzeigen' },
+			],
+		},
+	],
+	1: [
+		{
+			type: GameEventType.warpToRoom,
+			targetType: GameEventTarget.player,
+			targetIds: ['Kerker'],
+			messages: [
+				{ method: MessageQueueMethods.type, text: 'Es wird schwarz vor deinen Augen. Du fühlst dich schwach und hast das Gefühl, dass du gleich ohnmächtig wirst.', settings: { delayMsBefore: 1000 } },
+				{ method: MessageQueueMethods.type, text: 'Du beginnst zu taumeln' },
+				{ method: MessageQueueMethods.type, text: 'und fällst zu Boden.', settings: { delayMsAfter: 10000 } },
+				{ method: MessageQueueMethods.type, text: 'Du wachst auf und findest dich in einem Kerker wieder, ohne jede Erinnerung an die letzten Stunden oder Tage.' },
+			],
+		},
+		{
+			type: GameEventType.clearInventory,
+			targetType: GameEventTarget.player,
+			messages: [
+				{ method: MessageQueueMethods.print, text: 'Du fasst in deine Taschen doch sie sind leer.', settings: { delayMsBefore: 1000 } },
+			]
+		},
+		{
+			type: GameEventType.saveGame,
+		},
+	],
+};
+
 export default {
 	rooms,
 	exits,
+	gameEvents: {
+		tick: gameTickEvents,
+	},
 };
