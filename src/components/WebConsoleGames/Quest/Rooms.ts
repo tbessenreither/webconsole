@@ -202,7 +202,7 @@ let exits: ExitList = [
 		locked: false,
 		unlockItemKey: 'key-door-home-livingroom-kitchen',
 		meta: {
-			text: 'Julien, 2021: 1,10m, 2022: 1,23m, 2023: 1,45m',
+			text: 'Julien 2021: 1,10m, 2022: 1,23m, 2023: 1,45m<br>Paul 2021: 1,51m, 2022: 1,63m, 2023: 1,71m',
 		}
 	},
 	{
@@ -240,7 +240,7 @@ let exits: ExitList = [
 
 
 let gameTickEvents: GameTickEventList = {
-	2: [
+	3: [
 		{
 			type: GameEventType.addToInventory,
 			targetType: GameEventTarget.player,
@@ -272,7 +272,7 @@ let gameTickEvents: GameTickEventList = {
 			],
 		},
 	],
-	1: [
+	10: [
 		{
 			type: GameEventType.warpToRoom,
 			targetType: GameEventTarget.player,

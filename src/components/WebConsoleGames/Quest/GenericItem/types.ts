@@ -46,6 +46,7 @@ export type ItemConfig = {
 	canBeOpened?: boolean;
 	isOpen?: boolean;
 	messageEvents?: MessageEventList;
+	active?: boolean;
 }
 
 export type ItemConfigList = ItemConfig[];

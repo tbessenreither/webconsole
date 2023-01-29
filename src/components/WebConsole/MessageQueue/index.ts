@@ -72,7 +72,7 @@ export default class MessageQueue {
 			}
 		}
 
-		this._console.releaseInput();
+		this._console.unblockInput();
 		this._queueIsRunning = false;
 	}
 }

@@ -146,6 +146,8 @@ export class WebConsole extends CcHTMLElement {
 
 		MessageQueue.functionPrint = this.printLn;
 		MessageQueue.functionType = this.typeLn;
+
+		MessageQueue.console = this;
 	}
 
 	static get observedAttributes(): Array<string> {

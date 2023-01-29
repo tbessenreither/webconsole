@@ -29,6 +29,7 @@ export default class GenericItem implements GameObject {
 	isOpen: boolean;
 	parent: GameObject;
 	messageEvents: MessageEventList;
+	active: boolean;
 
 	constructor(config: ItemConfig, parent: GameObject = null) {
 		this.fromObject(config, parent);
@@ -76,6 +77,7 @@ export default class GenericItem implements GameObject {
 			canBeOpened: this.canBeOpened,
 			isOpen: this.isOpen,
 			messageEvents: this.messageEvents,
+			active: this.active,
 		};
 	}
 
@@ -100,6 +102,7 @@ export default class GenericItem implements GameObject {
 		this.canBeOpened = object.canBeOpened || false;
 		this.isOpen = object.isOpen || true;
 		this.messageEvents = object.messageEvents || {};
+		this.active = object.active || true;
 
 		this.inventory = {};
 		if (object.inventory) {
