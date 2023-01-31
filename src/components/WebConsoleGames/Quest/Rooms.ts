@@ -71,6 +71,10 @@ let rooms: RoomList = [
 				id: 'door-home-livingroom-kitchen',
 				location: { direction: Direction.West, height: Height.null },
 			},
+			{
+				id: 'door-home-livingroom-outside',
+				location: { direction: Direction.East, height: Height.null },
+			}
 		],
 	},
 	{
@@ -135,7 +139,6 @@ let rooms: RoomList = [
 										description: 'er ist klein und rostig',
 										weight: 0.05,
 										uses: 1,
-										location: { direction: Direction.West, height: Height.Bottom },
 									}],
 									messages: 'An den Brief ist ein Schlüssel angeheftet.',
 									playTimes: 1,
@@ -215,7 +218,18 @@ let exits: ExitList = [
 		unlockItemKey: 'key-door-home-livingroom-kitchen',
 		meta: {
 			text: 'Julien 2021: 1,10m, 2022: 1,23m, 2023: 1,45m<br>Paul 2021: 1,51m, 2022: 1,63m, 2023: 1,71m',
+			used: true,
 		}
+	},
+	{
+		id: 'door-home-livingroom-outside',
+		unusableFrom: [],
+		type: ExitType.Door,
+		locations: {},
+		description: 'es ist die Tür nach draußen',
+		closed: true,
+		locked: true,
+		unlockItemKey: 'key-door-home-livingroom-outside',
 	},
 	{
 		id: 'door-kerker-kerkervorraum',
@@ -269,11 +283,9 @@ let gameTickEvents: GameTickEventList = {
 					},
 					events: {
 						beforeReading: [{
-							type: GameEventType.noop,
 							messages: [{ method: MessageQueueMethods.type, text: 'Du erinnerst dich wieder.' }],
 						}],
 						afterReading: [{
-							type: GameEventType.noop,
 							messages: [{ method: MessageQueueMethods.type, text: 'Sie weiß eben das ich es vergessen würde.' }],
 							playTimes: 1,
 						}],

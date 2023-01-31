@@ -36,6 +36,9 @@ class GameEvent {
 	}
 
 	execute(event: GameEventConfig | GameEventConfig[]): void {
+		if (!event) {
+			return;
+		}
 		if (!this._gameState) {
 			throw new Error("Game state not set");
 		}

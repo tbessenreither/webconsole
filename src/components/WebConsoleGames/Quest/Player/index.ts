@@ -396,9 +396,7 @@ export default class Player implements GameObject {
 		if (targetGameObj.read) {
 			targetGameObj.read(action);
 		} else if (target.meta && target.meta.text) {
-			if (target.events.beforeReading) {
-				gameEvent.execute(target.events.beforeReading);
-			}
+			gameEvent.execute(target.events.beforeReading);
 
 			Print.Line(`Du liest ${nameItemTypeA(target.type)}`);
 			Print.Message(target.meta.text);
@@ -406,12 +404,10 @@ export default class Player implements GameObject {
 			if (target.meta.nameAfterReading) {
 				target.name = target.meta.nameAfterReading.toString();
 			} else {
-				target.name = `${target.name} (gelesen)`;
+				target.meta.read = true;
 			}
 
-			if (target.events.afterReading) {
-				gameEvent.execute(target.events.afterReading);
-			}
+			gameEvent.execute(target.events.afterReading);
 		}
 	}
 
@@ -457,7 +453,7 @@ export default class Player implements GameObject {
 			if (item.weight) {
 				inventoryWeight += item.weight;
 			}
-			inventoryString += `<br>- ${item.name} ${item.broken ? '- <span class="info">kaputt</span>' : ''}`;
+			inventoryString += `<br>- ${item.name} ${item.getStati().join(', ')}`;
 			if (describe) {
 				inventoryString += `<br>  ${item.describe()}`;
 			}

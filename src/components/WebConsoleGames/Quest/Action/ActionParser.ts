@@ -55,7 +55,7 @@ export default class ActionParser {
 			new RegExp(`(?:Benutze|Kombiniere) (?:${articlesRegex} )?(?<using>${singleWordRegex}) mit (?:${articlesRegex} )?(?<target>${singleWordRegex})`, 'i'),
 		],
 		[ActionType.Read]: [
-			new RegExp(`(?:Lese) (?:${articlesRegex} )?(?<target>${singleWordRegex})`, 'i'),
+			new RegExp(`(?:Lese) (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
 		]
 	}
 
@@ -180,6 +180,7 @@ export default class ActionParser {
 				let room = this._blueprint.room;
 				if (phrase) {
 					let exitType = lookupExitTypeByName(phrase);
+					console.log(room.getExits(), exitType, direction);
 					item = lookupGameObjectByType(room.getExits(), exitType, direction);
 				} else {
 					item = lookupGameObjectByDirection(room.getExits(), direction);

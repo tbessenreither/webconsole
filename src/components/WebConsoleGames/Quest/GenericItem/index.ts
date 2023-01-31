@@ -1,6 +1,6 @@
 import GameObject from '../GameObject';
 import { LocationDescriptor } from '../Descriptors/Location';
-import { ItemId, ItemType, ItemConfig, ItemObjectList, ItemMeta } from './types';
+import { ItemId, ItemType, ItemConfig, ItemObjectList } from './types';
 import Action from '../Action';
 import { capitalizeFirstLetter, joinSentences, joinWithCommaAndAnd } from '../Descriptors/Text';
 import { nameItemType, nameItemTypeA } from './helpers';
@@ -8,6 +8,7 @@ import gameTick from '../GameTick';
 import { Direction, Height } from '../Location/types';
 import { GameEventList } from '../GameEvent/types';
 import gameEvent from '../GameEvent';
+import { GameObjectMeta } from '../GameObject/types';
 
 export default class GenericItem implements GameObject {
 	id: ItemId;
@@ -25,7 +26,7 @@ export default class GenericItem implements GameObject {
 	broken: boolean;
 	hasInventory: boolean;
 	inventory: ItemObjectList;
-	meta: ItemMeta;
+	meta: GameObjectMeta;
 	canBeOpened: boolean;
 	isOpen: boolean;
 	parent: GameObject;
@@ -129,15 +130,11 @@ export default class GenericItem implements GameObject {
 			return null;
 		}
 
-		if (this.events.beforePickUp) {
-			gameEvent.execute(this.events.beforePickUp);
-		}
+		gameEvent.execute(this.events.beforePickUp);
 
 		this.parent.removeFromInventory(this);
 
-		if (this.events.afterPickUp) {
-			gameEvent.execute(this.events.afterPickUp);
-		}
+		gameEvent.execute(this.events.afterPickUp);
 
 		return this;
 	}
@@ -173,17 +170,29 @@ export default class GenericItem implements GameObject {
 		return null;
 	}
 
+	getStati(): string[] {
+		let stati: string[] = [];
+
+		if (this.broken) {
+			stati.push('kaputt');
+		}
+
+		if (this.meta.read) {
+			stati.push('gelesen');
+		}
+
+		return stati;
+	}
+
 	describeGeneral(): string {
 		let description: string[] = [];
 
 		description.push(`${this.location.describeObjectLocation()} ${nameItemTypeA(this.type)}`);
-		if (this.description) {
+		if (this.description && this.description.length > 0) {
 			description.push(this.description);
 		}
 
-		let brokenString = this.broken ? ' (kaputt)' : '';
-
-		return capitalizeFirstLetter(`Du siehst ${description.join(', ').trim()}${brokenString}`);
+		return capitalizeFirstLetter(`Du siehst ${description.join(', ').trim()}${this.getStati().join(', ')}`);
 	}
 
 	describeInventory(): string {

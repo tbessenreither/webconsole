@@ -6,9 +6,10 @@ import { RoomId } from '../GenericRoom/types';
 import { describeDirectionChange, directionToStringTo, inverseDirection } from '../Location/helpers';
 import Action from '../Action';
 import { LocationDescriptor } from '../Descriptors/Location';
-import { ObjectMeta } from '../GameObject/types';
 import gameTick from '../GameTick';
 import RoomLookup from '../GenericRoom/RoomLookup';
+import { GameEventList } from '../GameEvent/types';
+import { GameObjectMeta } from '../GameObject/types';
 
 
 export default class GenericExit implements GameObject {
@@ -24,7 +25,8 @@ export default class GenericExit implements GameObject {
 	closed: boolean;
 	locked: boolean;
 	unlockItemKey?: string;
-	meta: ObjectMeta;
+	meta: GameObjectMeta;
+	events: GameEventList;
 
 	constructor(config: ExitConfig) {
 		this.locations = new LocationsById();
@@ -58,6 +60,7 @@ export default class GenericExit implements GameObject {
 			locked: this.locked,
 			unlockItemKey: this.unlockItemKey,
 			meta: this.meta,
+			events: this.events,
 		};
 	}
 
@@ -74,6 +77,7 @@ export default class GenericExit implements GameObject {
 		this.locked = object.locked;
 		this.unlockItemKey = object.unlockItemKey;
 		this.meta = object.meta || {};
+		this.events = object.events || {};
 
 		return this;
 	}

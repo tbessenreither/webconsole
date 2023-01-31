@@ -1,5 +1,6 @@
 import GenericExit from ".";
-import { ObjectMeta } from "../GameObject/types";
+import { GameEventList } from "../GameEvent/types";
+import { GameObjectMeta } from "../GameObject/types";
 import { ItemId } from "../GenericItem/types";
 import { RoomId } from "../GenericRoom/types";
 import { Location, LocationList } from "../Location/types";
@@ -42,7 +43,8 @@ export type ExitConfig = {
 	closed: boolean;
 	locked: boolean;
 	unlockItemKey?: ItemId;
-	meta?: ObjectMeta;
+	meta?: GameObjectMeta;
+	events?: GameEventList;
 }
 
 export type ExitLink = {
