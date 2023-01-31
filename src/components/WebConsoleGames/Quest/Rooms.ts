@@ -111,36 +111,48 @@ let rooms: RoomList = [
 						description: 'Die Schrift ist schon stark verblichen aber gerade noch lesbar',
 						weight: 0.005,
 						meta: {
-							text: 'Hallo, du kennst mich nicht aber ich kenne dich. Ich habe dich beobachtet. Ich weiß dass du hier raus willst und ich kann dir dabei helfen. Ich habe einen Schlüssel, der dich hier raus bringt. Ich werde ihn dir geben, aber du schuldest mir was. Ein Freund',
+							text: { method: MessageQueueMethods.type, text: 'Hallo, du kennst mich nicht aber ich kenne dich. Ich habe dich beobachtet. Ich weiß dass du hier raus willst und ich kann dir dabei helfen. Ich habe einen Schlüssel, der dich hier raus bringt. Ich werde ihn dir geben, aber du schuldest mir was. Ein Freund' },
 							nameAfterReading: 'Brief von unbekanntem (gelesen)',
-							roomActionsAfterReading: [
-								'unhide door-kerker-kerkervorraum',
-							],
-							attached: [
+						},
+						events: {
+							beforePickUp: [{
+								messages: { method: MessageQueueMethods.type, text: 'Er ist schwerer als du dachtest.' },
+								playTimes: 1,
+							}],
+							afterPickUp: [{
+								messages: 'Du spürst einen kalten luftzug, als du den Brief aufhebst.',
+								playTimes: 1,
+							}],
+							afterReading: [
 								{
-									id: 'KerkerSchlüssel',
-									name: 'kleiner rostiger Schlüssel',
-									keywords: ['schlüssel', 'kleinen schlüssel', 'kleinen rostigen schlüssel', 'rostigen schlüssel', 'rostigen kleinen schlüssel'],
-									type: ItemType.Key,
-									description: 'er ist klein und rostig',
-									weight: 0.05,
-									uses: 1,
-									location: { direction: Direction.West, height: Height.Bottom },
+									type: GameEventType.addToInventory,
+									targetType: GameEventTarget.player,
+									items: [{
+										id: 'KerkerSchlüssel',
+										name: 'kleiner rostiger Schlüssel',
+										keywords: ['schlüssel', 'kleinen schlüssel', 'kleinen rostigen schlüssel', 'rostigen schlüssel', 'rostigen kleinen schlüssel'],
+										type: ItemType.Key,
+										description: 'er ist klein und rostig',
+										weight: 0.05,
+										uses: 1,
+										location: { direction: Direction.West, height: Height.Bottom },
+									}],
+									messages: 'An den Brief ist ein Schlüssel angeheftet.',
+									playTimes: 1,
+								},
+								{
+									type: GameEventType.roomActions,
+									roomIds: ['Kerker'],
+									commands: ['unhide door-kerker-kerkervorraum'],
+								},
+								{
+									messages: [
+										{ text: 'Als du den Brief zuende gelesen hast hörst du ein kratzendes Geräusch.' },
+										{ text: 'Du blickst in die Richtung und vor dir erscheint eine Tür.' },
+									],
+									playTimes: 1,
 								},
 							],
-						},
-						messageEvents: {
-							onPickUp: {
-								message: 'Er ist schwerer als du dachtest.',
-								playTimes: 1,
-								timesPlayed: 0,
-							},
-							afterPickUp: 'Du spürst einen kalten luftzug, als du den Brief aufhebst.',
-							afterReading: {
-								message: 'Als du den Brief zuende gelesen hast hörst du ein kratzendes Geräusch. Du blickst in die Richtung und vor dir erscheint eine Tür.',
-								playTimes: 1,
-								timesPlayed: 0,
-							},
 						}
 					},
 				],
@@ -255,15 +267,16 @@ let gameTickEvents: GameTickEventList = {
 					meta: {
 						text: 'Guten Morgen<br>Denkst du daran das du heute den Kuchen für die Kinder abholen sollst?<br>Sarah',
 					},
-					messageEvents: {
-						beforeReading: {
-							message: 'Du erinnerst dich wieder.',
+					events: {
+						beforeReading: [{
+							type: GameEventType.noop,
+							messages: [{ method: MessageQueueMethods.type, text: 'Du erinnerst dich wieder.' }],
+						}],
+						afterReading: [{
+							type: GameEventType.noop,
+							messages: [{ method: MessageQueueMethods.type, text: 'Sie weiß eben das ich es vergessen würde.' }],
 							playTimes: 1,
-						},
-						afterReading: {
-							message: 'Sie weiß eben das ich es vergessen würde.',
-							playTimes: 1,
-						},
+						}],
 					},
 				},
 			],

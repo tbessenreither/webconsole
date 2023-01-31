@@ -1,6 +1,7 @@
 import GameObject from "../GameObject";
 import GenericRoom from "../GenericRoom";
 import { Direction } from "../Location/types";
+import { PrintConfig } from "../Print/types";
 
 
 export enum ActionType {
@@ -33,7 +34,7 @@ export type ActionConfig = {
 	using: GameObject[];
 	room: GenericRoom;
 	direction: Direction;
-	events?: string[];
+	events?: PrintConfig[];
 	parsedData?: { [key: string]: string };
 }
 
@@ -44,3 +45,14 @@ export type ActionParsed = {
 	targetDirection?: string,
 	using?: string,
 }
+
+export type RoomAction = string;
+
+export type RoomActionList = RoomAction[];
+
+export type RoomActions = {
+	onPickUp?: RoomActionList,
+	afterPickUp?: RoomActionList,
+	beforeReading?: RoomActionList,
+	afterReading?: RoomActionList,
+};

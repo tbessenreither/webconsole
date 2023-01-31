@@ -1,6 +1,8 @@
 import GenericItem from '.';
-import { MessageEventConfig, MessageEventList, ObjectMetaTypes } from '../GameObject/types';
+import { RoomActions } from '../Action/types';
+import { GameEventList } from '../GameEvent/types';
 import { Location } from '../Location/types';
+import { PrintConfig } from '../Print/types';
 
 export type ItemId = string;
 
@@ -24,7 +26,13 @@ export enum ItemType {
 	Note = 'Note',
 }
 
-export type ItemMeta = { [key: string]: ObjectMetaTypes | ItemConfigList };
+export type ItemMeta = {
+	text?: string | PrintConfig;
+	used?: boolean;
+	roomActions?: RoomActions;
+	attached?: ItemConfigList;
+	nameAfterReading?: string;
+};
 
 export type ItemConfig = {
 	id: ItemId;
@@ -45,7 +53,7 @@ export type ItemConfig = {
 	meta?: ItemMeta;
 	canBeOpened?: boolean;
 	isOpen?: boolean;
-	messageEvents?: MessageEventList;
+	events?: GameEventList;
 	active?: boolean;
 }
 

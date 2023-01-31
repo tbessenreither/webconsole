@@ -8,12 +8,8 @@ import GenericRoom from "../GenericRoom";
 import defaultRooms from "../Rooms";
 import gameTick from "../GameTick";
 import gameEvent from "../GameEvent";
-import Print from "../Print";
 import RoomLookup from "../GenericRoom/RoomLookup";
 import { GameTickEventList } from "../GameTick/types";
-import { GameEvent, GameEventTarget, GameEventType } from "../GameEvent/types";
-import GenericItem from "../GenericItem";
-import { ItemType } from "../GenericItem/types";
 
 export default class GameState {
 	_console: WebConsole;
@@ -39,6 +35,7 @@ export default class GameState {
 
 		this.loadDefaultState();
 
+		gameEvent.gameState = this;
 		gameEvent.on('afterTick', this.eventHandlerAfterTick.bind(this));
 	}
 
@@ -77,81 +74,7 @@ export default class GameState {
 	eventHandlerAfterTick(ticksPassed: number) {
 		if (this.gameTickEvents[ticksPassed]) {
 			for (let event of this.gameTickEvents[ticksPassed]) {
-				this.executeGameEvent(event);
-			}
-		}
-	}
-
-	executeGameEvent(event: GameEvent) {
-		switch (event.type) {
-			case GameEventType.warpToRoom:
-				this.performGameEventWarpToRoom(event);
-				break;
-			case GameEventType.clearInventory:
-				this.performGameEventClearInventory(event);
-				break;
-			case GameEventType.addToInventory:
-				this.performGameEventAddToInventory(event);
-				break;
-			case GameEventType.removeFromInventory:
-				this.performGameEventRemoveFromInventory(event);
-			case GameEventType.saveGame:
-				this.save();
-				break;
-		}
-		if (event.messages) {
-			for (let message of event.messages) {
-				Print.Message(message);
-			}
-		}
-	}
-
-	performGameEventWarpToRoom(event: GameEvent): void {
-		switch (event.targetType) {
-			case GameEventTarget.player:
-				this.player.room = event.targetIds[0];
-				break;
-			case GameEventTarget.monster:
-				// TODO
-				break;
-		}
-	}
-
-	performGameEventClearInventory(event: GameEvent): void {
-		switch (event.targetType) {
-			case GameEventTarget.player:
-				this.player.clearInventory();
-				break;
-			case GameEventTarget.monster:
-				// TODO
-				break;
-		}
-	}
-
-	performGameEventRemoveFromInventory(event: GameEvent): void {
-		for (let itemId of event.targetIds) {
-			let item = new GenericItem({ id: itemId, name: 'tmp', keywords: [], type: ItemType.Item, description: '', weight: 0 });
-			switch (event.targetType) {
-				case GameEventTarget.player:
-					this.player.removeFromInventory(item);
-					break;
-				case GameEventTarget.monster:
-					// TODO
-					break;
-			}
-		}
-	}
-
-	performGameEventAddToInventory(event: GameEvent): void {
-		for (let itemConfig of event.items) {
-			let item = new GenericItem(itemConfig);
-			switch (event.targetType) {
-				case GameEventTarget.player:
-					this.player.addToInventory(item);
-					break;
-				case GameEventTarget.monster:
-					// TODO
-					break;
+				gameEvent.execute(event);
 			}
 		}
 	}

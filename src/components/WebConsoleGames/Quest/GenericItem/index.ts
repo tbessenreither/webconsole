@@ -1,12 +1,13 @@
 import GameObject from '../GameObject';
 import { LocationDescriptor } from '../Descriptors/Location';
-import { ItemId, ItemType, ItemConfig, ItemObjectList, ItemMeta, ItemConfigList } from './types';
+import { ItemId, ItemType, ItemConfig, ItemObjectList, ItemMeta } from './types';
 import Action from '../Action';
-import { capitalizeFirstLetter, handleMessageEvent, joinSentences, joinWithCommaAndAnd } from '../Descriptors/Text';
+import { capitalizeFirstLetter, joinSentences, joinWithCommaAndAnd } from '../Descriptors/Text';
 import { nameItemType, nameItemTypeA } from './helpers';
-import { MessageEventConfig, MessageEventList } from '../GameObject/types';
 import gameTick from '../GameTick';
 import { Direction, Height } from '../Location/types';
+import { GameEventList } from '../GameEvent/types';
+import gameEvent from '../GameEvent';
 
 export default class GenericItem implements GameObject {
 	id: ItemId;
@@ -28,7 +29,7 @@ export default class GenericItem implements GameObject {
 	canBeOpened: boolean;
 	isOpen: boolean;
 	parent: GameObject;
-	messageEvents: MessageEventList;
+	events: GameEventList;
 	active: boolean;
 
 	constructor(config: ItemConfig, parent: GameObject = null) {
@@ -76,7 +77,7 @@ export default class GenericItem implements GameObject {
 			meta: this.meta,
 			canBeOpened: this.canBeOpened,
 			isOpen: this.isOpen,
-			messageEvents: this.messageEvents,
+			events: this.events,
 			active: this.active,
 		};
 	}
@@ -101,7 +102,7 @@ export default class GenericItem implements GameObject {
 		this.meta = object.meta || {};
 		this.canBeOpened = object.canBeOpened || false;
 		this.isOpen = object.isOpen || true;
-		this.messageEvents = object.messageEvents || {};
+		this.events = object.events || {};
 		this.active = object.active || true;
 
 		this.inventory = {};
@@ -119,47 +120,6 @@ export default class GenericItem implements GameObject {
 		return this;
 	}
 
-	read(action: Action): void {
-		if (!this.meta.text) {
-			action.addEvent(`Es gibt nichts zu lesen`);
-			return;
-		}
-
-		if (this.messageEvents.beforeReading) {
-			this.messageEvents.beforeReading = handleMessageEvent(action, this.messageEvents.beforeReading);
-		}
-
-		action.addEvent(`Du liest ${nameItemTypeA(this.type)}`);
-		action.addEvent(this.meta.text.toString());
-
-		if (this.meta.attached) {
-			action.addEvent(`An den Brief ist etwas angeheftet:`);
-			for (let attachement of this.meta.attached as ItemConfigList) {
-				let itemObject = new GenericItem(attachement, action.origin);
-				action.addEvent(`Du erhältst ${nameItemTypeA(itemObject.type)}`);
-				action.origin.addToInventory(itemObject);
-			}
-			delete this.meta.attached;
-		}
-
-		if (this.meta.roomActionsAfterReading && Array.isArray(this.meta.roomActionsAfterReading)) {
-			for (let roomAction of this.meta.roomActionsAfterReading) {
-				action.room.performRoomAction(roomAction.toString());
-			}
-			delete this.meta.roomActionsAfterReading;
-		}
-
-		if (this.meta.nameAfterReading) {
-			this.name = this.meta.nameAfterReading.toString();
-		} else {
-			this.name = `${this.name} (gelesen)`;
-		}
-
-		if (this.messageEvents.afterReading) {
-			this.messageEvents.afterReading = handleMessageEvent(action, this.messageEvents.afterReading);
-		}
-	}
-
 	pickUp(action: Action = null): GenericItem | null {
 		if (!this.canBePickedUp) {
 			return null;
@@ -169,21 +129,14 @@ export default class GenericItem implements GameObject {
 			return null;
 		}
 
-		if (this.messageEvents.onPickUp) {
-			this.messageEvents.onPickUp = handleMessageEvent(action, this.messageEvents.onPickUp as MessageEventConfig);
+		if (this.events.beforePickUp) {
+			gameEvent.execute(this.events.beforePickUp);
 		}
 
 		this.parent.removeFromInventory(this);
 
-		if (this.meta.roomActionsAfterPickUp && Array.isArray(this.meta.roomActionsAfterPickUp)) {
-			for (let roomAction of this.meta.roomActionsAfterPickUp) {
-				action.room.performRoomAction(roomAction.toString());
-			}
-			delete this.meta.roomActionsAfterReading;
-		}
-
-		if (this.messageEvents.afterPickUp) {
-			this.messageEvents.afterPickUp = handleMessageEvent(action, this.messageEvents.afterPickUp);
+		if (this.events.afterPickUp) {
+			gameEvent.execute(this.events.afterPickUp);
 		}
 
 		return this;

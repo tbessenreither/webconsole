@@ -2,6 +2,7 @@ import GameObject from "../GameObject";
 import GenericRoom from "../GenericRoom";
 import { Direction } from "../Location/types";
 import Player from "../Player";
+import { PrintConfig } from "../Print/types";
 import { ActionConfig, ActionType } from "./types";
 
 
@@ -14,7 +15,7 @@ export default class Action {
 	private _room: GenericRoom;
 	private _direction: Direction;
 	private _parsedData: { [key: string]: string };
-	private _events: string[];
+	private _events: PrintConfig[];
 
 	constructor(config: ActionConfig) {
 		this._type = config.type;
@@ -74,7 +75,7 @@ export default class Action {
 		return this._parsedData;
 	}
 
-	get events(): string[] {
+	get events(): PrintConfig[] {
 		return this._events;
 	}
 
@@ -93,9 +94,14 @@ export default class Action {
 		return result;
 	}
 
-	public addEvent(event: string) {
+	public addEvent(event: PrintConfig | string) {
 		if (!this._events) {
 			this._events = [];
+		}
+		if (typeof event === 'string') {
+			event = {
+				text: event,
+			};
 		}
 		this._events.push(event);
 	}

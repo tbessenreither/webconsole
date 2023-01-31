@@ -28,7 +28,12 @@ class Print {
 		});
 	}
 
-	static Message(config: PrintConfig): void {
+	static Message(config: PrintConfig | string): void {
+		if (typeof config === 'string') {
+			Print.Line(config);
+			return;
+		}
+
 		if (!config.method) {
 			config.method = MessageQueueMethods.print;
 		}

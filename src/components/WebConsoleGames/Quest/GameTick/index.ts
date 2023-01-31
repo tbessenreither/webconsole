@@ -1,4 +1,4 @@
-import gameEvent from "../GameEvent";
+import GameEvent from "../GameEvent";
 import GameObject from "../GameObject";
 
 class GameTick {
@@ -41,7 +41,7 @@ class GameTick {
 	}
 
 	private _tickOnce() {
-		gameEvent.trigger('beforeTick', this.ticksPassed);
+		GameEvent.trigger('beforeTick', this.ticksPassed);
 
 		this._ticksPassed++;
 
@@ -49,7 +49,7 @@ class GameTick {
 		for (let element of this._elementsToTick) {
 			this._tickElement(element);
 		}
-		gameEvent.trigger('afterTick', this.ticksPassed);
+		GameEvent.trigger('afterTick', this.ticksPassed);
 	}
 
 	private _tickElement(element: GameObject) {

@@ -180,7 +180,6 @@ export default class ActionParser {
 				let room = this._blueprint.room;
 				if (phrase) {
 					let exitType = lookupExitTypeByName(phrase);
-					console.log('lookup exit by phrase', phrase, exitType, direction);
 					item = lookupGameObjectByType(room.getExits(), exitType, direction);
 				} else {
 					item = lookupGameObjectByDirection(room.getExits(), direction);

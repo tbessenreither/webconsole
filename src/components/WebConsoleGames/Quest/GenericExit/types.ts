@@ -1,7 +1,6 @@
 import GenericExit from ".";
 import { ObjectMeta } from "../GameObject/types";
-import { ItemConfig, ItemId } from "../GenericItem/types";
-import GenericRoom from "../GenericRoom";
+import { ItemId } from "../GenericItem/types";
 import { RoomId } from "../GenericRoom/types";
 import { Location, LocationList } from "../Location/types";
 

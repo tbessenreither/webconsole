@@ -12,9 +12,10 @@ import { Direction } from '../Location/types';
 import Print from '../Print';
 import { directionToStringTo, lookupDirection } from '../Location/helpers';
 import GenericExit from '../GenericExit';
-import { nameItemTypeThe2 } from '../GenericItem/helpers';
+import { nameItemTypeA, nameItemTypeThe2 } from '../GenericItem/helpers';
 import gameTick from '../GameTick';
 import GenericRoom from '../GenericRoom';
+import gameEvent from '../GameEvent';
 
 export default class Player implements GameObject {
 	id: string = 'player';
@@ -141,7 +142,7 @@ export default class Player implements GameObject {
 		this.actionHandler(action);
 		let actionEvents = action.events;
 		for (let event of actionEvents) {
-			Print.Line(event);
+			Print.Message(event);
 		}
 	}
 
@@ -182,14 +183,14 @@ export default class Player implements GameObject {
 				this.performRead(action);
 				break;
 			default:
-				action.addEvent('Diese Aktion kannst du nicht durchführen.');
+				Print.Line('Diese Aktion kannst du nicht durchführen.');
 				break;
 		}
 	}
 
 	actionDefaultCheck(action: Action): boolean {
 		if (action.targets.length === 0 && action.parsedData.target === null) {
-			action.addEvent('Das geht so leider nicht.');
+			Print.Line('Das geht so leider nicht.');
 			return false;
 		} else if (action.targets.length === 0 && action.parsedData.target !== null) {
 			let directionPart = '';
@@ -197,7 +198,7 @@ export default class Player implements GameObject {
 				let directionParsed = lookupDirection(action.parsedData.targetDirection);
 				directionPart = ` im ${directionToStringTo(directionParsed)}`;
 			}
-			action.addEvent(`Du siehst${directionPart} nichts auf das die Beschreibung '${action.parsedData.target}' passt.`);
+			Print.Line(`Du siehst${directionPart} nichts auf das die Beschreibung '${action.parsedData.target}' passt.`);
 			return false;
 		}
 		return true;
@@ -205,18 +206,18 @@ export default class Player implements GameObject {
 
 	performInvestigate(action: Action): void {
 		if (action.targets.length === 0 && action.parsedData.target !== null) {
-			action.addEvent(`Du siehst nichts auf das die Beschreibung '${action.parsedData.target}'`);
+			Print.Line(`Du siehst nichts auf das die Beschreibung '${action.parsedData.target}'`);
 			return;
 		} else if (action.targets.length === 0 && action.parsedData.target === null) {
-			action.addEvent('Du siehst dich um.');
+			Print.Line('Du siehst dich um.');
 			let room = this._gameState.rooms[this.room] as GenericRoom;
-			action.addEvent(room.describe(action));
+			Print.Line(room.describe(action));
 			return;
 		}
 
 		for (let target of action.targets) {
-			action.addEvent(`Du untersuchst ${target.name}.`);
-			action.addEvent(target.describe(action));
+			Print.Line(`Du untersuchst ${target.name}.`);
+			Print.Line(target.describe(action));
 			return;
 		}
 	}
@@ -231,12 +232,12 @@ export default class Player implements GameObject {
 				let pickedUpItem = target.pickUp(action);
 				if (pickedUpItem) {
 					this.addToInventory(pickedUpItem);
-					action.addEvent(`Du hast ${nameItemTypeThe2(target.type)} aufgehoben.`);
+					Print.Line(`Du hast ${nameItemTypeThe2(target.type)} aufgehoben.`);
 				} else {
-					action.addEvent(`Du konntest ${target.name} nicht aufheben.`);
+					Print.Line(`Du konntest ${target.name} nicht aufheben.`);
 				}
 			} else {
-				action.addEvent(`Du kannst ${target.name} nicht aufheben.`);
+				Print.Line(`Du kannst ${target.name} nicht aufheben.`);
 			}
 		}
 	}
@@ -254,6 +255,7 @@ export default class Player implements GameObject {
 			}
 		} else {
 			for (let target of action.targets) {
+				this.removeFromInventory(target as GenericItem);
 				action.room.addToInventory(target as GenericItem, action.direction);
 				Print.Line(`Du legst ${target.name} ab.`);
 			}
@@ -268,11 +270,11 @@ export default class Player implements GameObject {
 		let target = action.targets[0];
 
 		if (target instanceof GenericExit) {
-			action.addEvent(`Du ziehst an ${nameExitThe2(target.type)}.`);
+			Print.Line(`Du ziehst an ${nameExitThe2(target.type)}.`);
 			target.open(action);
 
 		} else {
-			action.addEvent('Das kannst du nicht öffnen.');
+			Print.Line('Das kannst du nicht öffnen.');
 		}
 	}
 
@@ -284,10 +286,10 @@ export default class Player implements GameObject {
 		let target = action.targets[0];
 
 		if (target instanceof GenericExit) {
-			action.addEvent(`Du drückst ${nameExitThe(target.type)} ins Schloss.`);
+			Print.Line(`Du drückst ${nameExitThe(target.type)} ins Schloss.`);
 			target.close(action);
 		} else {
-			action.addEvent('Das kannst du nicht schließen.');
+			Print.Line('Das kannst du nicht schließen.');
 		}
 	}
 
@@ -301,11 +303,11 @@ export default class Player implements GameObject {
 		if (target instanceof GenericExit) {
 			// try every item in the inventory
 			action.using = this.getUsableInventory();
-			//action.addEvent(`Du schließt ${nameExitThe(target.type)} auf.`);
+			//Print.Line(`Du schließt ${nameExitThe(target.type)} auf.`);
 			target.unlock(action);
 
 		} else {
-			action.addEvent('Das kannst du nicht aufschließen.');
+			Print.Line('Das kannst du nicht aufschließen.');
 		}
 	}
 
@@ -319,11 +321,11 @@ export default class Player implements GameObject {
 		if (target instanceof GenericExit) {
 			// try every item in the inventory
 			action.using = this.getUsableInventory();
-			//action.addEvent(`Du schließt ${nameExitThe(target.type)} ab.`);
+			//Print.Line(`Du schließt ${nameExitThe(target.type)} ab.`);
 			target.lock(action);
 
 		} else {
-			action.addEvent('Das kannst du nicht abschließen.');
+			Print.Line('Das kannst du nicht abschließen.');
 		}
 	}
 
@@ -335,7 +337,7 @@ export default class Player implements GameObject {
 		let exit = action.targets[0] as GenericExit;
 
 		if (exit.closed) {
-			action.addEvent(`${nameExitThe(exit.type)} ist noch geschlossen. Du versuchst sie zu öffnen.`);
+			Print.Line(`${nameExitThe(exit.type)} ist noch geschlossen. Du versuchst sie zu öffnen.`);
 			gameTick.execute();
 			if (!exit.open(action)) {
 				return;
@@ -343,12 +345,12 @@ export default class Player implements GameObject {
 		}
 
 		let newRoom = exit.targetRooms(this.room);
-		action.addEvent(`Du gehst durch ${nameExitThe(exit.type, exit.locations.get(this.room).direction)}`);
+		Print.Line(`Du gehst durch ${nameExitThe(exit.type, exit.locations.get(this.room).direction)}`);
 
 		//check if there is a transition message
 		let exitLink = exit.locations.getLink(this.room);
 		if (exitLink.transitionMessage) {
-			action.addEvent(exitLink.transitionMessage);
+			Print.Line(exitLink.transitionMessage);
 		}
 
 		if (newRoom === undefined) {
@@ -366,16 +368,16 @@ export default class Player implements GameObject {
 		}
 
 		if (action.using.length === 0) {
-			action.addEvent(`Du siehst nichts was auf die Beschreibung "${action.parsedData.using}" passen würde.`);
+			Print.Line(`Du siehst nichts was auf die Beschreibung "${action.parsedData.using}" passen würde.`);
 			return;
 		}
 
 		if (!action.targets[0].use) {
-			action.addEvent(`So kannst du nicht mit ${action.targets[0].name} interagieren.`);
+			Print.Line(`So kannst du nicht mit ${action.targets[0].name} interagieren.`);
 			return;
 		}
 
-		action.addEvent(`Du benutzt ${action.using[0].name} mit ${action.targets[0].name}.`)
+		Print.Line(`Du benutzt ${action.using[0].name} mit ${action.targets[0].name}.`)
 		action.targets[0].use(action);
 	}
 
@@ -384,12 +386,32 @@ export default class Player implements GameObject {
 			return;
 		}
 
-		let target = action.targets[0] as GenericItem;
-		if (target.read) {
-			target.read(action);
+		let targetGameObj = action.targets[0];
+		let target = targetGameObj as GenericItem;
+
+		if (target.canBePickedUp && !Object.keys(this.inventory).includes(targetGameObj.id)) {
+			this.performPickUp(action);
+		}
+
+		if (targetGameObj.read) {
+			targetGameObj.read(action);
 		} else if (target.meta && target.meta.text) {
-			action.addEvent('Du liest:')
-			action.addEvent(target.meta.text.toString());
+			if (target.events.beforeReading) {
+				gameEvent.execute(target.events.beforeReading);
+			}
+
+			Print.Line(`Du liest ${nameItemTypeA(target.type)}`);
+			Print.Message(target.meta.text);
+
+			if (target.meta.nameAfterReading) {
+				target.name = target.meta.nameAfterReading.toString();
+			} else {
+				target.name = `${target.name} (gelesen)`;
+			}
+
+			if (target.events.afterReading) {
+				gameEvent.execute(target.events.afterReading);
+			}
 		}
 	}
 

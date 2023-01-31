@@ -65,7 +65,6 @@ export default class MessageQueue {
 				await this._functions[message.method](message.text, message.settings);
 
 				if (message.settings && message.settings.delayMsAfter) {
-					console.log('delayAfter');
 					await this._delayMs(message.settings.delayMsAfter);
 				}
 				message.resolve(true);
