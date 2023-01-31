@@ -115,7 +115,7 @@ let rooms: RoomList = [
 						description: 'Die Schrift ist schon stark verblichen aber gerade noch lesbar',
 						weight: 0.005,
 						meta: {
-							text: { method: MessageQueueMethods.type, text: 'Hallo, du kennst mich nicht aber ich kenne dich. Ich habe dich beobachtet. Ich weiß dass du hier raus willst und ich kann dir dabei helfen. Ich habe einen Schlüssel, der dich hier raus bringt. Ich werde ihn dir geben, aber du schuldest mir was. Ein Freund' },
+							text: { method: MessageQueueMethods.type, text: 'Hallo, du kennst mich nicht aber ich kenne dich. Ich habe dich beobachtet. Ich weiß dass du hier raus willst und ich kann dir dabei helfen. Ich habe einen Schlüssel, der dich hier raus bringt. Ich werde ihn dir geben, aber du schuldest mir was. Ein Freund', settings: { typeDelayMs: 10 } },
 							nameAfterReading: 'Brief von unbekanntem (gelesen)',
 						},
 						events: {
@@ -238,7 +238,7 @@ let exits: ExitList = [
 		type: ExitType.Door,
 		isHidden: true,
 		locations: {},
-		description: 'sie ist sehr alt und aus Holz',
+		description: 'sie ist sehr alt und aus Holz. Du schwörst das sie bis eben noch nicht da war',
 		closed: true,
 		locked: true,
 		unlockItemKey: 'KerkerSchlüssel',

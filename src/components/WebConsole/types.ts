@@ -28,6 +28,7 @@ export type WebConsolePrintOptions = {
 	clearKey?: string;
 	key?: false | string;
 	delayMsBefore?: number;
+	typeDelayMs?: number;
 	delayMsAfter?: number;
 };
 

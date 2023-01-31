@@ -128,7 +128,7 @@ export class WebConsole extends CcHTMLElement {
 	bootCommands: Array<string> = [];
 
 	isTyping: boolean = false;
-	typingBuffer: { text: string, resolve: Function }[] = [];
+	typingBuffer: { text: string, settings: WebConsolePrintOptions, resolve: Function }[] = [];
 
 	constructor() {
 		super({ html, css });
@@ -609,10 +609,11 @@ export class WebConsole extends CcHTMLElement {
 		});
 	}
 
-	typeLn(text: string, options: WebConsolePrintOptions = {}): Promise<true> {
+	typeLn(text: string, settings: WebConsolePrintOptions = {}): Promise<true> {
 		return new Promise((resolve) => {
 			this.typingBuffer.push({
 				text: text,
+				settings: settings,
 				resolve: resolve,
 			});
 			this.startTyping();
@@ -627,20 +628,23 @@ export class WebConsole extends CcHTMLElement {
 
 		while (this.typingBuffer.length > 0) {
 			let item = this.typingBuffer.shift();
-			await this.performTyping(item.text);
+			await this.performTyping(item.text, item.settings.typeDelayMs);
 			item.resolve(true);
 		}
 
 		this.isTyping = false;
 	}
 
-	async performTyping(text: string) {
+	async performTyping(text: string, typeDelayMs: number = 40) {
+		let randomDelay = 20;
 		let letters = text.split('');
 		let lettersPrinted = '';
 		for (let letter of letters) {
 			lettersPrinted = `${lettersPrinted}${letter}`;
 			this.printLn(lettersPrinted, { clearKey: 'typing', key: 'typing', html: true });
-			await this.pause(Math.random() * 10 + 40);
+
+			let nextDelay = Math.max(0, (Math.random() * randomDelay) + typeDelayMs - (randomDelay / 2));
+			await this.pause(nextDelay);
 		}
 		this.printLn(text, { clearKey: 'typing', html: true });
 	}
