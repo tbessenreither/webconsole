@@ -8,7 +8,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	_console: WebConsole = null;
 	name = 'About';
 	dateOfBirth = '1986-10-21';
-	numberOfMovies = 424;
+	numberOfMovies = 440;
 
 	abouts: { [key: string]: Array<string> } = {
 		WebConsole: [
