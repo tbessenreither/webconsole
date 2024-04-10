@@ -40,8 +40,8 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			`Ob Arthouse, Classics, Action oder ein anderes Genre. Geschaut wird was interessant wirkt.`
 		],
 		Arbeit: [
-			`Ich arbeite derzeit als Softwareentwickler für eine Firma aus Kiel.`,
-			`Davor war ich Webentwickler bei einer Fullservice Werbeagentur in der Oberpfalz und davor selbstständig im Bereich Backend Entwicklung & System-Design und Hosting.`,
+			`Ich arbeite derzeit als Backend Entwickler für eine Firma aus Hannover.`,
+			`Davor war ich Softwareentwickler in Kiel und davor Webentwickler bei einer Fullservice Werbeagentur in der Oberpfalz und davor selbstständig im Bereich Backend Entwicklung & System-Design und Hosting.`,
 		],
 		Socials: [
 			`Auf folgenden Plattformen könnt ihr mich finden:`,
