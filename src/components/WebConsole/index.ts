@@ -4,14 +4,15 @@ import css from './style.scss';
 import { CcHTMLElement } from '../CcHTMLElement';
 import WebConsolePlugin from '../WebConsolePlugin';
 import { WebConsolePluginStore, WebConsoleCommandTargets, WebConsoleArguments, WebConsolePrintOptions, WebConsoleCommandOptions, WebConsoleAutocompleteResponse } from './types';
+import MessageQueue from './MessageQueue';
 
 const PACKAGE = require('../../../package.json');
 const version = PACKAGE.version;
 
 export class WebConsoleCommand {
-	commandStringIn: string = null;
+	commandStringIn: string;
 	command: string = '';
-	subcommands: Array<string> = null;
+	subcommands: Array<string>;
 	arguments: WebConsoleArguments = {};
 
 	constructor(command?: string) {
@@ -36,7 +37,7 @@ export class WebConsoleCommand {
 		return commandString;
 	}
 
-	lastSubcommand(value: string = null): string {
+	lastSubcommand(value: string | null = null): string | null {
 		if (this.subcommands) {
 			if (value !== null) {
 				this.subcommands[this.subcommandLenght() - 1] = value;
@@ -122,6 +123,13 @@ export class WebConsole extends CcHTMLElement {
 	inputBuffer: Array<string> = [];
 	inputPromiseResolve: Function = null;
 
+	captureInputTarget: CallableFunction = null;
+
+	bootCommands: Array<string> = [];
+
+	isTyping: boolean = false;
+	typingBuffer: { text: string, settings: WebConsolePrintOptions, resolve: Function }[] = [];
+
 	constructor() {
 		super({ html, css });
 
@@ -133,12 +141,36 @@ export class WebConsole extends CcHTMLElement {
 		this.init = this.init.bind(this);
 		this.print = this.print.bind(this);
 		this.printLn = this.printLn.bind(this);
+		this.typeLn = this.typeLn.bind(this);
 		this.clear = this.clear.bind(this);
+
+		MessageQueue.functionPrint = this.printLn;
+		MessageQueue.functionType = this.typeLn;
+
+		MessageQueue.console = this;
 	}
 
 	static get observedAttributes(): Array<string> {
 		// a list of attributes that should be observed
 		return [];
+	}
+
+	async pause(ms: number): Promise<boolean> {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve(true);
+			}, ms);
+		});
+	}
+
+	registerBootCommand(command: string) {
+		this.bootCommands.push(command);
+	}
+
+	runBootCommands() {
+		for (let command of this.bootCommands) {
+			this.onCommand(new WebConsoleCommand(command));
+		}
 	}
 
 	attributeChangedCallback(name: string, oldValue: string, newValue: string): boolean {
@@ -159,6 +191,7 @@ export class WebConsole extends CcHTMLElement {
 		this.output = this._shadowRoot.querySelector('[data-for="output"]') as HTMLPreElement;
 		this.input = this._shadowRoot.querySelector('input[data-action="input"]') as HTMLInputElement;
 		this.inputButton = this._shadowRoot.querySelector('button[data-action="inputButton"]') as HTMLButtonElement;
+
 		if (this.inputButton) {
 			this.inputButton.addEventListener('click', this._resolveInputBuffer);
 		}
@@ -203,6 +236,12 @@ export class WebConsole extends CcHTMLElement {
 					e.stopPropagation();
 
 					this.onCommand(new WebConsoleCommand(target.innerText));
+				} else if (target.dataset.type !== undefined) {
+					e.preventDefault();
+					e.stopPropagation();
+
+					this.input.value = target.innerText;
+					this.input.focus();
 				} else if (target.dataset.copy !== undefined) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -223,6 +262,7 @@ export class WebConsole extends CcHTMLElement {
 	}
 
 	changeMode(mode: 'normal' | 'input') {
+		this.unblockInput();
 		if (mode === 'input') {
 			this.input.parentElement.classList.add('inputMode');
 			this.inputButton.innerText = 'Enter';
@@ -233,6 +273,26 @@ export class WebConsole extends CcHTMLElement {
 			this.mode = 'normal';
 			this.inputButton.style.display = 'none';
 		}
+	}
+
+	blockInput() {
+		this.input.disabled = true;
+		this.inputButton.disabled = true;
+	}
+
+	unblockInput() {
+		this.input.disabled = false;
+		this.inputButton.disabled = false;
+		this.input.focus();
+	}
+
+	captureInput(handlerFunction: CallableFunction) {
+		this.captureInputTarget = handlerFunction;
+		this.changeMode('normal');
+	}
+
+	releaseInput() {
+		this.captureInputTarget = null;
 	}
 
 	async requestInput() {
@@ -263,6 +323,8 @@ export class WebConsole extends CcHTMLElement {
 		this.printLn(`Welcome to the WebConsole on ${this.getDomain()}`, { class: 'info title' });
 		this.printLn('Type "<span data-run>help</span>" for a list of available commands.', { html: true });
 		this.printLn('Remember all commands are case-sensitive.');
+
+		this.runBootCommands();
 
 		this.input.focus();
 	}
@@ -383,7 +445,9 @@ export class WebConsole extends CcHTMLElement {
 	}
 
 	async onCommand(command: WebConsoleCommand) {
-		if (this.input.disabled) {
+		if (this.captureInputTarget !== null) {
+			return this.captureInputTarget(command.getStringRaw());
+		} else if (this.input.disabled) {
 			return false;
 		}
 		this.addToCommandHistory(command.getString());
@@ -402,6 +466,7 @@ export class WebConsole extends CcHTMLElement {
 			}
 		} catch (err) {
 			this.printLn(`😱 Error: ${err.message}`, { class: 'error' });
+			console.error(err);
 		}
 		if (this.input.disabled) {
 			this.input.disabled = false;
@@ -519,13 +584,7 @@ export class WebConsole extends CcHTMLElement {
 		}
 
 		if (options.clearKey) {
-			let obj = null;
-			do {
-				obj = this.output.querySelector(`[data-key="${options.clearKey}"]`);
-				if (obj) {
-					obj.remove();
-				}
-			} while (obj);
+			this.removeClearKey(options.clearKey);
 		}
 
 		this.output.innerHTML += `<span ${keyAttribute} ${copyAttribute} class="${options.direction} ${options.class}">${text}</span>`;
@@ -533,8 +592,61 @@ export class WebConsole extends CcHTMLElement {
 		this.contentObject.scrollTop = this.contentObject.scrollHeight;
 	}
 
-	printLn(text: string, options: WebConsolePrintOptions = {}) {
-		this.print(text + '\n', options);
+	removeClearKey(key: string) {
+		let obj = null;
+		do {
+			obj = this.output.querySelector(`[data-key="${key}"]`);
+			if (obj) {
+				obj.remove();
+			}
+		} while (obj);
+	}
+
+	printLn(text: string, options: WebConsolePrintOptions = {}): Promise<true> {
+		return new Promise((resolve) => {
+			this.print(text + '\n', options);
+			resolve(true);
+		});
+	}
+
+	typeLn(text: string, settings: WebConsolePrintOptions = {}): Promise<true> {
+		return new Promise((resolve) => {
+			this.typingBuffer.push({
+				text: text,
+				settings: settings,
+				resolve: resolve,
+			});
+			this.startTyping();
+		});
+	}
+
+	async startTyping() {
+		if (this.isTyping) {
+			return;
+		}
+		this.isTyping = true;
+
+		while (this.typingBuffer.length > 0) {
+			let item = this.typingBuffer.shift();
+			await this.performTyping(item.text, item.settings.typeDelayMs);
+			item.resolve(true);
+		}
+
+		this.isTyping = false;
+	}
+
+	async performTyping(text: string, typeDelayMs: number = 40) {
+		let randomDelay = 20;
+		let letters = text.split('');
+		let lettersPrinted = '';
+		for (let letter of letters) {
+			lettersPrinted = `${lettersPrinted}${letter}`;
+			this.printLn(lettersPrinted, { clearKey: 'typing', key: 'typing', html: true });
+
+			let nextDelay = Math.max(0, (Math.random() * randomDelay) + typeDelayMs - (randomDelay / 2));
+			await this.pause(nextDelay);
+		}
+		this.printLn(text, { clearKey: 'typing', html: true });
 	}
 
 	clear() {

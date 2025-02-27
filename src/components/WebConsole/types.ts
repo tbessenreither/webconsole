@@ -27,6 +27,9 @@ export type WebConsolePrintOptions = {
 	clearLast?: boolean | number;
 	clearKey?: string;
 	key?: false | string;
+	delayMsBefore?: number;
+	typeDelayMs?: number;
+	delayMsAfter?: number;
 };
 
 export type WebConsoleCommandOptions = {
