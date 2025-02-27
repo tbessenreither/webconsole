@@ -1,7 +1,7 @@
 import { PlayerConfig } from './types';
 import { RoomId } from '../GenericRoom/types';
 import { nameExitThe, nameExitThe2 } from '../GenericExit/helpers';
-import GameState from '../Gamestate';
+import GameState from '../GameState';
 import GameObject from '../GameObject';
 import GenericItem from '../GenericItem';
 import { ItemConfigList, ItemObjectList } from '../GenericItem/types';
