@@ -25,6 +25,8 @@ export default class ActionParser {
 			new RegExp(`^Untersuche(?: (?:das )?Zimmer| (?:den )?Raum| (?:die )?Umgebung)$`, 'i'),
 			new RegExp(`Schau (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) an`, 'i'),
 			new RegExp(`Untersuche (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
+			new RegExp(`umschauen`),
+			new RegExp(`umsehen`),
 		],
 		[ActionType.Attack]: [
 			new RegExp(`Greife (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex}) (?:mit (?:dem|meinem|einem)?(?<using>${singleWordRegex}) )?an`, 'i'),
@@ -52,7 +54,7 @@ export default class ActionParser {
 			new RegExp(`Gehe (?:nach )?(?<targetDirection>${directionRegex})`, 'i'),
 		],
 		[ActionType.Use]: [
-			new RegExp(`(?:Benutze|Kombiniere) (?:${articlesRegex} )?(?<using>${singleWordRegex}) mit (?:${articlesRegex} )?(?<target>${singleWordRegex})`, 'i'),
+			new RegExp(`(?:Benutze|Kombiniere|Nutze) (?:${articlesRegex} )?(?<using>${singleWordRegex}) mit (?:${articlesRegex} )?(?<target>${singleWordRegex})`, 'i'),
 		],
 		[ActionType.Read]: [
 			new RegExp(`(?:Lese) (?:${articlesRegex} )?(?:(?<targetDirection>${directionRegex}) )?(?<target>${singleWordRegex})`, 'i'),
