@@ -3,4 +3,4 @@ import Quest from './Quest';
 
 let tikTakToe = new TikTakToe();
 
-let quest = new Quest();
+//let quest = new Quest();
