@@ -8,7 +8,9 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 	_console: WebConsole = null;
 	name = 'About';
 	dateOfBirth = '1986-10-21';
-	numberOfMovies = 440;
+	numberOfMovies = 506;
+	numberOfRecords = 123;
+	numberOfTelescopes = 3;
 
 	abouts: { [key: string]: Array<string> } = {
 		WebConsole: [
@@ -33,11 +35,21 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 			`Größtenteils fotografiere ich mit einer Nikon D5500 und dem 18-55mm Zoom Objektiv.`,
 			`Am liebsten irgendwas mit Natur.`,
 		],
+		Astro: [
+			`Ich liebe sterne und den Weltraum, so hab ich inzwischen ${this.numberOfTelescopes} Teleskope.`,
+			`Unter anderem ein 1300mm Maksutov und ein 12" 1500mm Dobson sowie ein Seestar 50.`,
+			`Die Bilder die ich mit dem Foto Equipment mache findet ihr in meiner <a href="https://tobias.bessenreither.de/index.php?/category/92">Piwigo Galerie</a>.`,
+		],
 		Filme: [
 			`Mein zweites großes Hobby.`,
 			`Wenn ich nicht gerade Programmiere oder Fotografiere wäre der dritte Platz an dem man mich suchen sollte in meinem Heimkino.`,
 			`Dort schaue ich vermutlich gerade einen meiner ${this.numberOfMovies} Filme.`,
 			`Ob Arthouse, Classics, Action oder ein anderes Genre. Geschaut wird was interessant wirkt.`
+		],
+		Platten: [
+			`Neben Filmen baue ich auch nach und nach meine Plattensammlung aus.`,
+			`Angefangen nachdem Spotify zwei meiner Lieblingsalben aus dem Sortiment genommen hat und ich festgestellt habe das einige meiner CDs schon nicht mehr funktionieren habe ich beschlossen in ein Medium zu investieren das mich überlebt.`,
+			`Inzwischen stehen ${this.numberOfRecords} Schallplatten bei mir zuhause rum.`,
 		],
 		Arbeit: [
 			`Ich arbeite derzeit als Backend Entwickler für eine Firma aus Hannover.`,
@@ -53,6 +65,7 @@ export default class WebConsoleAbout extends WebConsolePlugin {
 		Tierschutz: [
 			`Aktiv setze ich mich immer wieder für den Schutz von Ottern und Haien ein.`,
 			`So bin ich seit inzwischen vielen Jahren Mitglied in der <a href="https://aktion-fischotterschutz.de/start" target="_blank">Aktion Fischotterschutz</a>.`,
+			`Auch das <a href="https://www.vanaqua.org/">Vancouver Aquarium</a> und das <a href="https://www.marinemammalcenter.org/">The Marine Mammal Center</a> sind Organisationen die ich gerne unterstütze.`,
 			`Für Haie unterstütze ich aktiv die Organisation <a href="https://sharkangels.org/what-we-do/" target="_blank">Shark Angels</a> mit deren Hoodie ihr mich im Winter regelmäßig sehen könnt.`,
 		],
 	}
